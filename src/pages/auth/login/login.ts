@@ -1,30 +1,33 @@
-import type { IUser } from "../../../types/IUser";
-import type { Rol } from "../../../types/Rol";
-import { navigate } from "../../../utils/navigate";
+import "../../../main";
+import { loginUser, redirectByRole } from "../../../utils/auth";
 
-const form = document.getElementById("form") as HTMLFormElement;
-const inputEmail = document.getElementById("email") as HTMLInputElement;
-//const inputPassword = document.getElementById("password") as HTMLInputElement;
-const selectRol = document.getElementById("rol") as HTMLSelectElement;
+const form = document.querySelector<HTMLFormElement>("#form");
+const inputEmail = document.querySelector<HTMLInputElement>("#email");
+const inputPassword = document.querySelector<HTMLInputElement>("#password");
+const message = document.querySelector<HTMLParagraphElement>("#message");
 
-form.addEventListener("submit", (e: SubmitEvent) => {
+if (!form || !inputEmail || !inputPassword || !message) {
+  throw new Error("No se encontraron los elementos necesarios del login");
+}
+
+form.addEventListener("submit", (e) => {
   e.preventDefault();
-  const valueEmail = inputEmail.value;
-  //const valuePassword = inputPassword.value;
-  const valueRol = selectRol.value as Rol;
 
-  if (valueRol === "admin") {
-    navigate("/src/pages/admin/home/home.html");
-  } else if (valueRol === "client") {
-    navigate("/src/pages/client/home/home.html");
+  const email = inputEmail.value.trim();
+  const password = inputPassword.value;
+
+  if (!email || !password) {
+    message.textContent = "Email y contraseña son requeridos.";
+    return;
   }
 
-  const user: IUser = {
-    email: valueEmail,
-    role: valueRol,
-    loggedIn: true,
-  };
+  const user = loginUser(email, password);
 
-  const parseUser = JSON.stringify(user);
-  localStorage.setItem("userData", parseUser);
+  if (!user) {
+    message.textContent = "Credenciales inválidas.";
+    return;
+  }
+
+  message.textContent = "";
+  redirectByRole(user);
 });
