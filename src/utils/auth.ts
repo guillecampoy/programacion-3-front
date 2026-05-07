@@ -7,6 +7,7 @@ import {
   saveUser,
   saveUsers,
 } from "./localStorage";
+import { hashPassword, isSha256Hash } from "./hash";
 import { navigate, ROUTES } from "./navigate";
 
 const seedUsers: IUser[] = [
@@ -24,13 +25,40 @@ const seedUsers: IUser[] = [
   },
 ];
 
-export const seedUsersIfNeeded = (): void => {
+const hashUserPassword = async (user: IUser): Promise<IUser> => ({
+  ...user,
+  password: await hashPassword(user.password),
+});
+
+const migrateUsersIfNeeded = async (): Promise<IUser[]> => {
+  const users = getUsers();
+  let usersWereMigrated = false;
+
+  const migratedUsers = await Promise.all(
+    users.map(async (user) => {
+      if (isSha256Hash(user.password)) {
+        return user;
+      }
+
+      usersWereMigrated = true;
+      return hashUserPassword(user);
+    })
+  );
+
+  if (usersWereMigrated) {
+    saveUsers(migratedUsers);
+  }
+
+  return migratedUsers;
+};
+
+export const seedUsersIfNeeded = async (): Promise<void> => {
   if (!localStorage.getItem("users")) {
-    saveUsers(seedUsers);
+    saveUsers(await Promise.all(seedUsers.map(hashUserPassword)));
     return;
   }
 
-  const users = getUsers();
+  const users = await migrateUsersIfNeeded();
   const hasAdmin = users.some((user) => user.role === "admin");
   const hasClient = users.some((user) => user.role === "client");
   const missingSeedUsers = seedUsers.filter((seedUser) => {
@@ -43,13 +71,16 @@ export const seedUsersIfNeeded = (): void => {
   });
 
   if (missingSeedUsers.length > 0) {
-    saveUsers([...users, ...missingSeedUsers]);
+    saveUsers([...users, ...(await Promise.all(missingSeedUsers.map(hashUserPassword)))]);
   }
 };
 
-export const registerUser = (email: string, password: string): string | null => {
+export const registerUser = async (
+  email: string,
+  password: string
+): Promise<string | null> => {
   const normalizedEmail = email.trim();
-  const users = getUsers();
+  const users = await migrateUsersIfNeeded();
   const userExists = users.some((user) => user.email === normalizedEmail);
 
   if (userExists) {
@@ -59,7 +90,7 @@ export const registerUser = (email: string, password: string): string | null => 
   const newUser: IUser = {
     id: `user-${Date.now().toString()}`,
     email: normalizedEmail,
-    password,
+    password: await hashPassword(password),
     role: "client",
   };
 
@@ -67,11 +98,17 @@ export const registerUser = (email: string, password: string): string | null => 
   return null;
 };
 
-export const loginUser = (email: string, password: string): IUser | null => {
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<IUser | null> => {
   const normalizedEmail = email.trim();
-  const user = getUsers().find(
+  const users = await migrateUsersIfNeeded();
+  const hashedPassword = await hashPassword(password);
+  const user = users.find(
     (storedUser) =>
-      storedUser.email === normalizedEmail && storedUser.password === password
+      storedUser.email === normalizedEmail &&
+      storedUser.password === hashedPassword
   );
 
   if (!user) {
@@ -118,8 +155,8 @@ const getRequiredRole = (path: string): Rol | null => {
   return null;
 };
 
-export const guardRoute = (): void => {
-  seedUsersIfNeeded();
+export const guardRoute = async (): Promise<void> => {
+  await seedUsersIfNeeded();
 
   const path = window.location.pathname;
 

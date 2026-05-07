@@ -1,5 +1,6 @@
 import "../../../main";
 import { loginUser, redirectByRole } from "../../../utils/auth";
+import { validateCredentials } from "../../../utils/validation";
 
 const form = document.querySelector<HTMLFormElement>("#form");
 const inputEmail = document.querySelector<HTMLInputElement>("#email");
@@ -10,18 +11,20 @@ if (!form || !inputEmail || !inputPassword || !message) {
   throw new Error("No se encontraron los elementos necesarios del login");
 }
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const email = inputEmail.value.trim();
   const password = inputPassword.value;
 
-  if (!email || !password) {
-    message.textContent = "Email y contraseña son requeridos.";
+  const validationError = validateCredentials(email, password);
+
+  if (validationError) {
+    message.textContent = validationError;
     return;
   }
 
-  const user = loginUser(email, password);
+  const user = await loginUser(email, password);
 
   if (!user) {
     message.textContent = "Credenciales inválidas.";

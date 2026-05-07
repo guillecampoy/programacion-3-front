@@ -41,7 +41,7 @@ La protección centralizada se ejecuta desde `src/main.ts`.
 
 ## Limitaciones conocidas
 
-- Las contraseñas se guardan en texto plano.
-- No hay hash de contraseñas.
+- Las contraseñas se guardan con hash `SHA-256` en `localStorage`, pero sigue siendo un enfoque solo de frontend.
+- La validación de credenciales es de cliente: email con formato básico y contraseña de 8 a 64 caracteres con letras y números.
 - La autorización se basa en rutas del frontend y puede manipularse desde el navegador.
 - Este enfoque sirve solo para practicar flujo, tipado, navegación y separación de responsabilidades.
