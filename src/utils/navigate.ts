@@ -5,6 +5,8 @@ export const ROUTES = {
   clientHome: "/src/pages/client/home/home.html",
 } as const;
 
-export const navigate = (route: string): void => {
+export type Route = (typeof ROUTES)[keyof typeof ROUTES];
+
+export const navigate = (route: Route): void => {
   window.location.href = route;
 };
