@@ -5,7 +5,11 @@ import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import type { Product } from "../../../types/Product";
 import { logout } from "../../../utils/auth";
 import { getCategories } from "../../../utils/categories";
-import { getUser } from "../../../utils/localStorage";
+import {
+  addProductToCart,
+  getCart,
+  getUser,
+} from "../../../utils/localStorage";
 import { getProducts } from "../../../utils/products";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
@@ -43,6 +47,7 @@ const productDetailDescription = document.querySelector<HTMLParagraphElement>(
 );
 const productDetailPrice =
   document.querySelector<HTMLParagraphElement>("#productDetailPrice");
+const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
 
 if (
   !loggedUserName ||
@@ -61,7 +66,8 @@ if (
   !productDetailTitle ||
   !productDetailCategory ||
   !productDetailDescription ||
-  !productDetailPrice
+  !productDetailPrice ||
+  !cartQuantity
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
 }
@@ -74,6 +80,15 @@ const currencyFormatter = new Intl.NumberFormat("es-AR");
 const products = getProducts();
 const categories = getCategories();
 let selectedCategory = "";
+
+const renderCartQuantity = (): void => {
+  const totalQuantity = getCart().reduce(
+    (total, cartItem) => total + cartItem.quantity,
+    0
+  );
+
+  cartQuantity.textContent = String(totalQuantity);
+};
 
 const setActiveCategoryButton = (): void => {
   document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
@@ -228,7 +243,15 @@ document.addEventListener("click", (event) => {
   }
 
   if (target.classList.contains("btn-agregar")) {
-    alert(`Agregaste "${product.name}" a tu carrito de compra`);
+    const cart = addProductToCart(product);
+    const cartItem = cart.find((item) => item.product.id === product.id);
+
+    renderCartQuantity();
+    alert(
+      `Agregaste "${product.name}" a tu carrito de compra. Cantidad: ${
+        cartItem?.quantity ?? 1
+      }`
+    );
   }
 });
 
@@ -246,4 +269,5 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+renderCartQuantity();
 filterProducts();

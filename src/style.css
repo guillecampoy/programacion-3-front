@@ -69,11 +69,13 @@ hr {
   min-height: 100vh;
   box-sizing: border-box;
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
 }
 
 .auth-card {
+  flex: 0 1 380px;
   width: 100%;
   max-width: 380px;
   background: var(--color-blanco);
