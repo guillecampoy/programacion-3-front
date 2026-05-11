@@ -34,6 +34,12 @@ const ordersTableBody =
   document.querySelector<HTMLTableSectionElement>("#ordersTableBody");
 const cancelEditButton =
   document.querySelector<HTMLButtonElement>("#cancelEditButton");
+const adminSearchForm =
+  document.querySelector<HTMLFormElement>("#adminSearchForm");
+const adminSearchInput =
+  document.querySelector<HTMLInputElement>("#adminProductSearch");
+const adminSearchMessage =
+  document.querySelector<HTMLParagraphElement>("#adminSearchMessage");
 
 if (
   !logo ||
@@ -49,7 +55,10 @@ if (
   !message ||
   !productsTableBody ||
   !ordersTableBody ||
-  !cancelEditButton
+  !cancelEditButton ||
+  !adminSearchForm ||
+  !adminSearchInput ||
+  !adminSearchMessage
 ) {
   throw new Error("No se encontraron los elementos necesarios del admin");
 }
@@ -78,10 +87,29 @@ const renderCategories = (): void => {
   });
 };
 
-const renderProducts = (): void => {
-  productsTableBody.innerHTML = "";
+const productMatchesSearch = (product: Product, searchText: string): boolean =>
+  product.name.toLowerCase().includes(searchText.toLowerCase());
 
-  products.forEach((product) => {
+const getFilteredProducts = (): Product[] => {
+  const searchText = adminSearchInput.value.trim();
+
+  if (!searchText) {
+    return products;
+  }
+
+  return products.filter((product) => productMatchesSearch(product, searchText));
+};
+
+const renderProducts = (productsToRender = getFilteredProducts()): void => {
+  productsTableBody.innerHTML = "";
+  adminSearchMessage.textContent = "";
+
+  if (productsToRender.length === 0) {
+    adminSearchMessage.textContent = "No se encontraron productos con ese nombre.";
+    return;
+  }
+
+  productsToRender.forEach((product) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${product.name}</td>
@@ -201,6 +229,15 @@ productsTableBody.addEventListener("click", (event) => {
     persistProducts();
     resetForm();
   }
+});
+
+adminSearchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  renderProducts();
+});
+
+adminSearchInput.addEventListener("input", () => {
+  renderProducts();
 });
 
 cancelEditButton.addEventListener("click", resetForm);
