@@ -3,8 +3,12 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import type { Category, Product } from "../../../types/Product";
-import { categories } from "../../../types/Product";
 import { logout } from "../../../utils/auth";
+import {
+  getCategories,
+  getNextCategoryId,
+  saveCategories,
+} from "../../../utils/categories";
 import { getUser } from "../../../utils/localStorage";
 import { getOrders } from "../../../utils/orders";
 import { getNextProductId, getProducts, saveProducts } from "../../../utils/products";
@@ -40,6 +44,17 @@ const adminSearchInput =
   document.querySelector<HTMLInputElement>("#adminProductSearch");
 const adminSearchMessage =
   document.querySelector<HTMLParagraphElement>("#adminSearchMessage");
+const categoryForm = document.querySelector<HTMLFormElement>("#categoryForm");
+const categoryIdInput = document.querySelector<HTMLInputElement>("#categoryId");
+const categoryNameInput =
+  document.querySelector<HTMLInputElement>("#categoryName");
+const categoryMessage =
+  document.querySelector<HTMLParagraphElement>("#categoryMessage");
+const categoriesTableBody =
+  document.querySelector<HTMLTableSectionElement>("#categoriesTableBody");
+const cancelCategoryEditButton = document.querySelector<HTMLButtonElement>(
+  "#cancelCategoryEditButton"
+);
 
 if (
   !logo ||
@@ -58,7 +73,13 @@ if (
   !cancelEditButton ||
   !adminSearchForm ||
   !adminSearchInput ||
-  !adminSearchMessage
+  !adminSearchMessage ||
+  !categoryForm ||
+  !categoryIdInput ||
+  !categoryNameInput ||
+  !categoryMessage ||
+  !categoriesTableBody ||
+  !cancelCategoryEditButton
 ) {
   throw new Error("No se encontraron los elementos necesarios del admin");
 }
@@ -69,26 +90,65 @@ loggedUserName.textContent = getUser()?.email ?? "";
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
 let products = getProducts();
+let productCategories = getCategories();
 
-const resetForm = (): void => {
+const normalizeCategoryName = (categoryName: string): string =>
+  categoryName.replace(/\s+/g, "").toLowerCase();
+
+const normalizeSearchText = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+const resetForm = (clearMessage = true): void => {
   form.reset();
   productIdInput.value = "";
-  message.textContent = "";
+
+  if (clearMessage) {
+    message.textContent = "";
+  }
+};
+
+const resetCategoryForm = (clearMessage = true): void => {
+  categoryForm.reset();
+  categoryIdInput.value = "";
+
+  if (clearMessage) {
+    categoryMessage.textContent = "";
+  }
 };
 
 const renderCategories = (): void => {
   categorySelect.innerHTML = "";
 
-  categories.forEach((category) => {
+  productCategories.forEach((category) => {
     const option = document.createElement("option");
-    option.value = category;
-    option.textContent = category;
+    option.value = category.name;
+    option.textContent = category.name;
     categorySelect.appendChild(option);
   });
 };
 
+const renderCategoryTable = (): void => {
+  categoriesTableBody.innerHTML = "";
+
+  productCategories.forEach((category) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${category.name}</td>
+      <td>
+        <button type="button" class="button-secondary btn-edit-category" data-id="${category.id}">Editar</button>
+        <button type="button" class="btn-delete-category" data-id="${category.id}">Eliminar</button>
+      </td>
+    `;
+
+    categoriesTableBody.appendChild(tr);
+  });
+};
+
 const productMatchesSearch = (product: Product, searchText: string): boolean =>
-  product.name.toLowerCase().includes(searchText.toLowerCase());
+  normalizeSearchText(product.name).includes(normalizeSearchText(searchText));
 
 const getFilteredProducts = (): Product[] => {
   const searchText = adminSearchInput.value.trim();
@@ -158,17 +218,29 @@ const persistProducts = (): void => {
   renderProducts();
 };
 
+const persistCategories = (): void => {
+  saveCategories(productCategories);
+  renderCategories();
+  renderCategoryTable();
+};
+
 const getFormCategory = (): Category => categorySelect.value as Category;
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  if (productCategories.length === 0) {
+    message.textContent = "Creá una categoría antes de cargar productos.";
+    return;
+  }
+
   const productId = Number(productIdInput.value);
+  const productPrice = Number(priceInput.value);
   const productData: Product = {
     id: productId || getNextProductId(products),
     name: nameInput.value.trim(),
     description: descriptionInput.value.trim(),
-    price: Number(priceInput.value),
+    price: productPrice,
     image: imageInput.value.trim(),
     category: getFormCategory(),
     destacado: featuredInput.checked,
@@ -178,9 +250,11 @@ form.addEventListener("submit", (event) => {
     !productData.name ||
     !productData.description ||
     !productData.image ||
+    !Number.isFinite(productData.price) ||
     productData.price <= 0
   ) {
-    message.textContent = "Completá todos los campos del producto.";
+    message.textContent =
+      "Completá todos los campos del producto con un precio numérico mayor a cero.";
     return;
   }
 
@@ -195,7 +269,58 @@ form.addEventListener("submit", (event) => {
   }
 
   persistProducts();
-  resetForm();
+  resetForm(false);
+});
+
+categoryForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const categoryId = Number(categoryIdInput.value);
+  const categoryName = categoryNameInput.value.trim();
+  const normalizedCategoryName = normalizeCategoryName(categoryName);
+  const currentCategory = productCategories.find(
+    (category) => category.id === categoryId
+  );
+  const categoryAlreadyExists = productCategories.some(
+    (category) =>
+      normalizeCategoryName(category.name) === normalizedCategoryName &&
+      category.id !== categoryId
+  );
+
+  if (!categoryName) {
+    categoryMessage.textContent = "Completá el nombre de la categoría.";
+    return;
+  }
+
+  if (categoryAlreadyExists) {
+    categoryMessage.textContent = "Ya existe una categoría con ese nombre.";
+    return;
+  }
+
+  if (categoryId && currentCategory) {
+    const previousCategoryName = currentCategory.name;
+
+    productCategories = productCategories.map((category) =>
+      category.id === categoryId ? { ...category, name: categoryName } : category
+    );
+    products = products.map((product) =>
+      product.category === previousCategoryName
+        ? { ...product, category: categoryName }
+        : product
+    );
+    saveProducts(products);
+    renderProducts();
+    categoryMessage.textContent = "Categoría actualizada.";
+  } else {
+    productCategories = [
+      ...productCategories,
+      { id: getNextCategoryId(productCategories), name: categoryName },
+    ];
+    categoryMessage.textContent = "Categoría creada.";
+  }
+
+  persistCategories();
+  resetCategoryForm(false);
 });
 
 productsTableBody.addEventListener("click", (event) => {
@@ -231,6 +356,44 @@ productsTableBody.addEventListener("click", (event) => {
   }
 });
 
+categoriesTableBody.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  const categoryId = Number(target.dataset.id);
+  const category = productCategories.find((item) => item.id === categoryId);
+
+  if (!category) {
+    return;
+  }
+
+  if (target.classList.contains("btn-edit-category")) {
+    categoryIdInput.value = category.id.toString();
+    categoryNameInput.value = category.name;
+    categoryMessage.textContent = "Editando categoría.";
+    return;
+  }
+
+  if (target.classList.contains("btn-delete-category")) {
+    const categoryHasProducts = products.some(
+      (product) => product.category === category.name
+    );
+
+    if (categoryHasProducts) {
+      categoryMessage.textContent =
+        "No se puede eliminar una categoría con productos asociados.";
+      return;
+    }
+
+    productCategories = productCategories.filter((item) => item.id !== categoryId);
+    persistCategories();
+    resetCategoryForm();
+  }
+});
+
 adminSearchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   renderProducts();
@@ -240,8 +403,10 @@ adminSearchInput.addEventListener("input", () => {
   renderProducts();
 });
 
-cancelEditButton.addEventListener("click", resetForm);
+cancelEditButton.addEventListener("click", () => resetForm());
+cancelCategoryEditButton.addEventListener("click", () => resetCategoryForm());
 
 renderCategories();
+renderCategoryTable();
 renderProducts();
 renderOrders();

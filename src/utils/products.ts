@@ -3,8 +3,7 @@ import churrasquitoImage from "../assets/food-store/churrasquito_completo_bodego
 import empanadaImage from "../assets/food-store/empanada_bodegon.png";
 import milanesaImage from "../assets/food-store/mila_napo_bodegon.png";
 import papasImage from "../assets/food-store/papas_bodegon.png";
-import type { Category, Product } from "../types/Product";
-import { categories } from "../types/Product";
+import type { Product } from "../types/Product";
 
 const PRODUCTS_KEY = "products";
 
@@ -57,9 +56,6 @@ export const defaultProducts: Product[] = [
   },
 ];
 
-const isCategory = (value: unknown): value is Category =>
-  typeof value === "string" && categories.includes(value as Category);
-
 const isProduct = (value: unknown): value is Product => {
   if (!value || typeof value !== "object") {
     return false;
@@ -73,7 +69,7 @@ const isProduct = (value: unknown): value is Product => {
     typeof product.description === "string" &&
     typeof product.price === "number" &&
     typeof product.image === "string" &&
-    isCategory(product.category) &&
+    typeof product.category === "string" &&
     typeof product.destacado === "boolean"
   );
 };

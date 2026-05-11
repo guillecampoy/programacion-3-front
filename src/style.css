@@ -248,35 +248,92 @@ button:hover {
   background-color: #111;
 }
 
+.category-filter {
+  display: block;
+  width: 100%;
+  max-width: var(--product-card-width);
+  margin-top: 8px;
+  text-align: left;
+}
+
+.category-filter.active {
+  background-color: var(--color-primario);
+}
+
+#lista-categorias {
+  max-width: var(--product-card-width);
+  padding-left: 0;
+  list-style: none;
+}
+
 .admin-layout {
   display: grid;
   gap: 24px;
 }
 
-.product-form {
+.admin-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  align-items: end;
+  gap: 10px;
+}
+
+.admin-section-title {
+  color: var(--color-texto);
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.admin-box {
   background: var(--color-blanco);
   border: 1px solid var(--color-borde);
   border-radius: 8px;
   padding: 16px;
+  overflow-x: auto;
+}
+
+.product-form,
+.category-form {
+  display: grid;
+  gap: 12px;
+  align-items: end;
+}
+
+.product-form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.category-form {
+  grid-template-columns: minmax(220px, 420px);
+  align-items: start;
+}
+
+.category-admin-grid {
+  display: grid;
+  gap: 16px;
 }
 
 .product-form div,
-.product-form label {
+.product-form label,
+.category-form div {
   display: grid;
 }
 
 .product-form input,
 .product-form select,
-.product-form textarea {
+.product-form textarea,
+.category-form input {
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-full {
+  grid-column: 1 / -1;
+}
+
+.product-description-field,
+.product-featured-field,
+.product-actions,
+#productMessage {
   grid-column: 1 / -1;
 }
 
@@ -293,8 +350,17 @@ button:hover {
 
 .form-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  width: 100%;
+  max-width: var(--product-card-width);
+}
+
+.form-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-top: 0;
+  white-space: normal;
 }
 
 .table-wrapper {
@@ -359,6 +425,10 @@ footer p {
   }
 
   #contenedor-productos {
+    grid-template-columns: 1fr;
+  }
+
+  .product-form {
     grid-template-columns: 1fr;
   }
 }

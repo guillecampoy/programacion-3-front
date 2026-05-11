@@ -1,6 +1,9 @@
-export const categories = ["Milanesas", "Papas Fritas", "Minutas"] as const;
+export type Category = string;
 
-export type Category = (typeof categories)[number];
+export interface ProductCategory {
+  id: number;
+  name: string;
+}
 
 export interface Product {
   id: number;

@@ -3,8 +3,8 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import type { Product } from "../../../types/Product";
-import { categories } from "../../../types/Product";
 import { logout } from "../../../utils/auth";
+import { getCategories } from "../../../utils/categories";
 import { getUser } from "../../../utils/localStorage";
 import { getProducts } from "../../../utils/products";
 
@@ -20,6 +20,10 @@ const productList = document.querySelector<HTMLElement>("#contenedor-productos")
 const searchForm = document.querySelector<HTMLFormElement>("#searchForm");
 const searchInput = document.querySelector<HTMLInputElement>("#buscarProducto");
 const searchMessage = document.querySelector<HTMLParagraphElement>("#searchMessage");
+const productsTitle = document.querySelector<HTMLHeadingElement>("#productsTitle");
+const showAllProductsButton = document.querySelector<HTMLButtonElement>(
+  "#showAllProductsButton"
+);
 
 if (
   !loggedUserName ||
@@ -28,7 +32,9 @@ if (
   !productList ||
   !searchForm ||
   !searchInput ||
-  !searchMessage
+  !searchMessage ||
+  !productsTitle ||
+  !showAllProductsButton
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
 }
@@ -38,20 +44,42 @@ loggedUserName.textContent = getUser()?.email ?? "";
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
+const products = getProducts();
+const categories = getCategories();
+let selectedCategory = "";
+
+const setActiveCategoryButton = (): void => {
+  document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
+    button.classList.toggle("active", button.dataset.category === selectedCategory);
+  });
+};
+
+const renderProductsTitle = (): void => {
+  productsTitle.textContent = selectedCategory
+    ? `Productos de ${selectedCategory}`
+    : "Productos";
+};
+
 categories.forEach((category) => {
   const li = document.createElement("li");
-  const link = document.createElement("a");
+  const button = document.createElement("button");
 
-  link.href = "#";
-  link.textContent = category;
-  li.appendChild(link);
+  button.type = "button";
+  button.className = "button-secondary category-filter";
+  button.dataset.category = category.name;
+  button.textContent = category.name;
+  li.appendChild(button);
   categoryList.appendChild(li);
 });
 
-const featuredProducts = getProducts().filter((product) => product.destacado);
+const normalizeSearchText = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
 const productMatchesSearch = (product: Product, searchText: string): boolean =>
-  product.name.toLowerCase().includes(searchText.toLowerCase());
+  normalizeSearchText(product.name).includes(normalizeSearchText(searchText));
 
 const renderProducts = (productsToRender: Product[]): void => {
   productList.innerHTML = "";
@@ -84,10 +112,19 @@ const renderProducts = (productsToRender: Product[]): void => {
 
 const filterProducts = (): void => {
   const searchText = searchInput.value.trim();
-  const productsToRender = searchText
-    ? featuredProducts.filter((product) => productMatchesSearch(product, searchText))
-    : featuredProducts;
+  const productsToRender = products.filter((product) => {
+    const matchesCategory = selectedCategory
+      ? product.category === selectedCategory
+      : true;
+    const matchesSearch = searchText
+      ? productMatchesSearch(product, searchText)
+      : true;
 
+    return matchesCategory && matchesSearch;
+  });
+
+  renderProductsTitle();
+  setActiveCategoryButton();
   renderProducts(productsToRender);
 };
 
@@ -97,6 +134,23 @@ searchForm.addEventListener("submit", (event) => {
 });
 
 searchInput.addEventListener("input", filterProducts);
+
+showAllProductsButton.dataset.category = "";
+showAllProductsButton.addEventListener("click", () => {
+  selectedCategory = "";
+  filterProducts();
+});
+
+categoryList.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  selectedCategory = target.dataset.category ?? "";
+  filterProducts();
+});
 
 document.addEventListener("click", (event) => {
   const target = event.target;
@@ -110,11 +164,11 @@ document.addEventListener("click", (event) => {
   }
 
   const productId = Number(target.dataset.id);
-  const product = featuredProducts.find((item) => item.id === productId);
+  const product = products.find((item) => item.id === productId);
 
   if (product) {
     alert(`Agregaste "${product.name}" a tu carrito de compra`);
   }
 });
 
-renderProducts(featuredProducts);
+filterProducts();
