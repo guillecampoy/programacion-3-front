@@ -1,6 +1,7 @@
 import type { CartItem } from "../types/Cart";
 import type { IUser } from "../types/IUser";
 import type { Product } from "../types/Product";
+import { Rol } from "../types/Rol";
 
 const USERS_KEY = "users";
 const CURRENT_USER_KEY = "userData";
@@ -17,7 +18,7 @@ const isUser = (value: unknown): value is IUser => {
     typeof user.id === "string" &&
     typeof user.email === "string" &&
     typeof user.password === "string" &&
-    (user.role === "admin" || user.role === "client")
+    (user.role === Rol.Admin || user.role === Rol.Client)
   );
 };
 

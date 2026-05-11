@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../../assets/food-store/favicon_bodegon.png">
+    <title>Food Store - Carrito</title>
+</head>
+
+<body>
+    <header>
+        <div class="top-bar">
+            <div class="header-container">
+                <img id="storeLogo" alt="Logo de Food Store" class="logo">
+                <h1 class="title">Food Store</h1>
+            </div>
+            <section class="session-box" aria-label="Usuario logueado">
+                <span id="loggedUserName"></span>
+                <button id="logoutButton" type="button">Logout</button>
+            </section>
+        </div>
+        <nav>
+            <a href="../home/home.html">Inicio</a> |
+            <a href="#">Mis pedidos</a> |
+            <a href="./cart.html">Carrito(<span id="cartQuantity">0</span>)</a>
+        </nav>
+    </header>
+    <hr>
+
+    <main class="client-cart-layout">
+        <section class="client-cart-section">
+            <div class="cart-heading">
+                <h2 class="client-section-title">Carrito</h2>
+                <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+            </div>
+
+            <div id="cartContent" class="client-cart-box"></div>
+        </section>
+    </main>
+
+    <hr>
+    <footer>
+        <p>&copy; 2026 Food Store. Todos los derechos reservados</p>
+        <p>Contacto: <a href="mailto:info@foodstore.com">info@foodstore.com</a></p>
+    </footer>
+    <script type="module" src="./cart.ts"></script>
+</body>
+
+</html>

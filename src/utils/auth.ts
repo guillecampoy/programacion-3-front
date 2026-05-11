@@ -1,5 +1,5 @@
 import type { IUser } from "../types/IUser";
-import type { Rol } from "../types/Rol";
+import { Rol, type Rol as RolType } from "../types/Rol";
 import {
   getUser,
   getUsers,
@@ -15,13 +15,13 @@ const seedUsers: IUser[] = [
     id: "admin-seed",
     email: "admin@test.com",
     password: "admin123",
-    role: "admin",
+    role: Rol.Admin,
   },
   {
     id: "client-seed",
     email: "client@test.com",
     password: "client123",
-    role: "client",
+    role: Rol.Client,
   },
 ];
 
@@ -59,12 +59,12 @@ export const seedUsersIfNeeded = async (): Promise<void> => {
   }
 
   const users = await migrateUsersIfNeeded();
-  const hasAdmin = users.some((user) => user.role === "admin");
-  const hasClient = users.some((user) => user.role === "client");
+  const hasAdmin = users.some((user) => user.role === Rol.Admin);
+  const hasClient = users.some((user) => user.role === Rol.Client);
   const missingSeedUsers = seedUsers.filter((seedUser) => {
     const roleIsMissing =
-      (seedUser.role === "admin" && !hasAdmin) ||
-      (seedUser.role === "client" && !hasClient);
+      (seedUser.role === Rol.Admin && !hasAdmin) ||
+      (seedUser.role === Rol.Client && !hasClient);
     const emailExists = users.some((user) => user.email === seedUser.email);
 
     return roleIsMissing && !emailExists;
@@ -91,7 +91,7 @@ export const registerUser = async (
     id: `user-${Date.now().toString()}`,
     email: normalizedEmail,
     password: await hashPassword(password),
-    role: "client",
+    role: Rol.Client,
   };
 
   saveUsers([...users, newUser]);
@@ -120,7 +120,7 @@ export const loginUser = async (
 };
 
 export const redirectByRole = (user: IUser): void => {
-  if (user.role === "admin") {
+  if (user.role === Rol.Admin) {
     navigate(ROUTES.adminHome);
     return;
   }
@@ -143,13 +143,13 @@ const isPublicRoute = (path: string): boolean => {
   return publicRoutes.includes(path);
 };
 
-const getRequiredRole = (path: string): Rol | null => {
+const getRequiredRole = (path: string): RolType | null => {
   if (path.includes("/admin/") || path === "/admin") {
-    return "admin";
+    return Rol.Admin;
   }
 
   if (path.includes("/client/") || path === "/client") {
-    return "client";
+    return Rol.Client;
   }
 
   return null;
