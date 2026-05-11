@@ -1,0 +1,259 @@
+:root {
+  --color-primario: #ff6347;
+  --color-fondo: #f0f0f0;
+  --color-texto: #333;
+  --color-blanco: #fff;
+  --color-borde: #ddd;
+  --color-focus: #ff4500;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  color: var(--color-texto);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.session-box button {
+  margin-top: 0;
+  padding: 8px 10px;
+}
+
+nav {
+  margin-top: 12px;
+  text-align: right;
+}
+
+.logo {
+  width: 60px;
+}
+
+.title {
+  color: var(--color-primario);
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--color-texto);
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+#contenedor-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  background: var(--color-blanco);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.product-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.product-title {
+  color: var(--color-texto);
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.product-description,
+.product-price {
+  color: var(--color-texto);
+  margin-bottom: 5px;
+  font-weight: normal;
+  font-size: 14px;
+}
+
+label {
+  color: var(--color-texto);
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid var(--color-borde);
+  border-radius: 4px;
+}
+
+select,
+textarea {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid var(--color-borde);
+  border-radius: 4px;
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border: 2px solid var(--color-focus);
+}
+
+button {
+  background-color: var(--color-primario);
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: var(--color-focus);
+}
+
+.button-secondary {
+  background-color: var(--color-texto);
+}
+
+.button-secondary:hover {
+  background-color: #111;
+}
+
+.admin-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.product-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  align-items: end;
+  background: var(--color-blanco);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.product-form div,
+.product-form label {
+  display: grid;
+}
+
+.product-form input,
+.product-form select,
+.product-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-full {
+  grid-column: 1 / -1;
+}
+
+.checkbox-field {
+  align-content: center;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+}
+
+.checkbox-field input {
+  width: auto;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: var(--color-blanco);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--color-primario);
+  font-size: 14px;
+}
+
+td button {
+  margin-top: 0;
+  margin-right: 6px;
+  padding: 8px 10px;
+}
+
+footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+footer p {
+  color: var(--color-primario);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+@media (max-width: 640px) {
+  .top-bar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .session-box,
+  nav {
+    justify-content: flex-end;
+    text-align: right;
+  }
+}

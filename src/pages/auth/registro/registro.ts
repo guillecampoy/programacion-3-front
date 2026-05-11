@@ -1,4 +1,6 @@
 import "../../../main";
+import "../../../style.css";
+
 import { registerUser } from "../../../utils/auth";
 import { navigate, ROUTES } from "../../../utils/navigate";
 import { validateCredentials } from "../../../utils/validation";

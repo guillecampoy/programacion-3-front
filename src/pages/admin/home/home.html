@@ -1,16 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <title>Document</title>
+    <link rel="icon" href="../../../assets/food-store/favicon_bodegon.png">
+    <title>Food Store - Admin</title>
 </head>
 
 <body>
-    <h1>Hola desde la vista de admin</h1>
-    <button id="logoutButton">Logout</button>
+    <header>
+        <div class="top-bar">
+            <div class="header-container">
+                <img id="storeLogo" alt="Logo de Food Store" class="logo">
+                <h1 class="title">Food Store Admin</h1>
+            </div>
+            <section class="session-box" aria-label="Usuario logueado">
+                <span id="loggedUserName"></span>
+                <button id="logoutButton" type="button">Logout</button>
+            </section>
+        </div>
+        <nav>
+            <a href="#productos">Productos</a> |
+            <a href="#pedidos">Pedidos</a>
+        </nav>
+    </header>
+    <hr>
+
+    <main class="admin-layout">
+        <section id="productos">
+            <h2 class="subtitle">ABM de productos</h2>
+            <form id="productForm" class="product-form">
+                <input id="productId" type="hidden">
+                <div>
+                    <label for="productName">Nombre</label>
+                    <input id="productName" name="productName" required>
+                </div>
+                <div>
+                    <label for="productCategory">Categoría</label>
+                    <select id="productCategory" name="productCategory" required></select>
+                </div>
+                <div>
+                    <label for="productPrice">Precio</label>
+                    <input id="productPrice" name="productPrice" type="number" min="1" step="1" required>
+                </div>
+                <div>
+                    <label for="productImage">URL de imagen</label>
+                    <input id="productImage" name="productImage" required>
+                </div>
+                <div class="form-full">
+                    <label for="productDescription">Descripción</label>
+                    <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
+                </div>
+                <label class="checkbox-field">
+                    <input id="productFeatured" name="productFeatured" type="checkbox">
+                    Producto destacado
+                </label>
+                <div class="form-actions">
+                    <button type="submit" id="saveProductButton">Guardar producto</button>
+                    <button type="button" id="cancelEditButton" class="button-secondary">Cancelar edición</button>
+                </div>
+                <p id="productMessage"></p>
+            </form>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Destacado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="pedidos">
+            <h2 class="subtitle">Pedidos</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
     <script type="module" src="./home.ts"></script>
 </body>
 

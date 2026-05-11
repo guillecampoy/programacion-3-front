@@ -1,6 +1,8 @@
-# Proyecto: Protección de rutas
+# Proyecto: Food Store con protección de rutas
 
-Prototipo educativo de autenticación, autorización por roles y rutas protegidas con Vite, TypeScript y `localStorage`.
+Proyecto unificado en Vite que integra el prototipo de autenticación, autorización por roles y rutas protegidas con el catálogo estático de Food Store.
+
+No usa backend: la sesión, usuarios y datos semilla se manejan en el navegador con `localStorage`.
 
 ## Cómo ejecutar
 
@@ -29,15 +31,36 @@ El prototipo usa estas claves de `localStorage`:
 
 - `users`: array serializado de usuarios registrados.
 - `userData`: objeto serializado del usuario autenticado.
+- `products`: array serializado de productos del catálogo.
+- `orders`: array serializado de pedidos de prueba para la vista admin.
 
 ## Rutas principales
 
+- Entrada Vite: `/index.html`
 - Login: `/src/pages/auth/login/login.html`
 - Registro: `/src/pages/auth/registro/registro.html`
 - Admin: `/src/pages/admin/home/home.html`
-- Client: `/src/pages/client/home/home.html`
+- Client / catálogo Food Store: `/src/pages/client/home/home.html`
 
-La protección centralizada se ejecuta desde `src/main.ts`.
+## Uso de los index
+
+El proyecto debe ejecutarse desde `index.html`, que es la entrada raíz configurada en Vite y redirige al login.
+
+El antiguo `index_bis.html` del proyecto básico ya no se usa como archivo independiente. Su HTML fue integrado en `src/pages/client/home/home.html`, su CSS en `src/style.css`, su JavaScript en módulos TypeScript dentro de `src/pages/client/home/`, y sus imágenes en `src/assets/food-store/`.
+
+La protección centralizada se ejecuta desde `src/main.ts`, importado por cada vista.
+
+## Organización integrada
+
+- `src/assets/food-store/`: imágenes y favicon del catálogo.
+- `src/pages/client/home/home.html`: vista protegida del cliente y catálogo.
+- `src/pages/client/home/home.ts`: carga dinámica de categorías/productos y logout.
+- `src/types/Product.ts`: modelo de artículos/productos, incluyendo `destacado`.
+- `src/utils/products.ts`: datos iniciales y persistencia local del catálogo.
+- `src/utils/orders.ts`: datos iniciales y persistencia local de pedidos.
+- `src/style.css`: estilos unificados para las vistas.
+- `src/utils/`: autenticación, navegación, hash, validación y persistencia.
+- `src/types/`: contratos de usuario y roles.
 
 ## Limitaciones conocidas
 

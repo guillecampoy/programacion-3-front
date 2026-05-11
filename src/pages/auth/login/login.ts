@@ -1,4 +1,6 @@
 import "../../../main";
+import "../../../style.css";
+
 import { loginUser, redirectByRole } from "../../../utils/auth";
 import { validateCredentials } from "../../../utils/validation";
 
