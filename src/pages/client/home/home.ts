@@ -19,11 +19,30 @@ const categoryList = document.querySelector<HTMLUListElement>("#lista-categorias
 const productList = document.querySelector<HTMLElement>("#contenedor-productos");
 const searchForm = document.querySelector<HTMLFormElement>("#searchForm");
 const searchInput = document.querySelector<HTMLInputElement>("#buscarProducto");
+const featuredFilterInput =
+  document.querySelector<HTMLInputElement>("#featuredFilter");
 const searchMessage = document.querySelector<HTMLParagraphElement>("#searchMessage");
 const productsTitle = document.querySelector<HTMLHeadingElement>("#productsTitle");
 const showAllProductsButton = document.querySelector<HTMLButtonElement>(
   "#showAllProductsButton"
 );
+const productDetailModal =
+  document.querySelector<HTMLDivElement>("#productDetailModal");
+const closeProductDetailButton = document.querySelector<HTMLButtonElement>(
+  "#closeProductDetailButton"
+);
+const productDetailImage =
+  document.querySelector<HTMLImageElement>("#productDetailImage");
+const productDetailTitle =
+  document.querySelector<HTMLHeadingElement>("#productDetailTitle");
+const productDetailCategory = document.querySelector<HTMLParagraphElement>(
+  "#productDetailCategory"
+);
+const productDetailDescription = document.querySelector<HTMLParagraphElement>(
+  "#productDetailDescription"
+);
+const productDetailPrice =
+  document.querySelector<HTMLParagraphElement>("#productDetailPrice");
 
 if (
   !loggedUserName ||
@@ -32,9 +51,17 @@ if (
   !productList ||
   !searchForm ||
   !searchInput ||
+  !featuredFilterInput ||
   !searchMessage ||
   !productsTitle ||
-  !showAllProductsButton
+  !showAllProductsButton ||
+  !productDetailModal ||
+  !closeProductDetailButton ||
+  !productDetailImage ||
+  !productDetailTitle ||
+  !productDetailCategory ||
+  !productDetailDescription ||
+  !productDetailPrice
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
 }
@@ -100,7 +127,9 @@ const renderProducts = (productsToRender: Product[]): void => {
       <p class="product-price">Precio: <strong>$${currencyFormatter.format(
         product.price
       )}</strong></p>
-      <button type="button">Ver detalle</button>
+      <button type="button" class="btn-detalle" data-id="${product.id}">
+        Ver detalle
+      </button>
       <button type="button" class="btn-agregar" data-id="${product.id}">
         Agregar al carrito
       </button>
@@ -108,6 +137,22 @@ const renderProducts = (productsToRender: Product[]): void => {
 
     productList.appendChild(article);
   });
+};
+
+const openProductDetail = (product: Product): void => {
+  productDetailImage.src = product.image;
+  productDetailImage.alt = product.name;
+  productDetailTitle.textContent = product.name;
+  productDetailCategory.textContent = product.category;
+  productDetailDescription.textContent = product.longDescription;
+  productDetailPrice.innerHTML = `Precio: <strong>$${currencyFormatter.format(
+    product.price
+  )}</strong>`;
+  productDetailModal.hidden = false;
+};
+
+const closeProductDetail = (): void => {
+  productDetailModal.hidden = true;
 };
 
 const filterProducts = (): void => {
@@ -119,8 +164,11 @@ const filterProducts = (): void => {
     const matchesSearch = searchText
       ? productMatchesSearch(product, searchText)
       : true;
+    const matchesFeatured = featuredFilterInput.checked
+      ? product.destacado
+      : true;
 
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesSearch && matchesFeatured;
   });
 
   renderProductsTitle();
@@ -134,6 +182,7 @@ searchForm.addEventListener("submit", (event) => {
 });
 
 searchInput.addEventListener("input", filterProducts);
+featuredFilterInput.addEventListener("change", filterProducts);
 
 showAllProductsButton.dataset.category = "";
 showAllProductsButton.addEventListener("click", () => {
@@ -159,15 +208,41 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (!target.classList.contains("btn-agregar")) {
+  if (
+    !target.classList.contains("btn-agregar") &&
+    !target.classList.contains("btn-detalle")
+  ) {
     return;
   }
 
   const productId = Number(target.dataset.id);
   const product = products.find((item) => item.id === productId);
 
-  if (product) {
+  if (!product) {
+    return;
+  }
+
+  if (target.classList.contains("btn-detalle")) {
+    openProductDetail(product);
+    return;
+  }
+
+  if (target.classList.contains("btn-agregar")) {
     alert(`Agregaste "${product.name}" a tu carrito de compra`);
+  }
+});
+
+closeProductDetailButton.addEventListener("click", closeProductDetail);
+
+productDetailModal.addEventListener("click", (event) => {
+  if (event.target === productDetailModal) {
+    closeProductDetail();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !productDetailModal.hidden) {
+    closeProductDetail();
   }
 });
 

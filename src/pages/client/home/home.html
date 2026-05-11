@@ -27,21 +27,44 @@
         </nav>
     </header>
     <hr>
-    <aside>
-        <h2 class="subtitle">Categorías</h2>
-        <button id="showAllProductsButton" type="button" class="button-secondary category-filter active">Todas</button>
-        <ul id="lista-categorias"></ul>
-    </aside>
-    <main>
-        <form id="searchForm" class="search-form">
-            <label for="buscarProducto">Buscar productos</label>
-            <input id="buscarProducto" name="buscarProducto" placeholder="Ej: Hamburguesa">
-            <button type="submit">Buscar</button>
-        </form>
-        <h2 id="productsTitle" class="subtitle">Productos</h2>
-        <p id="searchMessage" class="empty-message"></p>
-        <section id="contenedor-productos"></section>
+    <main class="client-layout">
+        <aside class="client-sidebar">
+            <section class="client-filter-section">
+                <h2 class="client-section-title">Categorías</h2>
+                <div class="client-filter-box">
+                    <button id="showAllProductsButton" type="button" class="button-secondary category-filter active">Todas</button>
+                    <ul id="lista-categorias"></ul>
+                </div>
+            </section>
+            <section class="client-filter-section">
+                <h2 class="client-section-title">Buscar producto</h2>
+                <form id="searchForm" class="client-filter-box search-form">
+                    <label for="buscarProducto">Producto</label>
+                    <input id="buscarProducto" name="buscarProducto" placeholder="Ej: Hamburguesa">
+                    <label class="checkbox-field featured-filter">
+                        <input id="featuredFilter" name="featuredFilter" type="checkbox" checked>
+                        Solo productos destacados
+                    </label>
+                    <button type="submit">Buscar</button>
+                </form>
+            </section>
+        </aside>
+        <section class="client-products">
+            <h2 id="productsTitle" class="client-section-title">Productos</h2>
+            <p id="searchMessage" class="empty-message"></p>
+            <section id="contenedor-productos"></section>
+        </section>
     </main>
+    <div id="productDetailModal" class="modal-overlay" hidden>
+        <article class="modal-content" role="dialog" aria-modal="true" aria-labelledby="productDetailTitle">
+            <button id="closeProductDetailButton" type="button" class="modal-close" aria-label="Cerrar detalle">Cerrar</button>
+            <img id="productDetailImage" class="modal-product-image" alt="">
+            <h2 id="productDetailTitle" class="modal-title"></h2>
+            <p id="productDetailCategory" class="modal-category"></p>
+            <p id="productDetailDescription" class="modal-description"></p>
+            <p id="productDetailPrice" class="product-price"></p>
+        </article>
+    </div>
     <hr>
     <footer>
         <p>&copy; 2026 Food Store. Todos los derechos reservados</p>

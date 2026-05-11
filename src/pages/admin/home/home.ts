@@ -29,6 +29,9 @@ const priceInput = document.querySelector<HTMLInputElement>("#productPrice");
 const imageInput = document.querySelector<HTMLInputElement>("#productImage");
 const descriptionInput =
   document.querySelector<HTMLTextAreaElement>("#productDescription");
+const longDescriptionInput = document.querySelector<HTMLTextAreaElement>(
+  "#productLongDescription"
+);
 const featuredInput =
   document.querySelector<HTMLInputElement>("#productFeatured");
 const message = document.querySelector<HTMLParagraphElement>("#productMessage");
@@ -66,6 +69,7 @@ if (
   !priceInput ||
   !imageInput ||
   !descriptionInput ||
+  !longDescriptionInput ||
   !featuredInput ||
   !message ||
   !productsTableBody ||
@@ -240,6 +244,7 @@ form.addEventListener("submit", (event) => {
     id: productId || getNextProductId(products),
     name: nameInput.value.trim(),
     description: descriptionInput.value.trim(),
+    longDescription: longDescriptionInput.value.trim(),
     price: productPrice,
     image: imageInput.value.trim(),
     category: getFormCategory(),
@@ -249,6 +254,7 @@ form.addEventListener("submit", (event) => {
   if (
     !productData.name ||
     !productData.description ||
+    !productData.longDescription ||
     !productData.image ||
     !Number.isFinite(productData.price) ||
     productData.price <= 0
@@ -344,6 +350,7 @@ productsTableBody.addEventListener("click", (event) => {
     priceInput.value = product.price.toString();
     imageInput.value = product.image;
     descriptionInput.value = product.description;
+    longDescriptionInput.value = product.longDescription;
     featuredInput.checked = product.destacado;
     message.textContent = "Editando producto.";
     return;
