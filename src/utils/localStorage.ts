@@ -116,6 +116,10 @@ export const saveCart = (cart: CartItem[]): void => {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 };
 
+export const clearCart = (): void => {
+  localStorage.removeItem(CART_KEY);
+};
+
 export const addProductToCart = (product: Product): CartItem[] => {
   const cart = getCart();
   const cartItem = cart.find((item) => item.product.id === product.id);

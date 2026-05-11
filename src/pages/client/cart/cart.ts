@@ -3,7 +3,7 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import { logout } from "../../../utils/auth";
-import { getCart, getUser } from "../../../utils/localStorage";
+import { clearCart, getCart, getUser } from "../../../utils/localStorage";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 buttonLogout?.addEventListener("click", () => {
@@ -40,9 +40,13 @@ const renderCart = (): void => {
   if (cart.length === 0) {
     cartContent.className = "client-cart-box empty-cart-box";
     cartContent.innerHTML = `
-      <p class="empty-message">Tu carrito está vacío.</p>
-      <p>No tenés productos cargados en el pedido.</p>
-      <a class="cart-return-link" href="../home/home.html">Ir a productos</a>
+      <div class="cart-empty-state">
+        <p class="empty-message">Tu carrito está vacío.</p>
+        <p>No tenés productos cargados en el pedido.</p>
+      </div>
+      <div class="cart-actions">
+        <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+      </div>
     `;
     return;
   }
@@ -81,7 +85,34 @@ const renderCart = (): void => {
       <span>Total</span>
       <strong>$${currencyFormatter.format(totalAmount)}</strong>
     </section>
+    <div class="cart-actions">
+      <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+      <button
+        type="button"
+        id="clearCartButton"
+        class="cart-cancel-button"
+        title="Elimina el carrito"
+      >
+        Cancelar pedido
+      </button>
+    </div>
   `;
+
+  const clearCartButton =
+    cartContent.querySelector<HTMLButtonElement>("#clearCartButton");
+
+  clearCartButton?.addEventListener("click", () => {
+    const shouldClearCart = window.confirm(
+      "¿Querés cancelar este pedido y limpiar el carrito?"
+    );
+
+    if (!shouldClearCart) {
+      return;
+    }
+
+    clearCart();
+    renderCart();
+  });
 };
 
 renderCart();

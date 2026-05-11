@@ -226,16 +226,26 @@ hr {
   gap: 12px;
 }
 
-.cart-return-link {
-  display: inline-block;
+.cart-return-link,
+.cart-cancel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
-  background-color: var(--color-primario);
-  color: var(--color-blanco);
+  height: 40px;
+  min-height: 40px;
   border-radius: 4px;
   padding: 10px 12px;
+  font-family: inherit;
   font-size: 14px;
+  line-height: 1.2;
   font-weight: bold;
+  color: var(--color-blanco);
   text-decoration: none;
+}
+
+.cart-return-link {
+  background-color: var(--color-primario);
 }
 
 .cart-return-link:hover {
@@ -243,6 +253,8 @@ hr {
 }
 
 .client-cart-box {
+  display: grid;
+  gap: 14px;
   background: var(--color-blanco);
   border: 1px solid var(--color-borde);
   border-radius: 8px;
@@ -264,7 +276,6 @@ hr {
   align-items: center;
   gap: 24px;
   border-top: 1px solid var(--color-borde);
-  margin-top: 12px;
   padding-top: 14px;
   color: var(--color-texto);
   font-size: 18px;
@@ -275,13 +286,38 @@ hr {
   color: var(--color-primario);
 }
 
-.empty-cart-box {
-  display: grid;
-  gap: 12px;
-  justify-items: start;
+.cart-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
 }
 
-.empty-cart-box p {
+.cart-cancel-button {
+  appearance: none;
+  background-color: #a92b2b;
+  border: none;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.cart-cancel-button:hover {
+  background-color: #7f1f1f;
+}
+
+.empty-cart-box {
+  display: grid;
+  align-content: space-between;
+  min-height: 180px;
+}
+
+.cart-empty-state {
+  display: grid;
+  gap: 8px;
+}
+
+.cart-empty-state p {
   margin: 0;
 }
 
