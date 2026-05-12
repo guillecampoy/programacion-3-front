@@ -57,6 +57,7 @@ const renderCart = (): void => {
       <table class="cart-table">
         <thead>
           <tr>
+            <th>Imagen</th>
             <th>Producto</th>
             <th>Precio</th>
             <th>Cantidad</th>
@@ -68,6 +69,13 @@ const renderCart = (): void => {
             .map(
               (cartItem) => `
                 <tr>
+                  <td>
+                    <img
+                      class="cart-product-image"
+                      src="${cartItem.product.image}"
+                      alt="${cartItem.product.name}"
+                    >
+                  </td>
                   <td>${cartItem.product.name}</td>
                   <td>$${currencyFormatter.format(cartItem.product.price)}</td>
                   <td>${cartItem.quantity}</td>
