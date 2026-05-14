@@ -1,7 +1,9 @@
 import choriImage from "../assets/food-store/chori_bodegon.png";
 import churrasquitoImage from "../assets/food-store/churrasquito_completo_bodegon.png";
 import empanadaImage from "../assets/food-store/empanada_bodegon.png";
+import milanesaACaballoImage from "../assets/food-store/mila_a_caballo.png";
 import milanesaImage from "../assets/food-store/mila_napo_bodegon.png";
+import milanesaSimpleImage from "../assets/food-store/mila_simple.png";
 import papasImage from "../assets/food-store/papas_bodegon.png";
 import type { Product } from "../types/Product";
 
@@ -23,6 +25,28 @@ export const defaultProducts: Product[] = [
   },
   {
     id: 2,
+    name: "Milanesa a Caballo",
+    description: "Milanesa con huevos fritos, ideal para compartir",
+    longDescription:
+      "Milanesa a caballo preparada con corte vacuno, cubierta con huevos fritos y acompañamiento sugerido. Versión más completa de la milanesa clásica para validar el catálogo inicial.",
+    price: 23400,
+    image: milanesaACaballoImage,
+    category: "Milanesas",
+    destacado: true,
+  },
+  {
+    id: 3,
+    name: "Milanesa Simple",
+    description: "Milanesa clásica, crocante y abundante",
+    longDescription:
+      "Milanesa simple de corte vacuno con rebozado crocante. Opción base de la categoría Milanesas para comparar precios y presentación dentro del prototipo.",
+    price: 12600,
+    image: milanesaSimpleImage,
+    category: "Milanesas",
+    destacado: false,
+  },
+  {
+    id: 4,
     name: "Choripán",
     description:
       "Chorizo casero, mezcla premium, aderezos disponibles chimichurri y salsa criolla",
@@ -34,7 +58,7 @@ export const defaultProducts: Product[] = [
     destacado: true,
   },
   {
-    id: 3,
+    id: 5,
     name: "Churrasquito Completo",
     description: "Con lechuga, tomate y queso tybo",
     longDescription:
@@ -45,7 +69,7 @@ export const defaultProducts: Product[] = [
     destacado: true,
   },
   {
-    id: 4,
+    id: 6,
     name: "Empanada",
     description: "Masa casera, de gran tamaño, carne cortada a cuchillo",
     longDescription:
@@ -56,7 +80,7 @@ export const defaultProducts: Product[] = [
     destacado: false,
   },
   {
-    id: 5,
+    id: 7,
     name: "Papas bastón",
     description: "Crujientes, caseras, porción abundante",
     longDescription:
