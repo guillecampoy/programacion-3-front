@@ -46,13 +46,19 @@
                     <label for="productPrice">Precio</label>
                     <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" required>
                 </div>
-                <div class="product-field">
-                    <label for="productImage">URL de imagen</label>
-                    <input id="productImage" name="productImage" required>
+                <div class="product-field product-image-field">
+                    <label for="productImage">Imagen</label>
+                    <select id="productImage" name="productImage" required></select>
                 </div>
-                <div class="product-description-field">
-                    <label for="productDescription">Descripción corta</label>
-                    <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
+                <div class="product-description-preview-row">
+                    <div class="product-description-field">
+                        <label for="productDescription">Descripción corta</label>
+                        <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="product-preview-field">
+                        <label>Vista previa</label>
+                        <img id="productImagePreview" class="product-image-preview" alt="Vista previa de imagen seleccionada">
+                    </div>
                 </div>
                 <div class="product-long-description-field">
                     <label for="productLongDescription">Descripción detallada</label>
@@ -67,7 +73,7 @@
                     <button type="submit" id="saveProductButton">Guardar producto</button>
                     <button type="button" id="cancelEditButton" class="button-secondary">Cancelar edición</button>
                 </div>
-                <p id="productMessage"></p>
+                <p id="productMessage" class="form-message" aria-live="polite"></p>
             </form>
         </section>
 
@@ -108,7 +114,7 @@
                         <button type="submit">Guardar categoría</button>
                         <button type="button" id="cancelCategoryEditButton" class="button-secondary">Cancelar edición</button>
                     </div>
-                    <p id="categoryMessage"></p>
+                    <p id="categoryMessage" class="form-message" aria-live="polite"></p>
                 </form>
 
                 <table>

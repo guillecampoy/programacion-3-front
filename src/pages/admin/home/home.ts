@@ -11,6 +11,7 @@ import {
 } from "../../../utils/categories";
 import { getUser } from "../../../utils/localStorage";
 import { getOrders } from "../../../utils/orders";
+import { productImageOptions } from "../../../utils/productImages";
 import { getNextProductId, getProducts, saveProducts } from "../../../utils/products";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
@@ -21,12 +22,15 @@ buttonLogout?.addEventListener("click", () => {
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const form = document.querySelector<HTMLFormElement>("#productForm");
+const productSection = document.querySelector<HTMLElement>("#productos");
 const productIdInput = document.querySelector<HTMLInputElement>("#productId");
 const nameInput = document.querySelector<HTMLInputElement>("#productName");
 const categorySelect =
   document.querySelector<HTMLSelectElement>("#productCategory");
 const priceInput = document.querySelector<HTMLInputElement>("#productPrice");
-const imageInput = document.querySelector<HTMLInputElement>("#productImage");
+const imageInput = document.querySelector<HTMLSelectElement>("#productImage");
+const imagePreview =
+  document.querySelector<HTMLImageElement>("#productImagePreview");
 const descriptionInput =
   document.querySelector<HTMLTextAreaElement>("#productDescription");
 const longDescriptionInput = document.querySelector<HTMLTextAreaElement>(
@@ -63,11 +67,13 @@ if (
   !logo ||
   !loggedUserName ||
   !form ||
+  !productSection ||
   !productIdInput ||
   !nameInput ||
   !categorySelect ||
   !priceInput ||
   !imageInput ||
+  !imagePreview ||
   !descriptionInput ||
   !longDescriptionInput ||
   !featuredInput ||
@@ -93,6 +99,8 @@ loggedUserName.textContent = getUser()?.email ?? "";
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
+type FormMessageType = "success" | "error" | "info";
+
 let products = getProducts();
 let productCategories = getCategories();
 
@@ -105,12 +113,29 @@ const normalizeSearchText = (value: string): string =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 
+const setFormMessage = (
+  element: HTMLParagraphElement,
+  text: string,
+  type: FormMessageType
+): void => {
+  element.textContent = text;
+  element.className = `form-message form-message-${type}`;
+  element.setAttribute("role", type === "error" ? "alert" : "status");
+};
+
+const clearFormMessage = (element: HTMLParagraphElement): void => {
+  element.textContent = "";
+  element.className = "form-message";
+  element.removeAttribute("role");
+};
+
 const resetForm = (clearMessage = true): void => {
   form.reset();
   productIdInput.value = "";
+  updateImagePreview();
 
   if (clearMessage) {
-    message.textContent = "";
+    clearFormMessage(message);
   }
 };
 
@@ -119,7 +144,7 @@ const resetCategoryForm = (clearMessage = true): void => {
   categoryIdInput.value = "";
 
   if (clearMessage) {
-    categoryMessage.textContent = "";
+    clearFormMessage(categoryMessage);
   }
 };
 
@@ -132,6 +157,55 @@ const renderCategories = (): void => {
     option.textContent = category.name;
     categorySelect.appendChild(option);
   });
+};
+
+const updateImagePreview = (): void => {
+  const selectedOption = imageInput.selectedOptions[0];
+
+  if (!imageInput.value) {
+    imagePreview.removeAttribute("src");
+    imagePreview.alt = "Sin imagen seleccionada";
+    return;
+  }
+
+  imagePreview.src = imageInput.value;
+  imagePreview.alt = selectedOption?.textContent
+    ? `Vista previa de ${selectedOption.textContent}`
+    : "Vista previa de imagen seleccionada";
+};
+
+const renderProductImageOptions = (): void => {
+  imageInput.innerHTML = "";
+
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "";
+  emptyOption.textContent = "Seleccioná una imagen";
+  imageInput.appendChild(emptyOption);
+
+  productImageOptions.forEach((imageOption) => {
+    const option = document.createElement("option");
+    option.value = imageOption.url;
+    option.textContent = imageOption.label;
+    imageInput.appendChild(option);
+  });
+
+  updateImagePreview();
+};
+
+const selectProductImage = (imageUrl: string): void => {
+  const hasImageOption = productImageOptions.some(
+    (imageOption) => imageOption.url === imageUrl
+  );
+
+  if (!hasImageOption) {
+    const currentImageOption = document.createElement("option");
+    currentImageOption.value = imageUrl;
+    currentImageOption.textContent = "Imagen actual";
+    imageInput.appendChild(currentImageOption);
+  }
+
+  imageInput.value = imageUrl;
+  updateImagePreview();
 };
 
 const renderCategoryTable = (): void => {
@@ -234,7 +308,11 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
 
   if (productCategories.length === 0) {
-    message.textContent = "Creá una categoría antes de cargar productos.";
+    setFormMessage(
+      message,
+      "Creá una categoría antes de cargar productos.",
+      "error"
+    );
     return;
   }
 
@@ -259,8 +337,11 @@ form.addEventListener("submit", (event) => {
     !Number.isFinite(productData.price) ||
     productData.price <= 0
   ) {
-    message.textContent =
-      "Completá todos los campos del producto con un precio numérico mayor a cero.";
+    setFormMessage(
+      message,
+      "Completá todos los campos del producto con un precio numérico mayor a cero.",
+      "error"
+    );
     return;
   }
 
@@ -268,10 +349,10 @@ form.addEventListener("submit", (event) => {
     products = products.map((product) =>
       product.id === productId ? productData : product
     );
-    message.textContent = "Producto actualizado.";
+    setFormMessage(message, "Producto actualizado correctamente.", "success");
   } else {
     products = [...products, productData];
-    message.textContent = "Producto creado.";
+    setFormMessage(message, "Producto creado correctamente.", "success");
   }
 
   persistProducts();
@@ -294,12 +375,20 @@ categoryForm.addEventListener("submit", (event) => {
   );
 
   if (!categoryName) {
-    categoryMessage.textContent = "Completá el nombre de la categoría.";
+    setFormMessage(
+      categoryMessage,
+      "Completá el nombre de la categoría.",
+      "error"
+    );
     return;
   }
 
   if (categoryAlreadyExists) {
-    categoryMessage.textContent = "Ya existe una categoría con ese nombre.";
+    setFormMessage(
+      categoryMessage,
+      "Ya existe una categoría con ese nombre.",
+      "error"
+    );
     return;
   }
 
@@ -316,13 +405,21 @@ categoryForm.addEventListener("submit", (event) => {
     );
     saveProducts(products);
     renderProducts();
-    categoryMessage.textContent = "Categoría actualizada.";
+    setFormMessage(
+      categoryMessage,
+      "Categoría actualizada correctamente.",
+      "success"
+    );
   } else {
     productCategories = [
       ...productCategories,
       { id: getNextCategoryId(productCategories), name: categoryName },
     ];
-    categoryMessage.textContent = "Categoría creada.";
+    setFormMessage(
+      categoryMessage,
+      "Categoría creada correctamente.",
+      "success"
+    );
   }
 
   persistCategories();
@@ -348,18 +445,27 @@ productsTableBody.addEventListener("click", (event) => {
     nameInput.value = product.name;
     categorySelect.value = product.category;
     priceInput.value = product.price.toString();
-    imageInput.value = product.image;
+    selectProductImage(product.image);
     descriptionInput.value = product.description;
     longDescriptionInput.value = product.longDescription;
     featuredInput.checked = product.destacado;
-    message.textContent = "Editando producto.";
+    setFormMessage(message, `Editando producto: ${product.name}.`, "info");
+    productSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    nameInput.focus();
     return;
   }
 
   if (target.classList.contains("btn-delete")) {
+    const deletedProductName = product.name;
+
     products = products.filter((item) => item.id !== productId);
     persistProducts();
-    resetForm();
+    resetForm(false);
+    setFormMessage(
+      message,
+      `Producto eliminado: ${deletedProductName}.`,
+      "success"
+    );
   }
 });
 
@@ -380,7 +486,7 @@ categoriesTableBody.addEventListener("click", (event) => {
   if (target.classList.contains("btn-edit-category")) {
     categoryIdInput.value = category.id.toString();
     categoryNameInput.value = category.name;
-    categoryMessage.textContent = "Editando categoría.";
+    setFormMessage(categoryMessage, `Editando categoría: ${category.name}.`, "info");
     return;
   }
 
@@ -390,14 +496,24 @@ categoriesTableBody.addEventListener("click", (event) => {
     );
 
     if (categoryHasProducts) {
-      categoryMessage.textContent =
-        "No se puede eliminar una categoría con productos asociados.";
+      setFormMessage(
+        categoryMessage,
+        "No se puede eliminar una categoría con productos asociados.",
+        "error"
+      );
       return;
     }
 
+    const deletedCategoryName = category.name;
+
     productCategories = productCategories.filter((item) => item.id !== categoryId);
     persistCategories();
-    resetCategoryForm();
+    resetCategoryForm(false);
+    setFormMessage(
+      categoryMessage,
+      `Categoría eliminada: ${deletedCategoryName}.`,
+      "success"
+    );
   }
 });
 
@@ -410,9 +526,35 @@ adminSearchInput.addEventListener("input", () => {
   renderProducts();
 });
 
-cancelEditButton.addEventListener("click", () => resetForm());
-cancelCategoryEditButton.addEventListener("click", () => resetCategoryForm());
+imageInput.addEventListener("change", updateImagePreview);
 
+cancelEditButton.addEventListener("click", () => {
+  const wasEditing = productIdInput.value !== "";
+
+  resetForm(false);
+  setFormMessage(
+    message,
+    wasEditing
+      ? "Edición de producto cancelada."
+      : "Formulario de producto limpio.",
+    "info"
+  );
+});
+
+cancelCategoryEditButton.addEventListener("click", () => {
+  const wasEditing = categoryIdInput.value !== "";
+
+  resetCategoryForm(false);
+  setFormMessage(
+    categoryMessage,
+    wasEditing
+      ? "Edición de categoría cancelada."
+      : "Formulario de categoría limpio.",
+    "info"
+  );
+});
+
+renderProductImageOptions();
 renderCategories();
 renderCategoryTable();
 renderProducts();
