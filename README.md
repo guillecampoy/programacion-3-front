@@ -42,14 +42,6 @@ El prototipo usa estas claves de `localStorage`:
 - Admin: `/src/pages/admin/home/home.html`
 - Client / catálogo Food Store: `/src/pages/client/home/home.html`
 
-## Uso de los index
-
-El proyecto debe ejecutarse desde `index.html`, que es la entrada raíz configurada en Vite y redirige al login.
-
-El antiguo `index_bis.html` del proyecto básico ya no se usa como archivo independiente. Su HTML fue integrado en `src/pages/client/home/home.html`, su CSS en `src/style.css`, su JavaScript en módulos TypeScript dentro de `src/pages/client/home/`, y sus imágenes en `src/assets/food-store/`.
-
-La protección centralizada se ejecuta desde `src/main.ts`, importado por cada vista.
-
 ## Organización integrada
 
 - `src/assets/food-store/`: imágenes y favicon del catálogo.
