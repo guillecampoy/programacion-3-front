@@ -120,6 +120,18 @@ export const clearCart = (): void => {
   localStorage.removeItem(CART_KEY);
 };
 
+export const removeProductFromCart = (productId: Product["id"]): CartItem[] => {
+  const cart = getCart().filter((item) => item.product.id !== productId);
+
+  if (cart.length === 0) {
+    clearCart();
+    return [];
+  }
+
+  saveCart(cart);
+  return cart;
+};
+
 export const addProductToCart = (product: Product): CartItem[] => {
   const cart = getCart();
   const cartItem = cart.find((item) => item.product.id === product.id);

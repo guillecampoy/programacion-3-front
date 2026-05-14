@@ -227,7 +227,8 @@ hr {
 }
 
 .cart-return-link,
-.cart-cancel-button {
+.cart-cancel-button,
+.cart-remove-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -266,7 +267,9 @@ hr {
 }
 
 .cart-table td:nth-child(4),
-.cart-table th:nth-child(4) {
+.cart-table th:nth-child(4),
+.cart-table td:nth-child(6),
+.cart-table th:nth-child(6) {
   text-align: center;
 }
 
@@ -312,6 +315,21 @@ hr {
 
 .cart-cancel-button:hover {
   background-color: #7f1f1f;
+}
+
+.cart-remove-button {
+  appearance: none;
+  height: 34px;
+  min-height: 34px;
+  border: 1px solid #d8a0a0;
+  background-color: #fff3f3;
+  color: #8f2424;
+  cursor: pointer;
+}
+
+.cart-remove-button:hover {
+  background-color: #f8dddd;
+  border-color: #c57373;
 }
 
 .empty-cart-box {

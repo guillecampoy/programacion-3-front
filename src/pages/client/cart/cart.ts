@@ -3,7 +3,12 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import { logout } from "../../../utils/auth";
-import { clearCart, getCart, getUser } from "../../../utils/localStorage";
+import {
+  clearCart,
+  getCart,
+  getUser,
+  removeProductFromCart,
+} from "../../../utils/localStorage";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 buttonLogout?.addEventListener("click", () => {
@@ -62,6 +67,7 @@ const renderCart = (): void => {
             <th>Precio</th>
             <th>Cantidad</th>
             <th>Subtotal</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
@@ -82,6 +88,17 @@ const renderCart = (): void => {
                   <td>$${currencyFormatter.format(
                     cartItem.product.price * cartItem.quantity
                   )}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="cart-remove-button"
+                      data-product-id="${cartItem.product.id}"
+                      aria-label="Eliminar ${cartItem.product.name} del carrito"
+                      title="Eliminar artículo"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
                 </tr>
               `
             )
@@ -108,6 +125,21 @@ const renderCart = (): void => {
 
   const clearCartButton =
     cartContent.querySelector<HTMLButtonElement>("#clearCartButton");
+  const removeButtons =
+    cartContent.querySelectorAll<HTMLButtonElement>(".cart-remove-button");
+
+  removeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const productId = Number(button.dataset.productId);
+
+      if (Number.isNaN(productId)) {
+        return;
+      }
+
+      removeProductFromCart(productId);
+      renderCart();
+    });
+  });
 
   clearCartButton?.addEventListener("click", () => {
     const shouldClearCart = window.confirm(
