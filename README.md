@@ -18,12 +18,12 @@ Al iniciar la aplicación, si no existe `localStorage.users`, se crean estos usu
 Admin:
 
 - Email: `admin@test.com`
-- Password: `admin123`
+- Password: `Admin1234`
 
 Client:
 
 - Email: `client@test.com`
-- Password: `client123`
+- Password: `Client1234`
 
 ## Persistencia
 

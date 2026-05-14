@@ -14,13 +14,13 @@ const seedUsers: IUser[] = [
   {
     id: "admin-seed",
     email: "admin@test.com",
-    password: "admin123",
+    password: "Admin1234",
     role: Rol.Admin,
   },
   {
     id: "client-seed",
     email: "client@test.com",
-    password: "client123",
+    password: "Client1234",
     role: Rol.Client,
   },
 ];
@@ -59,19 +59,45 @@ export const seedUsersIfNeeded = async (): Promise<void> => {
   }
 
   const users = await migrateUsersIfNeeded();
-  const hasAdmin = users.some((user) => user.role === Rol.Admin);
-  const hasClient = users.some((user) => user.role === Rol.Client);
+  const hashedSeedUsers = await Promise.all(seedUsers.map(hashUserPassword));
+  let usersWereUpdated = false;
+
+  const syncedUsers = users.map((user) => {
+    const matchingSeedUser = hashedSeedUsers.find(
+      (seedUser) => seedUser.id === user.id && seedUser.email === user.email
+    );
+
+    if (!matchingSeedUser || user.password === matchingSeedUser.password) {
+      return user;
+    }
+
+    usersWereUpdated = true;
+    return {
+      ...user,
+      password: matchingSeedUser.password,
+    };
+  });
+
+  if (usersWereUpdated) {
+    saveUsers(syncedUsers);
+  }
+
+  const hasAdmin = syncedUsers.some((user) => user.role === Rol.Admin);
+  const hasClient = syncedUsers.some((user) => user.role === Rol.Client);
   const missingSeedUsers = seedUsers.filter((seedUser) => {
     const roleIsMissing =
       (seedUser.role === Rol.Admin && !hasAdmin) ||
       (seedUser.role === Rol.Client && !hasClient);
-    const emailExists = users.some((user) => user.email === seedUser.email);
+    const emailExists = syncedUsers.some((user) => user.email === seedUser.email);
 
     return roleIsMissing && !emailExists;
   });
 
   if (missingSeedUsers.length > 0) {
-    saveUsers([...users, ...(await Promise.all(missingSeedUsers.map(hashUserPassword)))]);
+    saveUsers([
+      ...syncedUsers,
+      ...(await Promise.all(missingSeedUsers.map(hashUserPassword))),
+    ]);
   }
 };
 
