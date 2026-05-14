@@ -1,8 +1,12 @@
-# Proyecto: Food Store con protección de rutas
+# Proyecto: Food Store - Evaluación 1
 
 Proyecto unificado en Vite que integra el prototipo de autenticación, autorización por roles y rutas protegidas con el catálogo estático de Food Store.
 
 No usa backend: la sesión, usuarios y datos semilla se manejan en el navegador con `localStorage`.
+
+## Enlace video explicativo
+
+[Explicación funcional entrega](https://youtu.be/5MXFKpoUTiw)
 
 ## Cómo ejecutar
 
