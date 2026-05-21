@@ -1,6 +1,6 @@
 export type Category = string;
 
-export interface ProductCategory {
+export interface ICategoria {
   id: number;
   name: string;
 }

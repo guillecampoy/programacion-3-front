@@ -5,12 +5,12 @@ import milanesaACaballoImage from "../assets/food-store/mila_a_caballo.png";
 import milanesaImage from "../assets/food-store/mila_napo_bodegon.png";
 import milanesaSimpleImage from "../assets/food-store/mila_simple.png";
 import papasImage from "../assets/food-store/papas_bodegon.png";
-import type { Product, ProductCategory } from "../types/Product";
+import type { ICategoria, Product } from "../types/Product";
 
 export const DEFAULT_LONG_DESCRIPTION =
   "Descripción ampliada pendiente. Acá podés detallar ingredientes, tamaño de la porción, acompañamientos sugeridos y cualquier aclaración útil para el cliente.";
 
-export const defaultCategories: ProductCategory[] = [
+export const defaultCategories: ICategoria[] = [
   { id: 1, name: "Milanesas" },
   { id: 2, name: "Papas Fritas" },
   { id: 3, name: "Minutas" },
