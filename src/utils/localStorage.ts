@@ -132,6 +132,22 @@ export const removeProductFromCart = (productId: Product["id"]): CartItem[] => {
   return cart;
 };
 
+export const updateProductQuantityInCart = (
+  productId: Product["id"],
+  quantity: number
+): CartItem[] => {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return getCart();
+  }
+
+  const cart = getCart().map((item) =>
+    item.product.id === productId ? { ...item, quantity } : item
+  );
+
+  saveCart(cart);
+  return cart;
+};
+
 export const addProductToCart = (product: Product): CartItem[] => {
   const cart = getCart();
   const cartItem = cart.find((item) => item.product.id === product.id);

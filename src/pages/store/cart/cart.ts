@@ -8,6 +8,7 @@ import {
   getCart,
   getUser,
   removeProductFromCart,
+  updateProductQuantityInCart,
 } from "../../../utils/localStorage";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
@@ -64,7 +65,7 @@ const renderCart = (): void => {
           <tr>
             <th>Imagen</th>
             <th>Producto</th>
-            <th>Precio</th>
+            <th>Precio unitario</th>
             <th>Cantidad</th>
             <th>Subtotal</th>
             <th>Acción</th>
@@ -84,7 +85,17 @@ const renderCart = (): void => {
                   </td>
                   <td>${cartItem.product.name}</td>
                   <td>$${currencyFormatter.format(cartItem.product.price)}</td>
-                  <td>${cartItem.quantity}</td>
+                  <td>
+                    <input
+                      type="number"
+                      class="cart-quantity-input"
+                      data-product-id="${cartItem.product.id}"
+                      value="${cartItem.quantity}"
+                      min="1"
+                      step="1"
+                      aria-label="Cantidad de ${cartItem.product.name}"
+                    >
+                  </td>
                   <td>$${currencyFormatter.format(
                     cartItem.product.price * cartItem.quantity
                   )}</td>
@@ -127,6 +138,8 @@ const renderCart = (): void => {
     cartContent.querySelector<HTMLButtonElement>("#clearCartButton");
   const removeButtons =
     cartContent.querySelectorAll<HTMLButtonElement>(".cart-remove-button");
+  const quantityInputs =
+    cartContent.querySelectorAll<HTMLInputElement>(".cart-quantity-input");
 
   removeButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -137,6 +150,22 @@ const renderCart = (): void => {
       }
 
       removeProductFromCart(productId);
+      renderCart();
+    });
+  });
+
+  quantityInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      const productId = Number(input.dataset.productId);
+      const quantity = Number(input.value);
+
+      if (Number.isNaN(productId) || !Number.isInteger(quantity) || quantity <= 0) {
+        const currentItem = getCart().find((item) => item.product.id === productId);
+        input.value = String(currentItem?.quantity ?? 1);
+        return;
+      }
+
+      updateProductQuantityInCart(productId, quantity);
       renderCart();
     });
   });

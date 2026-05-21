@@ -1,14 +1,9 @@
-import type { ProductCategory } from "../types/Product";
+import { defaultCategories } from "../data/data";
+import type { ICategoria } from "../types/Product";
 
 const CATEGORIES_KEY = "categories";
 
-export const defaultCategories: ProductCategory[] = [
-  { id: 1, name: "Milanesas" },
-  { id: 2, name: "Papas Fritas" },
-  { id: 3, name: "Minutas" },
-];
-
-const isProductCategory = (value: unknown): value is ProductCategory => {
+const isProductCategory = (value: unknown): value is ICategoria => {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -18,11 +13,11 @@ const isProductCategory = (value: unknown): value is ProductCategory => {
   return typeof category.id === "number" && typeof category.name === "string";
 };
 
-export const saveCategories = (categories: ProductCategory[]): void => {
+export const saveCategories = (categories: ICategoria[]): void => {
   localStorage.setItem(CATEGORIES_KEY, JSON.stringify(categories));
 };
 
-export const getCategories = (): ProductCategory[] => {
+export const getCategories = (): ICategoria[] => {
   const categoriesFromStorage = localStorage.getItem(CATEGORIES_KEY);
 
   if (!categoriesFromStorage) {
@@ -57,7 +52,7 @@ export const getCategories = (): ProductCategory[] => {
   }
 };
 
-export const getNextCategoryId = (categories: ProductCategory[]): number => {
+export const getNextCategoryId = (categories: ICategoria[]): number => {
   const maxId = categories.reduce(
     (currentMax, category) => Math.max(currentMax, category.id),
     0

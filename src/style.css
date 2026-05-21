@@ -281,6 +281,21 @@ hr {
   border-radius: 6px;
 }
 
+.cart-quantity-input {
+  width: 72px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  text-align: center;
+  font: inherit;
+}
+
+.cart-quantity-input:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
 .cart-totalizer {
   display: flex;
   justify-content: flex-end;

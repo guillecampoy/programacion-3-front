@@ -151,7 +151,7 @@ export const redirectByRole = (user: IUser): void => {
     return;
   }
 
-  navigate(ROUTES.clientHome);
+  navigate(ROUTES.storeHome);
 };
 
 const isPublicRoute = (path: string): boolean => {
@@ -174,7 +174,12 @@ const getRequiredRole = (path: string): RolType | null => {
     return Rol.Admin;
   }
 
-  if (path.includes("/client/") || path === "/client") {
+  if (
+    path.includes("/store/") ||
+    path === "/store" ||
+    path.includes("/client/") ||
+    path === "/client"
+  ) {
     return Rol.Client;
   }
 
