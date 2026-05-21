@@ -1,12 +1,7 @@
+import { defaultCategories } from "../data/data";
 import type { ProductCategory } from "../types/Product";
 
 const CATEGORIES_KEY = "categories";
-
-export const defaultCategories: ProductCategory[] = [
-  { id: 1, name: "Milanesas" },
-  { id: 2, name: "Papas Fritas" },
-  { id: 3, name: "Minutas" },
-];
 
 const isProductCategory = (value: unknown): value is ProductCategory => {
   if (!value || typeof value !== "object") {

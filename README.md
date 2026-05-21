@@ -44,13 +44,13 @@ El prototipo usa estas claves de `localStorage`:
 - Login: `/src/pages/auth/login/login.html`
 - Registro: `/src/pages/auth/registro/registro.html`
 - Admin: `/src/pages/admin/home/home.html`
-- Client / catálogo Food Store: `/src/pages/client/home/home.html`
+- Store / catálogo Food Store: `/src/pages/store/home/home.html`
 
 ## Organización integrada
 
 - `src/assets/food-store/`: imágenes y favicon del catálogo.
-- `src/pages/client/home/home.html`: vista protegida del cliente y catálogo.
-- `src/pages/client/home/home.ts`: carga dinámica de categorías/productos y logout.
+- `src/pages/store/home/home.html`: vista protegida del cliente y catálogo.
+- `src/pages/store/home/home.ts`: carga dinámica de categorías/productos y logout.
 - `src/types/Product.ts`: modelo de artículos/productos, incluyendo `destacado`.
 - `src/utils/products.ts`: datos iniciales y persistencia local del catálogo.
 - `src/utils/orders.ts`: datos iniciales y persistencia local de pedidos.
