@@ -41,10 +41,13 @@
                 <form id="searchForm" class="client-filter-box search-form">
                     <label for="buscarProducto">Producto</label>
                     <input id="buscarProducto" name="buscarProducto" placeholder="Ej: Hamburguesa">
-                    <label class="checkbox-field featured-filter">
-                        <input id="featuredFilter" name="featuredFilter" type="checkbox" checked>
-                        Solo productos destacados
-                    </label>
+                    <label for="sortProducts">Ordenar</label>
+                    <select id="sortProducts" name="sortProducts">
+                        <option value="name-asc">Nombre A-Z</option>
+                        <option value="name-desc">Nombre Z-A</option>
+                        <option value="price-asc">Precio ascendente</option>
+                        <option value="price-desc">Precio descendente</option>
+                    </select>
                     <button type="submit">Buscar</button>
                 </form>
             </section>

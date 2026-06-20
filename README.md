@@ -30,6 +30,21 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - La sesion se guarda en `localStorage.userData` sin password.
 - La redireccion depende del rol del usuario autenticado.
 
+### Registro validado
+
+- El registro pide nombre, email y contraseña.
+- Verifica que el email no exista en `public/data/usuarios.json`.
+- El alta queda solo en la sesion local y no se persiste en `usuarios.json`.
+- El alta realiza auto-login como `USUARIO`.
+
+### Catalogo validado
+
+- El catalogo carga categorias desde `public/data/categorias.json`.
+- El catalogo carga productos desde `public/data/productos.json`.
+- Solo se muestran productos disponibles y no eliminados.
+- El filtro por categoria, la busqueda por nombre y el ordenamiento se resuelven en el cliente.
+- Cada tarjeta muestra imagen, nombre, precio y badge de disponibilidad.
+
 ## Como ejecutar
 
 ```bash
@@ -59,12 +74,13 @@ Los usuarios de referencia para el login viven en `public/data/usuarios.json`:
 
 Claves usadas en `localStorage`:
 
-- `users`: usuarios registrados.
 - `userData`: usuario autenticado.
 - `categories`: categorias del catalogo.
 - `products`: productos del catalogo.
 - `orders`: pedidos de prueba o generados localmente.
 - `cart`: items del carrito.
+
+`users` quedo como almacenamiento legado de una version anterior y ya no participa en el login ni en el registro actual.
 
 ## Rutas principales
 

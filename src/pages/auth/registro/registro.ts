@@ -3,31 +3,33 @@ import "../../../style.css";
 
 import { registerUser } from "../../../utils/auth";
 import { navigate, ROUTES } from "../../../utils/navigate";
-import { validateCredentials } from "../../../utils/validation";
+import { validateRegistration } from "../../../utils/validation";
 
 const form = document.querySelector<HTMLFormElement>("#form");
+const inputName = document.querySelector<HTMLInputElement>("#name");
 const inputEmail = document.querySelector<HTMLInputElement>("#email");
 const inputPassword = document.querySelector<HTMLInputElement>("#password");
 const message = document.querySelector<HTMLParagraphElement>("#message");
 
-if (!form || !inputEmail || !inputPassword || !message) {
+if (!form || !inputName || !inputEmail || !inputPassword || !message) {
   throw new Error("No se encontraron los elementos necesarios del registro");
 }
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  const name = inputName.value.trim();
   const email = inputEmail.value.trim();
   const password = inputPassword.value;
 
-  const validationError = validateCredentials(email, password);
+  const validationError = validateRegistration(name, email, password);
 
   if (validationError) {
     message.textContent = validationError;
     return;
   }
 
-  const error = await registerUser(email, password);
+  const error = await registerUser(name, email, password);
 
   if (error) {
     message.textContent = error;
@@ -35,5 +37,5 @@ form.addEventListener("submit", async (e) => {
   }
 
   message.textContent = "Usuario registrado correctamente.";
-  navigate(ROUTES.login);
+  navigate(ROUTES.storeHome);
 });

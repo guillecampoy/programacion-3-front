@@ -20,6 +20,7 @@ const isSessionUser = (value: unknown): value is IUser => {
 
   return (
     typeof user.id === "string" &&
+    (typeof user.name === "string" || typeof user.name === "undefined") &&
     typeof user.email === "string" &&
     (user.role === Rol.Admin || user.role === Rol.Client)
   );

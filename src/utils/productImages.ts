@@ -48,3 +48,11 @@ export const productImageOptions: ProductImageOption[] = Object.entries(
   .sort((firstOption, secondOption) =>
     firstOption.label.localeCompare(secondOption.label, "es")
   );
+
+export const resolveProductImageUrl = (fileName: string): string =>
+  productImageOptions.find((option) => option.fileName === fileName)?.url ??
+  productImageOptions.find(
+    (option) =>
+      option.fileName.replace(/\.[^.]+$/, "") === fileName.replace(/\.[^.]+$/, "")
+  )?.url ??
+  "";

@@ -1,47 +1,38 @@
 import type { IUser } from "../types/IUser";
 import { Rol, type Rol as RolType } from "../types/Rol";
 import type { ApiUser } from "./api";
-import { fetchUsers, mapApiRoleToRole } from "./api";
-import {
-  getUser,
-  getUsers,
-  removeUser,
-  saveUser,
-  saveUsers,
-  type IStoredUser,
-} from "./localStorage";
-import { hashPassword } from "./hash";
+import { fetchUserByEmail, fetchUsers, mapApiRoleToRole } from "./api";
+import { getUser, removeUser, saveUser } from "./localStorage";
 import { navigate, ROUTES } from "./navigate";
 
 const mapApiUserToSessionUser = (user: ApiUser): IUser => ({
   id: user.id,
+  name: `${user.nombre} ${user.apellido}`.trim(),
   email: user.mail.trim(),
   role: mapApiRoleToRole(user.rol),
 });
 
 export const registerUser = async (
+  name: string,
   email: string,
-  password: string
+  _password: string
 ): Promise<string | null> => {
+  const normalizedName = name.trim();
   const normalizedEmail = email.trim();
-  const localUsers = getUsers();
-  const apiUsers = await fetchUsers().catch(() => []);
-  const emailExists =
-    localUsers.some((user) => user.email === normalizedEmail) ||
-    apiUsers.some((user) => user.mail.trim() === normalizedEmail);
+  const existingUser = await fetchUserByEmail(normalizedEmail).catch(() => null);
 
-  if (emailExists) {
+  if (existingUser) {
     return "Ya existe un usuario con ese email.";
   }
 
-  const newUser: IStoredUser = {
+  const newUser: IUser = {
     id: `user-${Date.now().toString()}`,
+    name: normalizedName,
     email: normalizedEmail,
-    password: await hashPassword(password),
     role: Rol.Client,
   };
 
-  saveUsers([...localUsers, newUser]);
+  saveUser(newUser);
   return null;
 };
 

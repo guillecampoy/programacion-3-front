@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nombre": "Milanesas",
+    "descripcion": "Platos de milanesa y versiones completas.",
+    "imagen": "mila_napo_bodegon.png",
+    "eliminado": false
+  },
+  {
+    "id": 2,
+    "nombre": "Papas Fritas",
+    "descripcion": "Guarniciones y porciones para compartir.",
+    "imagen": "papas_bodegon.png",
+    "eliminado": false
+  },
+  {
+    "id": 3,
+    "nombre": "Minutas",
+    "descripcion": "Sandwiches, empanadas y opciones rapidas.",
+    "imagen": "chori_bodegon.png",
+    "eliminado": false
+  }
+]

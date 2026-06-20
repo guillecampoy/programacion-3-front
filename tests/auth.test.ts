@@ -15,8 +15,9 @@ vi.mock("../src/utils/navigate", () => ({
   },
 }));
 
-import { loginUser, redirectByRole } from "../src/utils/auth";
+import { loginUser, redirectByRole, registerUser } from "../src/utils/auth";
 import { Rol } from "../src/types/Rol";
+import { validateRegistration } from "../src/utils/validation";
 
 const createLocalStorageMock = (): Storage => {
   const store = new Map<string, string>();
@@ -66,12 +67,14 @@ describe("auth", () => {
     expect(fetchMock).toHaveBeenCalledWith("/data/usuarios.json");
     expect(user).toEqual({
       id: "admin-1",
+      name: "Admin FoodStore",
       email: "admin@test.com",
       role: Rol.Admin,
     });
     expect(localStorage.getItem("userData")).toBe(
       JSON.stringify({
         id: "admin-1",
+        name: "Admin FoodStore",
         email: "admin@test.com",
         role: Rol.Admin,
       })
@@ -99,5 +102,61 @@ describe("auth", () => {
 
     redirectByRole({ id: "2", email: "client@test.com", role: Rol.Client });
     expect(navigateMock).toHaveBeenCalledWith("/src/pages/store/home/home.html");
+  });
+
+  it("registra un usuario de forma local y lo deja logueado", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    }));
+
+    const error = await registerUser("Nuevo Cliente", "nuevo@test.com", "abc123");
+
+    expect(error).toBeNull();
+    const storedUser = JSON.parse(localStorage.getItem("userData") ?? "{}") as {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+
+    expect(storedUser.id).toContain("user-");
+    expect(storedUser.name).toBe("Nuevo Cliente");
+    expect(storedUser.email).toBe("nuevo@test.com");
+    expect(storedUser.role).toBe(Rol.Client);
+  });
+
+  it("rechaza emails ya existentes en usuarios.json", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [
+        {
+          id: "u-1",
+          nombre: "Existente",
+          apellido: "User",
+          mail: "existente@test.com",
+          celular: "000",
+          password: "abc123",
+          rol: "USUARIO",
+        },
+      ],
+    }));
+
+    const error = await registerUser("Otro", "existente@test.com", "abc123");
+
+    expect(error).toBe("Ya existe un usuario con ese email.");
+    expect(localStorage.getItem("userData")).toBeNull();
+  });
+
+  it("valida el formulario de registro", () => {
+    expect(validateRegistration("", "nuevo@test.com", "abc123")).toBe(
+      "El nombre es requerido."
+    );
+    expect(validateRegistration("Nuevo", "mal", "abc123")).toBe(
+      "Ingresá un email válido."
+    );
+    expect(validateRegistration("Nuevo", "nuevo@test.com", "abc")).toBe(
+      "La contraseña debe tener al menos 6 caracteres."
+    );
   });
 });
