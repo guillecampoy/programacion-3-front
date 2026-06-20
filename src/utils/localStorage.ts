@@ -7,7 +7,11 @@ const USERS_KEY = "users";
 const CURRENT_USER_KEY = "userData";
 const CART_KEY = "cart";
 
-const isUser = (value: unknown): value is IUser => {
+export interface IStoredUser extends IUser {
+  password: string;
+}
+
+const isSessionUser = (value: unknown): value is IUser => {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -17,12 +21,24 @@ const isUser = (value: unknown): value is IUser => {
   return (
     typeof user.id === "string" &&
     typeof user.email === "string" &&
-    typeof user.password === "string" &&
     (user.role === Rol.Admin || user.role === Rol.Client)
   );
 };
 
-export const getUsers = (): IUser[] => {
+const isStoredUser = (value: unknown): value is IStoredUser => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const user = value as Record<string, unknown>;
+
+  return (
+    isSessionUser(user) &&
+    typeof user.password === "string"
+  );
+};
+
+export const getUsers = (): IStoredUser[] => {
   const usersFromStorage = localStorage.getItem(USERS_KEY);
 
   if (!usersFromStorage) {
@@ -36,13 +52,13 @@ export const getUsers = (): IUser[] => {
       return [];
     }
 
-    return parsedUsers.filter(isUser);
+    return parsedUsers.filter(isStoredUser);
   } catch {
     return [];
   }
 };
 
-export const saveUsers = (users: IUser[]): void => {
+export const saveUsers = (users: IStoredUser[]): void => {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
@@ -59,7 +75,7 @@ export const getUser = (): IUser | null => {
 
   try {
     const parsedUser = JSON.parse(userFromStorage) as unknown;
-    return isUser(parsedUser) ? parsedUser : null;
+    return isSessionUser(parsedUser) ? parsedUser : null;
   } catch {
     return null;
   }

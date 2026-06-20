@@ -1,66 +1,93 @@
-# Proyecto: Food Store - Evaluación 1
+# Food Store Frontend
 
-Proyecto unificado en Vite que integra el prototipo de autenticación, autorización por roles y rutas protegidas con el catálogo estático de Food Store.
+Frontend del TPI de Programacion 3, construido con Vite y TypeScript.
 
-No usa backend: la sesión, usuarios y datos semilla se manejan en el navegador con `localStorage`.
+La fuente funcional de este proyecto es `docs/TPI.pdf` hasta la pagina 19.  
+Las historias de usuario a iterar estan en `docs/historias/` y este README se va a actualizar a medida que avance cada implementacion.
 
-## Enlace video explicativo
+## Fuentes de verdad
 
-[Explicación funcional entrega](https://youtu.be/5MXFKpoUTiw)
+- `docs/TPI.pdf`: alcance funcional general del front.
+- `docs/historias/`: historias a implementar una por una.
+- `public/data/`: contrato de datos local que define el TPI para la primera iteracion del frontend.
 
-## Cómo ejecutar
+## Estado actual
+
+La base ya integra estos modulos del front:
+
+- autenticacion y registro;
+- catalogo de productos con busqueda, filtros y detalle;
+- carrito local;
+- panel de administracion;
+- persistencia client-side con `localStorage`.
+
+No hay backend en esta entrega. La sesion, los usuarios, los productos, las categorias, los pedidos y el carrito viven en el navegador.
+El README describe el estado validado del proyecto, no solo la consigna.
+
+### Login validado
+
+- El login consulta `public/data/usuarios.json`.
+- La sesion se guarda en `localStorage.userData` sin password.
+- La redireccion depende del rol del usuario autenticado.
+
+## Como ejecutar
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
+```
+
+## Checks
+
+```bash
+npm test
+npm run build
 ```
 
 ## Usuarios semilla
 
-Al iniciar la aplicación, si no existe `localStorage.users`, se crean estos usuarios:
+Los usuarios de referencia para el login viven en `public/data/usuarios.json`:
 
-Admin:
+- Admin
+  - Email: `admin@test.com`
+  - Password: `Admin1234`
+- Cliente
+  - Email: `client@test.com`
+  - Password: `Client1234`
 
-- Email: `admin@test.com`
-- Password: `Admin1234`
+## Persistencia local
 
-Client:
+Claves usadas en `localStorage`:
 
-- Email: `client@test.com`
-- Password: `Client1234`
-
-## Persistencia
-
-El prototipo usa estas claves de `localStorage`:
-
-- `users`: array serializado de usuarios registrados.
-- `userData`: objeto serializado del usuario autenticado.
-- `products`: array serializado de productos del catálogo.
-- `orders`: array serializado de pedidos de prueba para la vista admin.
+- `users`: usuarios registrados.
+- `userData`: usuario autenticado.
+- `categories`: categorias del catalogo.
+- `products`: productos del catalogo.
+- `orders`: pedidos de prueba o generados localmente.
+- `cart`: items del carrito.
 
 ## Rutas principales
 
-- Entrada Vite: `/index.html`
 - Login: `/src/pages/auth/login/login.html`
 - Registro: `/src/pages/auth/registro/registro.html`
 - Admin: `/src/pages/admin/home/home.html`
-- Store / catálogo Food Store: `/src/pages/store/home/home.html`
+- Catalogo: `/src/pages/store/home/home.html`
+- Carrito: `/src/pages/store/cart/cart.html`
 
-## Organización integrada
+## Estructura relevante
 
-- `src/assets/food-store/`: imágenes y favicon del catálogo.
-- `src/pages/store/home/home.html`: vista protegida del cliente y catálogo.
-- `src/pages/store/home/home.ts`: carga dinámica de categorías/productos y logout.
-- `src/types/Product.ts`: modelo de artículos/productos, incluyendo `destacado`.
-- `src/utils/products.ts`: datos iniciales y persistencia local del catálogo.
-- `src/utils/orders.ts`: datos iniciales y persistencia local de pedidos.
-- `src/style.css`: estilos unificados para las vistas.
-- `src/utils/`: autenticación, navegación, hash, validación y persistencia.
-- `src/types/`: contratos de usuario y roles.
+- `src/pages/auth/`: login y registro.
+- `src/pages/store/home/`: catalogo del cliente.
+- `src/pages/store/cart/`: carrito y cierre local.
+- `src/pages/admin/home/`: panel de administracion.
+- `src/utils/`: auth, navegacion, validaciones y persistencia.
+- `src/data/data.ts`: semilla inicial de categorias y productos.
+- `src/types/`: contratos de dominio del front.
+- `src/assets/food-store/`: imagenes y favicon del proyecto.
 
-## Limitaciones conocidas
+## Notas funcionales
 
-- Las contraseñas se guardan con hash `SHA-256` en `localStorage`, pero sigue siendo un enfoque solo de frontend.
-- La validación de credenciales es de cliente: email con formato básico y contraseña de 8 a 20 caracteres con letras y números.
-- La autorización se basa en rutas del frontend y puede manipularse desde el navegador.
-- Este enfoque sirve solo para practicar flujo, tipado, navegación y separación de responsabilidades.
+- El acceso por rol se resuelve en el front.
+- La validacion de credenciales y formularios es client-side.
+- La persistencia es local, por lo que recargar el navegador no usa un backend real.
+- Las historias futuras se van a cerrar de a una sobre esta base.

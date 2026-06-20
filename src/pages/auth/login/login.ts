@@ -1,6 +1,7 @@
 import "../../../main";
 import "../../../style.css";
 
+import { getUser } from "../../../utils/localStorage";
 import { loginUser, redirectByRole } from "../../../utils/auth";
 import { validateCredentials } from "../../../utils/validation";
 
@@ -11,6 +12,12 @@ const message = document.querySelector<HTMLParagraphElement>("#message");
 
 if (!form || !inputEmail || !inputPassword || !message) {
   throw new Error("No se encontraron los elementos necesarios del login");
+}
+
+const currentUser = getUser();
+
+if (currentUser) {
+  redirectByRole(currentUser);
 }
 
 form.addEventListener("submit", async (e) => {
