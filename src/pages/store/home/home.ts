@@ -109,6 +109,7 @@ const toCartProduct = (product: CatalogProduct): Product => ({
   image: product.imagen,
   category: product.categoryName,
   destacado: true,
+  stock: product.stock,
 });
 
 const setActiveCategoryButton = (): void => {
@@ -131,18 +132,6 @@ const renderCategories = (): void => {
     li.appendChild(button);
     categoryList.appendChild(li);
   });
-};
-
-const openProductDetail = (product: CatalogProduct): void => {
-  productDetailImage.src = product.imagen;
-  productDetailImage.alt = product.nombre;
-  productDetailTitle.textContent = product.nombre;
-  productDetailCategory.textContent = product.categoryName;
-  productDetailDescription.textContent = product.descripcion;
-  productDetailPrice.innerHTML = `Precio: <strong>$${currencyFormatter.format(
-    product.precio
-  )}</strong>`;
-  productDetailModal.hidden = false;
 };
 
 const closeProductDetail = (): void => {
@@ -279,27 +268,8 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  openProductDetail(product);
-});
-
-document.addEventListener("keydown", (event) => {
-  if (!(event.target instanceof HTMLElement)) {
-    return;
-  }
-
-  const card = event.target.closest<HTMLElement>(".product-card");
-
-  if (!card || (event.key !== "Enter" && event.key !== " ")) {
-    return;
-  }
-
-  event.preventDefault();
-
-  const productId = Number(card.dataset.id);
-  const product = catalogProducts.find((item) => item.id === productId);
-
-  if (product) {
-    openProductDetail(product);
+  if (button?.classList.contains("btn-detalle") || card) {
+    window.location.href = `../productDetail/productDetail.html?id=${product.id}`;
   }
 });
 

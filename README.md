@@ -45,6 +45,14 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - El filtro por categoria, la busqueda por nombre y el ordenamiento se resuelven en el cliente.
 - Cada tarjeta muestra imagen, nombre, precio y badge de disponibilidad.
 
+### Detalle validado
+
+- El detalle de producto vive en `src/pages/store/productDetail/`.
+- Se carga por `id` desde la query string.
+- Muestra imagen, nombre, descripcion, precio, stock y estado.
+- La cantidad respeta el stock restante y no permite agregar sin disponibilidad.
+- Al agregar, el producto queda en `localStorage.cart` con la cantidad elegida.
+
 ## Como ejecutar
 
 ```bash
@@ -88,6 +96,7 @@ Claves usadas en `localStorage`:
 - Registro: `/src/pages/auth/registro/registro.html`
 - Admin: `/src/pages/admin/home/home.html`
 - Catalogo: `/src/pages/store/home/home.html`
+- Detalle de producto: `/src/pages/store/productDetail/productDetail.html`
 - Carrito: `/src/pages/store/cart/cart.html`
 
 ## Estructura relevante

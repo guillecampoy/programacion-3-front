@@ -3,6 +3,7 @@ export const ROUTES = {
   registro: "/src/pages/auth/registro/registro.html",
   adminHome: "/src/pages/admin/home/home.html",
   storeHome: "/src/pages/store/home/home.html",
+  storeProductDetail: "/src/pages/store/productDetail/productDetail.html",
   storeCart: "/src/pages/store/cart/cart.html",
 } as const;
 

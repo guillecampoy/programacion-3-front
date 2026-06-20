@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../../assets/food-store/favicon_bodegon.png">
+    <title>Food Store - Detalle de producto</title>
+</head>
+<body>
+    <header>
+        <div class="top-bar">
+            <div class="header-container">
+                <img id="storeLogo" alt="Logo de Food Store" class="logo">
+                <h1 class="title">Food Store</h1>
+            </div>
+            <section class="session-box" aria-label="Usuario logueado">
+                <span id="loggedUserName"></span>
+                <button id="logoutButton" type="button">Logout</button>
+            </section>
+        </div>
+        <nav>
+            <a href="../home/home.html">Inicio</a> |
+            <a href="#">Mis pedidos</a> |
+            <a href="../cart/cart.html">Carrito(<span id="cartQuantity">0</span>)</a>
+        </nav>
+    </header>
+    <hr>
+
+    <main class="product-detail-layout">
+        <section id="productDetailState" class="product-detail-state" hidden></section>
+        <article id="productDetailCard" class="product-detail-card" hidden>
+            <img id="productDetailImage" class="product-detail-image" alt="">
+            <div class="product-detail-content">
+                <p id="productDetailCategory" class="modal-category"></p>
+                <h2 id="productDetailTitle" class="modal-title"></h2>
+                <p id="productDetailDescription" class="modal-description"></p>
+                <p id="productDetailPrice" class="product-price"></p>
+                <p id="productDetailStock" class="product-detail-stock"></p>
+                <p id="productDetailStatus" class="product-detail-status"></p>
+                <div class="product-detail-form">
+                    <label for="quantity">Cantidad</label>
+                    <input id="quantity" type="number" min="1" step="1" value="1">
+                    <button id="addToCartButton" type="button">Agregar al carrito</button>
+                    <a class="cart-return-link" href="../home/home.html">Volver al catálogo</a>
+                </div>
+                <p id="productDetailMessage" class="form-message"></p>
+            </div>
+        </article>
+    </main>
+
+    <hr>
+    <footer>
+        <p>&copy; 2026 Food Store. Todos los derechos reservados</p>
+        <p>Contacto: <a href="mailto:info@foodstore.com">info@foodstore.com</a></p>
+    </footer>
+    <script type="module" src="./productDetail.ts"></script>
+</body>
+</html>

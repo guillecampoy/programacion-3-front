@@ -149,6 +149,12 @@ export const removeProductFromCart = (productId: Product["id"]): CartItem[] => {
   return cart;
 };
 
+export const getCartQuantityForProduct = (productId: Product["id"]): number =>
+  getCart().find((item) => item.product.id === productId)?.quantity ?? 0;
+
+const getProductStock = (product: Product): number | null =>
+  typeof product.stock === "number" && product.stock >= 0 ? product.stock : null;
+
 export const updateProductQuantityInCart = (
   productId: Product["id"],
   quantity: number
@@ -157,22 +163,57 @@ export const updateProductQuantityInCart = (
     return getCart();
   }
 
-  const cart = getCart().map((item) =>
-    item.product.id === productId ? { ...item, quantity } : item
-  );
+  const cart = getCart().map((item) => {
+    if (item.product.id !== productId) {
+      return item;
+    }
+
+    const maxQuantity = getProductStock(item.product);
+
+    if (maxQuantity === 0) {
+      return item;
+    }
+
+    const nextQuantity =
+      typeof maxQuantity === "number" ? Math.min(quantity, maxQuantity) : quantity;
+
+    return { ...item, quantity: nextQuantity };
+  });
 
   saveCart(cart);
   return cart;
 };
 
-export const addProductToCart = (product: Product): CartItem[] => {
+export const addProductToCart = (product: Product, quantity = 1): CartItem[] => {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return getCart();
+  }
+
   const cart = getCart();
   const cartItem = cart.find((item) => item.product.id === product.id);
+  const maxQuantity = getProductStock(product);
+  const currentQuantity = cartItem?.quantity ?? 0;
 
   if (cartItem) {
-    cartItem.quantity += 1;
+    if (maxQuantity === 0) {
+      return cart;
+    }
+
+    const nextQuantity =
+      typeof maxQuantity === "number"
+        ? Math.min(currentQuantity + quantity, maxQuantity)
+        : currentQuantity + quantity;
+
+    cartItem.quantity = nextQuantity;
   } else {
-    cart.push({ product, quantity: 1 });
+    const nextQuantity =
+      typeof maxQuantity === "number" ? Math.min(quantity, maxQuantity) : quantity;
+
+    if (nextQuantity <= 0) {
+      return cart;
+    }
+
+    cart.push({ product, quantity: nextQuantity });
   }
 
   saveCart(cart);
