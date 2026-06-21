@@ -20,133 +20,148 @@
                 <button id="logoutButton" type="button">Logout</button>
             </section>
         </div>
-        <nav>
-            <a href="#productos">Productos</a> |
-            <a href="#listado-productos">Listado</a> |
-            <a href="#categorias">Categorías</a> |
-            <a href="#pedidos">Pedidos</a>
-        </nav>
     </header>
     <hr>
 
     <main class="admin-layout">
-        <section id="productos" class="admin-section">
-            <h2 class="admin-section-title">ABM de productos</h2>
-            <form id="productForm" class="admin-box product-form">
-                <input id="productId" type="hidden">
-                <div class="product-field">
-                    <label for="productName">Nombre</label>
-                    <input id="productName" name="productName" required>
-                </div>
-                <div class="product-field">
-                    <label for="productCategory">Categoría</label>
-                    <select id="productCategory" name="productCategory" required></select>
-                </div>
-                <div class="product-field">
-                    <label for="productPrice">Precio</label>
-                    <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" required>
-                </div>
-                <div class="product-field product-image-field">
-                    <label for="productImage">Imagen</label>
-                    <select id="productImage" name="productImage" required></select>
-                </div>
-                <div class="product-description-preview-row">
-                    <div class="product-description-field">
-                        <label for="productDescription">Descripción corta</label>
-                        <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
-                    </div>
-                    <div class="product-preview-field">
-                        <label>Vista previa</label>
-                        <img id="productImagePreview" class="product-image-preview" alt="Vista previa de imagen seleccionada">
-                    </div>
-                </div>
-                <div class="product-long-description-field">
-                    <label for="productLongDescription">Descripción detallada</label>
-                    <textarea id="productLongDescription" name="productLongDescription" rows="5"
-                        placeholder="Texto de prueba: detalle de ingredientes, porción, preparación y recomendaciones para el cliente." required></textarea>
-                </div>
-                <label class="checkbox-field product-featured-field">
-                    <input id="productFeatured" name="productFeatured" type="checkbox">
-                    Producto destacado
-                </label>
-                <div class="form-actions product-actions">
-                    <button type="submit" id="saveProductButton">Guardar producto</button>
-                    <button type="button" id="cancelEditButton" class="button-secondary">Cancelar edición</button>
-                </div>
-                <p id="productMessage" class="form-message" aria-live="polite"></p>
-            </form>
-        </section>
+        <aside class="admin-sidebar admin-box">
+            <h2 class="client-section-title">Navegación</h2>
+            <nav class="admin-sidebar-nav" aria-label="Navegación administrativa">
+                <a href="#dashboard">Dashboard</a>
+                <a href="#productos">Productos</a>
+                <a href="#listado-productos">Listado</a>
+                <a href="#categorias">Categorías</a>
+                <a href="#pedidos">Pedidos</a>
+                <a href="../../store/home/home.html">Ver tienda</a>
+            </nav>
+        </aside>
 
-        <section id="listado-productos" class="admin-section">
-            <h2 class="admin-section-title">Listado de productos</h2>
-            <div class="admin-box">
-                <form id="adminSearchForm" class="search-form">
-                    <label for="adminProductSearch">Buscar productos</label>
-                    <input id="adminProductSearch" name="adminProductSearch" placeholder="Ej: Milanesa">
-                    <button type="submit">Buscar</button>
+        <div class="admin-content">
+            <section id="dashboard" class="admin-section">
+                <h2 class="admin-section-title">Dashboard</h2>
+                <p id="dashboardMessage" class="empty-message" aria-live="polite"></p>
+                <div id="dashboardMetrics" class="dashboard-metrics"></div>
+                <div id="dashboardSummary" class="dashboard-summary-grid"></div>
+            </section>
+
+            <section id="productos" class="admin-section">
+                <h2 class="admin-section-title">ABM de productos</h2>
+                <form id="productForm" class="admin-box product-form">
+                    <input id="productId" type="hidden">
+                    <div class="product-field">
+                        <label for="productName">Nombre</label>
+                        <input id="productName" name="productName" required>
+                    </div>
+                    <div class="product-field">
+                        <label for="productCategory">Categoría</label>
+                        <select id="productCategory" name="productCategory" required></select>
+                    </div>
+                    <div class="product-field">
+                        <label for="productPrice">Precio</label>
+                        <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" required>
+                    </div>
+                    <div class="product-field product-image-field">
+                        <label for="productImage">Imagen</label>
+                        <select id="productImage" name="productImage" required></select>
+                    </div>
+                    <div class="product-description-preview-row">
+                        <div class="product-description-field">
+                            <label for="productDescription">Descripción corta</label>
+                            <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="product-preview-field">
+                            <label>Vista previa</label>
+                            <img id="productImagePreview" class="product-image-preview" alt="Vista previa de imagen seleccionada">
+                        </div>
+                    </div>
+                    <div class="product-long-description-field">
+                        <label for="productLongDescription">Descripción detallada</label>
+                        <textarea id="productLongDescription" name="productLongDescription" rows="5"
+                            placeholder="Texto de prueba: detalle de ingredientes, porción, preparación y recomendaciones para el cliente." required></textarea>
+                    </div>
+                    <label class="checkbox-field product-featured-field">
+                        <input id="productFeatured" name="productFeatured" type="checkbox">
+                        Producto destacado
+                    </label>
+                    <div class="form-actions product-actions">
+                        <button type="submit" id="saveProductButton">Guardar producto</button>
+                        <button type="button" id="cancelEditButton" class="button-secondary">Cancelar edición</button>
+                    </div>
+                    <p id="productMessage" class="form-message" aria-live="polite"></p>
                 </form>
-                <p id="adminSearchMessage" class="empty-message"></p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Categoría</th>
-                            <th>Precio</th>
-                            <th>Destacado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTableBody"></tbody>
-                </table>
-            </div>
-        </section>
+            </section>
 
-        <section id="categorias" class="admin-section">
-            <h2 class="admin-section-title">ABM de categorías</h2>
-            <div class="admin-box category-admin-grid">
-                <form id="categoryForm" class="category-form">
-                    <input id="categoryId" type="hidden">
-                    <div>
-                        <label for="categoryName">Nombre</label>
-                        <input id="categoryName" name="categoryName" placeholder="Ej: Milanesa" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit">Guardar categoría</button>
-                        <button type="button" id="cancelCategoryEditButton" class="button-secondary">Cancelar edición</button>
-                    </div>
-                    <p id="categoryMessage" class="form-message" aria-live="polite"></p>
-                </form>
+            <section id="listado-productos" class="admin-section">
+                <h2 class="admin-section-title">Listado de productos</h2>
+                <div class="admin-box">
+                    <form id="adminSearchForm" class="search-form">
+                        <label for="adminProductSearch">Buscar productos</label>
+                        <input id="adminProductSearch" name="adminProductSearch" placeholder="Ej: Milanesa">
+                        <button type="submit">Buscar</button>
+                    </form>
+                    <p id="adminSearchMessage" class="empty-message"></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Categoría</th>
+                                <th>Precio</th>
+                                <th>Destacado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Categoría</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="categoriesTableBody"></tbody>
-                </table>
-            </div>
-        </section>
+            <section id="categorias" class="admin-section">
+                <h2 class="admin-section-title">ABM de categorías</h2>
+                <div class="admin-box category-admin-grid">
+                    <form id="categoryForm" class="category-form">
+                        <input id="categoryId" type="hidden">
+                        <div>
+                            <label for="categoryName">Nombre</label>
+                            <input id="categoryName" name="categoryName" placeholder="Ej: Milanesa" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">Guardar categoría</button>
+                            <button type="button" id="cancelCategoryEditButton" class="button-secondary">Cancelar edición</button>
+                        </div>
+                        <p id="categoryMessage" class="form-message" aria-live="polite"></p>
+                    </form>
 
-        <section id="pedidos" class="admin-section">
-            <h2 class="admin-section-title">Pedidos</h2>
-            <div class="admin-box">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Número</th>
-                            <th>Cliente</th>
-                            <th>Estado</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Fecha</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody"></tbody>
-                </table>
-            </div>
-        </section>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="pedidos" class="admin-section">
+                <h2 class="admin-section-title">Pedidos</h2>
+                <div class="admin-box">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </main>
 
     <script type="module" src="./home.ts"></script>

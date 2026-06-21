@@ -64,6 +64,13 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - El historial filtra por el usuario en sesion, muestra tarjetas con estado coloreado y abre un modal con el detalle completo.
 - Si no hay pedidos para el usuario, se muestra un estado vacio.
 
+### Dashboard admin validado
+
+- El panel admin muestra un dashboard inicial con 4 tarjetas: total de categorias, total de productos, total de pedidos y productos disponibles.
+- El resumen de dashboard calcula categorias activas/inactivas, productos disponibles/no disponibles, usuarios administradores/clientes y pedidos por estado desde los JSON locales.
+- El acceso al panel sigue restringido al rol `ADMIN`.
+- La navegacion admin incluye acceso a dashboard, productos, categorias, pedidos y un enlace para volver a la tienda.
+
 ## Como ejecutar
 
 ```bash

@@ -3,6 +3,13 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import type { Category, Product } from "../../../types/Product";
+import {
+  fetchCategories,
+  fetchOrders,
+  fetchProducts,
+  fetchUsers,
+} from "../../../utils/api";
+import { buildAdminDashboardStats } from "../../../utils/adminDashboard";
 import { logout } from "../../../utils/auth";
 import {
   getCategories,
@@ -21,6 +28,9 @@ buttonLogout?.addEventListener("click", () => {
 
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
+const dashboardMessage = document.querySelector<HTMLParagraphElement>("#dashboardMessage");
+const dashboardMetrics = document.querySelector<HTMLDivElement>("#dashboardMetrics");
+const dashboardSummary = document.querySelector<HTMLDivElement>("#dashboardSummary");
 const form = document.querySelector<HTMLFormElement>("#productForm");
 const productSection = document.querySelector<HTMLElement>("#productos");
 const productIdInput = document.querySelector<HTMLInputElement>("#productId");
@@ -66,6 +76,9 @@ const cancelCategoryEditButton = document.querySelector<HTMLButtonElement>(
 if (
   !logo ||
   !loggedUserName ||
+  !dashboardMessage ||
+  !dashboardMetrics ||
+  !dashboardSummary ||
   !form ||
   !productSection ||
   !productIdInput ||
@@ -98,11 +111,19 @@ logo.src = logoImage;
 loggedUserName.textContent = getUser()?.email ?? "";
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
+const numberFormatter = new Intl.NumberFormat("es-AR");
 
 type FormMessageType = "success" | "error" | "info";
 
 let products = getProducts();
 let productCategories = getCategories();
+
+const metricToneClass = {
+  neutral: "dashboard-metric-neutral",
+  accent: "dashboard-metric-accent",
+  success: "dashboard-metric-success",
+  warning: "dashboard-metric-warning",
+} as const;
 
 const normalizeCategoryName = (categoryName: string): string =>
   categoryName.replace(/\s+/g, "").toLowerCase();
@@ -289,6 +310,75 @@ const renderOrders = (): void => {
 
     ordersTableBody.appendChild(tr);
   });
+};
+
+const renderDashboard = async (): Promise<void> => {
+  try {
+    const [apiCategories, apiProducts, apiUsers, apiOrders] = await Promise.all([
+      fetchCategories().catch(() => []),
+      fetchProducts().catch(() => []),
+      fetchUsers().catch(() => []),
+      fetchOrders().catch(() => []),
+    ]);
+
+    const stats = buildAdminDashboardStats({
+      categories: apiCategories,
+      products: apiProducts,
+      users: apiUsers,
+      orders: apiOrders,
+    });
+
+    dashboardMessage.textContent = "";
+    dashboardMetrics.innerHTML = `
+      <article class="dashboard-metric ${metricToneClass.accent}">
+        <span>Total categorías</span>
+        <strong>${numberFormatter.format(stats.totalCategories)}</strong>
+      </article>
+      <article class="dashboard-metric ${metricToneClass.neutral}">
+        <span>Total productos</span>
+        <strong>${numberFormatter.format(stats.totalProducts)}</strong>
+      </article>
+      <article class="dashboard-metric ${metricToneClass.warning}">
+        <span>Total pedidos</span>
+        <strong>${numberFormatter.format(stats.totalOrders)}</strong>
+      </article>
+      <article class="dashboard-metric ${metricToneClass.success}">
+        <span>Productos disponibles</span>
+        <strong>${numberFormatter.format(stats.availableProducts)}</strong>
+      </article>
+    `;
+
+    dashboardSummary.innerHTML = `
+      <article class="dashboard-summary-card">
+        <h3>Categorías</h3>
+        <p>Activas: <strong>${stats.activeCategories}</strong></p>
+        <p>Inactivas: <strong>${stats.inactiveCategories}</strong></p>
+      </article>
+      <article class="dashboard-summary-card">
+        <h3>Productos</h3>
+        <p>Disponibles: <strong>${stats.activeProducts}</strong></p>
+        <p>No disponibles: <strong>${stats.inactiveProducts}</strong></p>
+      </article>
+      <article class="dashboard-summary-card">
+        <h3>Usuarios</h3>
+        <p>Administradores: <strong>${stats.adminUsers}</strong></p>
+        <p>Clientes: <strong>${stats.clientUsers}</strong></p>
+      </article>
+      <article class="dashboard-summary-card dashboard-summary-card-wide">
+        <h3>Pedidos por estado</h3>
+        <ul class="dashboard-status-list">
+          <li>Pendientes: <strong>${stats.orderStatusCounts.PENDIENTE}</strong></li>
+          <li>Confirmados: <strong>${stats.orderStatusCounts.CONFIRMADO}</strong></li>
+          <li>Terminados: <strong>${stats.orderStatusCounts.TERMINADO}</strong></li>
+          <li>Cancelados: <strong>${stats.orderStatusCounts.CANCELADO}</strong></li>
+        </ul>
+      </article>
+    `;
+  } catch {
+    dashboardMessage.textContent = "No se pudo cargar el dashboard.";
+    dashboardMetrics.innerHTML = "";
+    dashboardSummary.innerHTML = "";
+  }
 };
 
 const persistProducts = (): void => {
@@ -559,3 +649,4 @@ renderCategories();
 renderCategoryTable();
 renderProducts();
 renderOrders();
+void renderDashboard();

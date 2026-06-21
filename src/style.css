@@ -818,6 +818,40 @@ button:hover {
 
 .admin-layout {
   display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-sidebar-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-sidebar-nav a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.admin-sidebar-nav a:hover {
+  background: #efe8de;
+}
+
+.admin-content {
+  display: grid;
   gap: 24px;
 }
 
@@ -860,6 +894,68 @@ button:hover {
 .category-admin-grid {
   display: grid;
   gap: 16px;
+}
+
+.dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboard-metric,
+.dashboard-summary-card {
+  display: grid;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 14px;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  background: var(--color-blanco);
+}
+
+.dashboard-metric span,
+.dashboard-summary-card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-texto);
+}
+
+.dashboard-metric strong {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.dashboard-metric-accent {
+  background: #fff6e8;
+}
+
+.dashboard-metric-neutral {
+  background: #f7f4ef;
+}
+
+.dashboard-metric-success {
+  background: #eef8ef;
+}
+
+.dashboard-metric-warning {
+  background: #fff3e6;
+}
+
+.dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dashboard-summary-card-wide {
+  grid-column: 1 / -1;
+}
+
+.dashboard-status-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .product-form div,
@@ -1051,6 +1147,19 @@ footer p {
   }
 
   .product-description-preview-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: static;
+  }
+
+  .dashboard-metrics,
+  .dashboard-summary-grid {
     grid-template-columns: 1fr;
   }
 
