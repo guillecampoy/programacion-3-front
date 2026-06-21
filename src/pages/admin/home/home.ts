@@ -4,6 +4,7 @@ import "../../../style.css";
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import {
   type ApiProduct,
+  type ApiUser,
   fetchCategories,
   fetchOrders,
   fetchProducts,
@@ -26,6 +27,14 @@ import {
   updateAdminProduct,
 } from "../../../utils/adminProducts";
 import { buildAdminDashboardStats } from "../../../utils/adminDashboard";
+import {
+  filterAdminOrdersByStatus,
+  getAdminOrderCustomerName,
+  getAdminOrderItemCount,
+  sortAdminOrdersByDateDesc,
+  updateAdminOrderStatus,
+  type AdminOrderStatusFilter,
+} from "../../../utils/adminOrders";
 import { logout } from "../../../utils/auth";
 import { getUser } from "../../../utils/localStorage";
 import { getOrders } from "../../../utils/orders";
@@ -33,6 +42,7 @@ import {
   productImageOptions,
   resolveProductImageUrl,
 } from "../../../utils/productImages";
+import type { Order, OrderStatus } from "../../../types/Order";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 buttonLogout?.addEventListener("click", () => {
@@ -84,6 +94,40 @@ const productsMessage =
   document.querySelector<HTMLParagraphElement>("#productsMessage");
 const ordersTableBody =
   document.querySelector<HTMLTableSectionElement>("#ordersTableBody");
+const ordersMessage =
+  document.querySelector<HTMLParagraphElement>("#ordersMessage");
+const ordersFilterForm = document.querySelector<HTMLFormElement>(
+  "#ordersFilterForm"
+);
+const orderStatusFilter = document.querySelector<HTMLSelectElement>(
+  "#orderStatusFilter"
+);
+const orderModal = document.querySelector<HTMLDivElement>("#orderModal");
+const closeOrderModalButton = document.querySelector<HTMLButtonElement>(
+  "#closeOrderModalButton"
+);
+const orderModalTitle = document.querySelector<HTMLHeadingElement>(
+  "#orderModalTitle"
+);
+const orderModalStatusBadge = document.querySelector<HTMLParagraphElement>(
+  "#orderModalStatusBadge"
+);
+const orderModalId = document.querySelector<HTMLSpanElement>("#orderModalId");
+const orderModalCustomer = document.querySelector<HTMLSpanElement>(
+  "#orderModalCustomer"
+);
+const orderModalDate = document.querySelector<HTMLSpanElement>("#orderModalDate");
+const orderModalTotal = document.querySelector<HTMLSpanElement>("#orderModalTotal");
+const orderModalPhone = document.querySelector<HTMLSpanElement>("#orderModalPhone");
+const orderModalPayment = document.querySelector<HTMLSpanElement>(
+  "#orderModalPayment"
+);
+const orderStatusSelect = document.querySelector<HTMLSelectElement>(
+  "#orderStatusSelect"
+);
+const orderDetailsTableBody = document.querySelector<HTMLTableSectionElement>(
+  "#orderDetailsTableBody"
+);
 const cancelEditButton =
   document.querySelector<HTMLButtonElement>("#cancelEditButton");
 const adminSearchForm =
@@ -141,6 +185,21 @@ if (
   !productsTableBody ||
   !productsMessage ||
   !ordersTableBody ||
+  !ordersMessage ||
+  !ordersFilterForm ||
+  !orderStatusFilter ||
+  !orderModal ||
+  !closeOrderModalButton ||
+  !orderModalTitle ||
+  !orderModalStatusBadge ||
+  !orderModalId ||
+  !orderModalCustomer ||
+  !orderModalDate ||
+  !orderModalTotal ||
+  !orderModalPhone ||
+  !orderModalPayment ||
+  !orderStatusSelect ||
+  !orderDetailsTableBody ||
   !cancelEditButton ||
   !adminSearchForm ||
   !adminSearchInput ||
@@ -169,6 +228,10 @@ type FormMessageType = "success" | "error" | "info";
 
 let productCategories: AdminCategory[] = [];
 let adminProducts: ApiProduct[] = [];
+let adminUsers: ApiUser[] = [];
+let adminOrders: Order[] = [];
+let selectedOrderStatus: AdminOrderStatusFilter = "TODOS";
+let activeOrderId: string | null = null;
 
 const metricToneClass = {
   neutral: "dashboard-metric-neutral",
@@ -423,23 +486,122 @@ const selectProductImage = (imageUrl: string): void => {
   updateProductImagePreview();
 };
 
+const orderStatusOptions: Array<{ value: OrderStatus; label: string }> = [
+  { value: "PENDIENTE", label: "Pendiente" },
+  { value: "CONFIRMADO", label: "Confirmado" },
+  { value: "TERMINADO", label: "Terminado" },
+  { value: "CANCELADO", label: "Cancelado" },
+];
+
+const getOrderStatusBadgeClass = (status: OrderStatus): string =>
+  `order-status-badge order-status-${status.toLowerCase()}`;
+
+const renderOrderStatusSelectOptions = (): void => {
+  orderStatusSelect.innerHTML = "";
+
+  orderStatusOptions.forEach((optionConfig) => {
+    const option = document.createElement("option");
+    option.value = optionConfig.value;
+    option.textContent = optionConfig.label;
+    orderStatusSelect.appendChild(option);
+  });
+};
+
+const renderOrderDetails = (order: Order): void => {
+  orderDetailsTableBody.innerHTML = "";
+
+  if (order.detalles.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3">El pedido no tiene productos.</td>`;
+    orderDetailsTableBody.appendChild(tr);
+    return;
+  }
+
+  order.detalles.forEach((detail) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${detail.productName ?? `Producto ${detail.idProducto}`}</td>
+      <td>${detail.cantidad}</td>
+      <td>$${currencyFormatter.format(detail.subtotal)}</td>
+    `;
+    orderDetailsTableBody.appendChild(tr);
+  });
+};
+
+const syncOrderModal = (): void => {
+  if (!activeOrderId) {
+    return;
+  }
+
+  const order = adminOrders.find((item) => item.id === activeOrderId);
+
+  if (!order) {
+    closeOrderModal();
+    return;
+  }
+
+  const customerName = getAdminOrderCustomerName(order, adminUsers);
+  const itemCount = getAdminOrderItemCount(order);
+
+  orderModalTitle.textContent = `Pedido ${order.id} · ${itemCount} items`;
+  orderModalStatusBadge.textContent = order.estado;
+  orderModalStatusBadge.className = getOrderStatusBadgeClass(order.estado);
+  orderModalId.textContent = order.id;
+  orderModalCustomer.textContent = customerName;
+  orderModalDate.textContent = order.fecha;
+  orderModalTotal.textContent = `$${currencyFormatter.format(order.total)}`;
+  orderModalPhone.textContent = order.telefono ?? "Sin teléfono";
+  orderModalPayment.textContent = order.formaPago;
+  orderStatusSelect.value = order.estado;
+  orderStatusSelect.setAttribute("aria-label", `Cambiar estado de ${order.id}`);
+  renderOrderDetails(order);
+};
+
+const openOrderModal = (order: Order): void => {
+  activeOrderId = order.id;
+  orderModal.hidden = false;
+  syncOrderModal();
+};
+
+const closeOrderModal = (): void => {
+  activeOrderId = null;
+  orderModal.hidden = true;
+};
+
 const renderOrders = (): void => {
   ordersTableBody.innerHTML = "";
 
-  getOrders().forEach((order) => {
+  const visibleOrders = filterAdminOrdersByStatus(
+    adminOrders,
+    selectedOrderStatus
+  );
+
+  ordersMessage.textContent =
+    visibleOrders.length === 0
+      ? selectedOrderStatus === "TODOS"
+        ? "No hay pedidos para mostrar."
+        : "No hay pedidos para ese estado."
+      : selectedOrderStatus === "TODOS"
+        ? ""
+        : `Pedidos filtrados por ${selectedOrderStatus.toLowerCase()}.`;
+
+  if (visibleOrders.length === 0) {
+    return;
+  }
+
+  visibleOrders.forEach((order) => {
     const tr = document.createElement("tr");
-    const itemCount = order.detalles.reduce(
-      (totalItems, item) => totalItems + item.cantidad,
-      0
-    );
+    const customerName = getAdminOrderCustomerName(order, adminUsers);
 
     tr.innerHTML = `
       <td>${order.id}</td>
-      <td>${order.idUsuario}</td>
-      <td>${order.estado}</td>
-      <td>${itemCount}</td>
-      <td>$${currencyFormatter.format(order.total)}</td>
+      <td>${customerName}</td>
       <td>${order.fecha}</td>
+      <td><span class="${getOrderStatusBadgeClass(order.estado)}">${order.estado}</span></td>
+      <td>$${currencyFormatter.format(order.total)}</td>
+      <td>
+        <button type="button" class="button-secondary btn-view-order" data-id="${order.id}">Ver detalle</button>
+      </td>
     `;
 
     ordersTableBody.appendChild(tr);
@@ -534,6 +696,18 @@ const refreshProductViews = (): void => {
 const loadAdminProducts = async (): Promise<void> => {
   adminProducts = await fetchRawProducts().catch(() => []);
   refreshProductViews();
+};
+
+const loadAdminOrders = async (): Promise<void> => {
+  const [apiOrders, localOrders, users] = await Promise.all([
+    fetchOrders().catch(() => []),
+    Promise.resolve(getOrders()),
+    fetchUsers().catch(() => []),
+  ]);
+
+  adminUsers = users;
+  adminOrders = sortAdminOrdersByDateDesc([...apiOrders, ...localOrders]);
+  renderOrders();
 };
 
 const openProductEditor = (product?: ApiProduct): void => {
@@ -720,6 +894,53 @@ productsTableBody.addEventListener("click", (event) => {
   }
 });
 
+ordersTableBody.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  const order = adminOrders.find((item) => item.id === target.dataset.id);
+
+  if (!order || !target.classList.contains("btn-view-order")) {
+    return;
+  }
+
+  openOrderModal(order);
+});
+
+ordersFilterForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+});
+
+orderStatusFilter.addEventListener("change", () => {
+  selectedOrderStatus = orderStatusFilter.value as AdminOrderStatusFilter;
+  renderOrders();
+});
+
+orderStatusSelect.addEventListener("change", () => {
+  if (!activeOrderId) {
+    return;
+  }
+
+  const nextStatus = orderStatusSelect.value as OrderStatus;
+
+  adminOrders = updateAdminOrderStatus(adminOrders, activeOrderId, nextStatus);
+  renderOrders();
+  syncOrderModal();
+});
+
+closeOrderModalButton.addEventListener("click", () => {
+  closeOrderModal();
+});
+
+orderModal.addEventListener("click", (event) => {
+  if (event.target === orderModal) {
+    closeOrderModal();
+  }
+});
+
 categoriesTableBody.addEventListener("click", (event) => {
   const target = event.target;
 
@@ -836,12 +1057,18 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !categoryModal.hidden) {
     closeCategoryModal();
   }
+
+  if (event.key === "Escape" && !orderModal.hidden) {
+    closeOrderModal();
+  }
 });
 
 renderProductImageOptions();
 renderCategoryImageOptions();
 renderProductCategoryOptions();
+renderOrderStatusSelectOptions();
 renderOrders();
 void loadAdminCategories();
 void loadAdminProducts();
+void loadAdminOrders();
 void renderDashboard();

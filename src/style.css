@@ -902,6 +902,11 @@ button:hover {
   gap: 16px;
 }
 
+.order-admin-grid {
+  display: grid;
+  gap: 16px;
+}
+
 .category-actions {
   justify-content: flex-start;
 }
@@ -920,6 +925,61 @@ button:hover {
   height: 54px;
   object-fit: cover;
   border-radius: 6px;
+}
+
+.order-filter-form {
+  max-width: 260px;
+}
+
+.order-status-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin: 0 0 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.order-status-pendiente {
+  background: #fff7e8;
+  color: #9b5b00;
+}
+
+.order-status-confirmado {
+  background: #eef4ff;
+  color: #24458f;
+}
+
+.order-status-terminado {
+  background: #eef8ef;
+  color: #286b34;
+}
+
+.order-status-cancelado {
+  background: #fff3f3;
+  color: #8f2424;
+}
+
+.order-modal-summary {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.order-modal-summary p {
+  margin: 0;
+}
+
+.order-status-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.order-details-table-wrapper {
+  margin-top: 8px;
 }
 
 .dashboard-metrics {

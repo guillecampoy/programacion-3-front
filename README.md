@@ -18,7 +18,7 @@ La base ya integra estos modulos del front:
 - autenticacion y registro;
 - catalogo de productos con busqueda, filtros y detalle;
 - carrito local con checkout y creacion de pedidos;
-- panel de administracion con dashboard y CRUD de categorias/productos;
+- panel de administracion con dashboard, CRUD de categorias/productos y gestion de pedidos;
 - persistencia client-side con `localStorage`.
 
 No hay backend en esta entrega. La sesion, los usuarios, los productos, las categorias, los pedidos y el carrito viven en el navegador.
@@ -86,6 +86,14 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - Las validaciones rechazan precio menor o igual a 0, stock negativo y categorias inexistentes o eliminadas.
 - Las operaciones de alta, edicion y borrado se aplican sobre el estado en memoria de la sesion.
 
+### Gestion de pedidos admin validada
+
+- Los pedidos se cargan desde `/data/pedidos.json` y se combinan con los pedidos locales generados en la sesion.
+- La lista de pedidos se ordena por fecha descendente y muestra el nombre del cliente resuelto desde `/data/usuarios.json`.
+- El filtro por estado funciona en el cliente y mantiene el orden actual.
+- El detalle se abre en un modal con la informacion principal del pedido y los items incluidos.
+- El cambio de estado se aplica sobre el estado en memoria de la sesion.
+
 ## Como ejecutar
 
 ```bash
@@ -122,6 +130,7 @@ Claves usadas en `localStorage`:
 
 `users` quedo como almacenamiento legado de una version anterior y ya no participa en el login ni en el registro actual.
 `categories` quedo como almacenamiento legado de una version anterior y ya no participa en el CRUD actual de categorias.
+`orders` sigue siendo la base local del checkout y la gestion admin la usa como estado combinado en memoria; el cambio de estado del admin no persiste en `localStorage`.
 
 ## Rutas principales
 

@@ -108,16 +108,27 @@
 
             <section id="pedidos" class="admin-section">
                 <h2 class="admin-section-title">Pedidos</h2>
-                <div class="admin-box">
+                <div class="admin-box order-admin-grid">
+                    <form id="ordersFilterForm" class="search-form order-filter-form">
+                        <label for="orderStatusFilter">Filtrar por estado</label>
+                        <select id="orderStatusFilter" name="orderStatusFilter">
+                            <option value="TODOS">Todos</option>
+                            <option value="PENDIENTE">Pendientes</option>
+                            <option value="CONFIRMADO">Confirmados</option>
+                            <option value="TERMINADO">Terminados</option>
+                            <option value="CANCELADO">Cancelados</option>
+                        </select>
+                    </form>
+                    <p id="ordersMessage" class="empty-message"></p>
                     <table>
                         <thead>
                             <tr>
                                 <th>Número</th>
                                 <th>Cliente</th>
-                                <th>Estado</th>
-                                <th>Items</th>
-                                <th>Total</th>
                                 <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody"></tbody>
@@ -202,6 +213,38 @@
                 </div>
                 <p id="productMessage" class="form-message" aria-live="polite"></p>
             </form>
+        </article>
+    </div>
+
+    <div id="orderModal" class="modal-overlay" hidden>
+        <article class="modal-content" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+            <button id="closeOrderModalButton" type="button" class="modal-close" aria-label="Cerrar detalle">Cerrar</button>
+            <h2 id="orderModalTitle" class="modal-title">Detalle del pedido</h2>
+            <p id="orderModalStatusBadge" class="order-status-badge" aria-live="polite"></p>
+            <div class="order-modal-summary">
+                <p><strong>Número:</strong> <span id="orderModalId"></span></p>
+                <p><strong>Cliente:</strong> <span id="orderModalCustomer"></span></p>
+                <p><strong>Fecha:</strong> <span id="orderModalDate"></span></p>
+                <p><strong>Total:</strong> <span id="orderModalTotal"></span></p>
+                <p><strong>Teléfono:</strong> <span id="orderModalPhone"></span></p>
+                <p><strong>Pago:</strong> <span id="orderModalPayment"></span></p>
+            </div>
+            <div class="order-status-field">
+                <label for="orderStatusSelect">Estado</label>
+                <select id="orderStatusSelect" name="orderStatusSelect"></select>
+            </div>
+            <div class="table-wrapper order-details-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderDetailsTableBody"></tbody>
+                </table>
+            </div>
         </article>
     </div>
 
