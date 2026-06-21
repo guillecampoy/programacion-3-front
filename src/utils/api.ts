@@ -189,6 +189,9 @@ export const fetchProducts = async (): Promise<ApiProduct[]> =>
     }))
   );
 
+export const fetchRawProducts = async (): Promise<ApiProduct[]> =>
+  fetchJsonArray("/data/productos.json", isApiProduct);
+
 export const fetchOrders = async (): Promise<ApiOrder[]> =>
   fetchJsonArray("/data/pedidos.json", isApiOrder);
 

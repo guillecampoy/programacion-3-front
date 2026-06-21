@@ -18,7 +18,7 @@ La base ya integra estos modulos del front:
 - autenticacion y registro;
 - catalogo de productos con busqueda, filtros y detalle;
 - carrito local con checkout y creacion de pedidos;
-- panel de administracion;
+- panel de administracion con dashboard y CRUD de categorias/productos;
 - persistencia client-side con `localStorage`.
 
 No hay backend en esta entrega. La sesion, los usuarios, los productos, las categorias, los pedidos y el carrito viven en el navegador.
@@ -78,6 +78,14 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - La eliminacion pide confirmacion y oculta la fila de inmediato.
 - El selector de productos reutiliza las categorias visibles de la sesion actual.
 
+### CRUD de productos admin validado
+
+- Los productos se cargan desde `/data/productos.json` y las categorias visibles desde `/data/categorias.json`.
+- La tabla de administracion muestra todos los campos del producto y resuelve el nombre de categoria.
+- El alta y la edicion se resuelven en un modal con nombre, descripcion, precio, stock, categoria, imagen y disponible.
+- Las validaciones rechazan precio menor o igual a 0, stock negativo y categorias inexistentes o eliminadas.
+- Las operaciones de alta, edicion y borrado se aplican sobre el estado en memoria de la sesion.
+
 ## Como ejecutar
 
 ```bash
@@ -108,7 +116,7 @@ Los usuarios de referencia para el login viven en `public/data/usuarios.json`:
 Claves usadas en `localStorage`:
 
 - `userData`: usuario autenticado.
-- `products`: productos del catalogo.
+- `products`: almacenamiento legado de una version anterior; el CRUD admin de productos ya trabaja en memoria durante la sesion.
 - `orders`: pedidos de prueba o generados localmente.
 - `cart`: items del carrito.
 

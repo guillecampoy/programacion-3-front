@@ -46,49 +46,29 @@
 
             <section id="productos" class="admin-section">
                 <h2 class="admin-section-title">ABM de productos</h2>
-                <form id="productForm" class="admin-box product-form">
-                    <input id="productId" type="hidden">
-                    <div class="product-field">
-                        <label for="productName">Nombre</label>
-                        <input id="productName" name="productName" required>
-                    </div>
-                    <div class="product-field">
-                        <label for="productCategory">Categoría</label>
-                        <select id="productCategory" name="productCategory" required></select>
-                    </div>
-                    <div class="product-field">
-                        <label for="productPrice">Precio</label>
-                        <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" required>
-                    </div>
-                    <div class="product-field product-image-field">
-                        <label for="productImage">Imagen</label>
-                        <select id="productImage" name="productImage" required></select>
-                    </div>
-                    <div class="product-description-preview-row">
-                        <div class="product-description-field">
-                            <label for="productDescription">Descripción corta</label>
-                            <textarea id="productDescription" name="productDescription" rows="3" required></textarea>
-                        </div>
-                        <div class="product-preview-field">
-                            <label>Vista previa</label>
-                            <img id="productImagePreview" class="product-image-preview" alt="Vista previa de imagen seleccionada">
-                        </div>
-                    </div>
-                    <div class="product-long-description-field">
-                        <label for="productLongDescription">Descripción detallada</label>
-                        <textarea id="productLongDescription" name="productLongDescription" rows="5"
-                            placeholder="Texto de prueba: detalle de ingredientes, porción, preparación y recomendaciones para el cliente." required></textarea>
-                    </div>
-                    <label class="checkbox-field product-featured-field">
-                        <input id="productFeatured" name="productFeatured" type="checkbox">
-                        Producto destacado
-                    </label>
+                <div class="admin-box product-admin-grid">
                     <div class="form-actions product-actions">
-                        <button type="submit" id="saveProductButton">Guardar producto</button>
-                        <button type="button" id="cancelEditButton" class="button-secondary">Cancelar edición</button>
+                        <button type="button" id="openProductModalButton">Nuevo producto</button>
                     </div>
-                    <p id="productMessage" class="form-message" aria-live="polite"></p>
-                </form>
+                    <p id="productsMessage" class="empty-message"></p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th>Categoría</th>
+                                    <th>Imagen</th>
+                                    <th>Disponible</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </section>
 
             <section id="listado-productos" class="admin-section">
@@ -100,18 +80,6 @@
                         <button type="submit">Buscar</button>
                     </form>
                     <p id="adminSearchMessage" class="empty-message"></p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Categoría</th>
-                                <th>Precio</th>
-                                <th>Destacado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productsTableBody"></tbody>
-                    </table>
                 </div>
             </section>
 
@@ -186,6 +154,53 @@
                     <button type="button" id="cancelCategoryEditButton" class="button-secondary">Cancelar edición</button>
                 </div>
                 <p id="categoryMessage" class="form-message" aria-live="polite"></p>
+            </form>
+        </article>
+    </div>
+
+    <div id="productModal" class="modal-overlay" hidden>
+        <article class="modal-content" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+            <button id="closeProductModalButton" type="button" class="modal-close" aria-label="Cerrar formulario">Cerrar</button>
+            <h2 id="productModalTitle" class="modal-title">Nuevo producto</h2>
+            <form id="productForm" class="product-form">
+                <input id="productId" type="hidden">
+                <div>
+                    <label for="productName">Nombre</label>
+                    <input id="productName" name="productName" required>
+                </div>
+                <div>
+                    <label for="productDescription">Descripción</label>
+                    <textarea id="productDescription" name="productDescription" rows="4" required></textarea>
+                </div>
+                <div>
+                    <label for="productPrice">Precio</label>
+                    <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" required>
+                </div>
+                <div>
+                    <label for="productStock">Stock</label>
+                    <input id="productStock" name="productStock" inputmode="numeric" pattern="[0-9]+" required>
+                </div>
+                <div>
+                    <label for="productCategory">Categoría</label>
+                    <select id="productCategory" name="productCategory" required></select>
+                </div>
+                <div>
+                    <label for="productImage">Imagen</label>
+                    <select id="productImage" name="productImage" required></select>
+                </div>
+                <label class="checkbox-field">
+                    <input id="productAvailable" name="productAvailable" type="checkbox">
+                    Disponible
+                </label>
+                <div class="product-preview-field">
+                    <label>Vista previa</label>
+                    <img id="productImagePreview" class="product-image-preview" alt="Vista previa de imagen seleccionada">
+                </div>
+                <div class="form-actions product-actions">
+                    <button type="submit" id="saveProductButton">Guardar producto</button>
+                    <button type="button" id="cancelEditButton" class="button-secondary">Cancelar edición</button>
+                </div>
+                <p id="productMessage" class="form-message" aria-live="polite"></p>
             </form>
         </article>
     </div>
