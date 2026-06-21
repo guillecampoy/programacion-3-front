@@ -5,6 +5,7 @@ export const ROUTES = {
   storeHome: "/src/pages/store/home/home.html",
   storeProductDetail: "/src/pages/store/productDetail/productDetail.html",
   storeCart: "/src/pages/store/cart/cart.html",
+  clientOrders: "/src/pages/client/orders/orders.html",
 } as const;
 
 export type Route = (typeof ROUTES)[keyof typeof ROUTES];

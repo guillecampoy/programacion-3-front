@@ -77,3 +77,18 @@ export const validateRegistration = (
 
   return null;
 };
+
+export const validateCheckout = (
+  phone: string,
+  paymentMethod: string
+): string | null => {
+  if (!phone.trim()) {
+    return "El teléfono es requerido.";
+  }
+
+  if (!paymentMethod.trim()) {
+    return "La forma de pago es requerida.";
+  }
+
+  return null;
+};

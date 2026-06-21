@@ -1,14 +1,25 @@
-export interface OrderItem {
-  productName: string;
-  quantity: number;
+export type OrderStatus =
+  | "PENDIENTE"
+  | "CONFIRMADO"
+  | "TERMINADO"
+  | "CANCELADO";
+
+export type PaymentMethod = "TARJETA" | "TRANSFERENCIA" | "EFECTIVO";
+
+export interface OrderDetail {
+  idProducto: number;
+  cantidad: number;
   subtotal: number;
+  productName?: string;
 }
 
 export interface Order {
   id: string;
-  clientEmail: string;
-  status: "Pendiente" | "Preparando" | "Entregado";
+  fecha: string;
+  estado: OrderStatus;
   total: number;
-  createdAt: string;
-  items: OrderItem[];
+  formaPago: PaymentMethod;
+  idUsuario: string;
+  telefono?: string;
+  detalles: OrderDetail[];
 }

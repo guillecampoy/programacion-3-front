@@ -273,18 +273,18 @@ const renderOrders = (): void => {
 
   getOrders().forEach((order) => {
     const tr = document.createElement("tr");
-    const itemCount = order.items.reduce(
-      (totalItems, item) => totalItems + item.quantity,
+    const itemCount = order.detalles.reduce(
+      (totalItems, item) => totalItems + item.cantidad,
       0
     );
 
     tr.innerHTML = `
       <td>${order.id}</td>
-      <td>${order.clientEmail}</td>
-      <td>${order.status}</td>
+      <td>${order.idUsuario}</td>
+      <td>${order.estado}</td>
       <td>${itemCount}</td>
       <td>$${currencyFormatter.format(order.total)}</td>
-      <td>${order.createdAt}</td>
+      <td>${order.fecha}</td>
     `;
 
     ordersTableBody.appendChild(tr);

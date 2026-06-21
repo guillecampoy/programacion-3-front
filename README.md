@@ -17,7 +17,7 @@ La base ya integra estos modulos del front:
 
 - autenticacion y registro;
 - catalogo de productos con busqueda, filtros y detalle;
-- carrito local;
+- carrito local con checkout y creacion de pedidos;
 - panel de administracion;
 - persistencia client-side con `localStorage`.
 
@@ -52,6 +52,14 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - Muestra imagen, nombre, descripcion, precio, stock y estado.
 - La cantidad respeta el stock restante y no permite agregar sin disponibilidad.
 - Al agregar, el producto queda en `localStorage.cart` con la cantidad elegida.
+
+### Carrito y pedido validado
+
+- El carrito muestra subtotal, envio y total.
+- El envio fijo actual es de `$2500`.
+- El checkout pide telefono y forma de pago.
+- El pedido se crea en `localStorage.orders` con estado `PENDIENTE`.
+- Al confirmar, el carrito se vacia y la navegacion pasa a `Mis pedidos`.
 
 ## Como ejecutar
 
@@ -98,6 +106,7 @@ Claves usadas en `localStorage`:
 - Catalogo: `/src/pages/store/home/home.html`
 - Detalle de producto: `/src/pages/store/productDetail/productDetail.html`
 - Carrito: `/src/pages/store/cart/cart.html`
+- Mis pedidos: `/src/pages/client/orders/orders.html`
 
 ## Estructura relevante
 

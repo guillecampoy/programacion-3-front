@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="../../../assets/food-store/favicon_bodegon.png">
-    <title>Food Store - Carrito</title>
+    <title>Food Store - Mis pedidos</title>
 </head>
 
 <body>
@@ -21,29 +21,24 @@
             </section>
         </div>
         <nav>
-            <a href="../home/home.html">Inicio</a> |
-            <a href="../../client/orders/orders.html">Mis pedidos</a> |
-            <a href="./cart.html">Carrito(<span id="cartQuantity">0</span>)</a>
+            <a href="../../store/home/home.html">Inicio</a> |
+            <a href="./orders.html">Mis pedidos</a> |
+            <a href="../../store/cart/cart.html">Carrito</a>
         </nav>
     </header>
     <hr>
-
-    <main class="client-cart-layout">
-        <section class="client-cart-section">
-            <div class="cart-heading">
-                <h2 class="client-section-title">Carrito</h2>
-            </div>
-
-            <div id="cartContent" class="client-cart-box"></div>
+    <main class="client-orders-layout">
+        <section class="client-orders-box">
+            <h2 class="client-section-title">Mis pedidos</h2>
+            <p class="empty-message">Próximamente se listarán aquí tus pedidos confirmados.</p>
         </section>
     </main>
-
     <hr>
     <footer>
         <p>&copy; 2026 Food Store. Todos los derechos reservados</p>
         <p>Contacto: <a href="mailto:info@foodstore.com">info@foodstore.com</a></p>
     </footer>
-    <script type="module" src="./cart.ts"></script>
+    <script type="module" src="./orders.ts"></script>
 </body>
 
 </html>

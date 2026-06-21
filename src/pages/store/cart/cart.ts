@@ -3,6 +3,9 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import { logout } from "../../../utils/auth";
+import { calculateCartSummary, createOrderFromCart, saveOrders, getOrders } from "../../../utils/orders";
+import { navigate, ROUTES } from "../../../utils/navigate";
+import { validateCheckout } from "../../../utils/validation";
 import {
   clearCart,
   getCart,
@@ -12,48 +15,51 @@ import {
 } from "../../../utils/localStorage";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
-buttonLogout?.addEventListener("click", () => {
-  logout();
-});
-
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
 const cartContent = document.querySelector<HTMLDivElement>("#cartContent");
 
-if (!loggedUserName || !logo || !cartQuantity || !cartContent) {
+if (!loggedUserName || !logo || !cartQuantity || !cartContent || !buttonLogout) {
   throw new Error("No se encontraron los elementos necesarios del carrito");
 }
 
+buttonLogout.addEventListener("click", () => {
+  logout();
+});
+
 logo.src = logoImage;
-loggedUserName.textContent = getUser()?.email ?? "";
+loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
+const renderCartQuantity = (): void => {
+  cartQuantity.textContent = String(
+    getCart().reduce((total, cartItem) => total + cartItem.quantity, 0)
+  );
+};
+
+const renderEmptyState = (): void => {
+  cartContent.className = "client-cart-box empty-cart-box";
+  cartContent.innerHTML = `
+    <div class="cart-empty-state">
+      <p class="empty-message">Tu carrito está vacío.</p>
+      <p>No tenés productos cargados en el pedido.</p>
+    </div>
+    <div class="cart-actions">
+      <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+    </div>
+  `;
+};
+
 const renderCart = (): void => {
   const cart = getCart();
-  const totalQuantity = cart.reduce(
-    (total, cartItem) => total + cartItem.quantity,
-    0
-  );
-  const totalAmount = cart.reduce(
-    (total, cartItem) => total + cartItem.product.price * cartItem.quantity,
-    0
-  );
+  const { subtotal, envio, total } = calculateCartSummary(cart);
 
-  cartQuantity.textContent = String(totalQuantity);
+  renderCartQuantity();
 
   if (cart.length === 0) {
-    cartContent.className = "client-cart-box empty-cart-box";
-    cartContent.innerHTML = `
-      <div class="cart-empty-state">
-        <p class="empty-message">Tu carrito está vacío.</p>
-        <p>No tenés productos cargados en el pedido.</p>
-      </div>
-      <div class="cart-actions">
-        <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
-      </div>
-    `;
+    renderEmptyState();
     return;
   }
 
@@ -92,6 +98,7 @@ const renderCart = (): void => {
                       data-product-id="${cartItem.product.id}"
                       value="${cartItem.quantity}"
                       min="1"
+                      max="${cartItem.product.stock ?? cartItem.quantity}"
                       step="1"
                       aria-label="Cantidad de ${cartItem.product.name}"
                     >
@@ -118,28 +125,73 @@ const renderCart = (): void => {
       </table>
     </div>
     <section class="cart-totalizer" aria-label="Total del carrito">
-      <span>Total</span>
-      <strong>$${currencyFormatter.format(totalAmount)}</strong>
+      <span>Subtotal</span>
+      <strong>$${currencyFormatter.format(subtotal)}</strong>
     </section>
-    <div class="cart-actions">
-      <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
-      <button
-        type="button"
-        id="clearCartButton"
-        class="cart-cancel-button"
-        title="Elimina el carrito"
+    <section class="cart-totalizer" aria-label="Costo de envío">
+      <span>Envío</span>
+      <strong>$${currencyFormatter.format(envio)}</strong>
+    </section>
+    <section class="cart-totalizer" aria-label="Total del carrito">
+      <span>Total</span>
+      <strong>$${currencyFormatter.format(total)}</strong>
+    </section>
+    <form id="checkoutForm" class="cart-checkout-box">
+      <h3 class="client-section-title">Checkout</h3>
+      <label for="phone">Teléfono</label>
+      <input
+        type="tel"
+        id="phone"
+        name="phone"
+        autocomplete="tel"
+        placeholder="Ej: 1155555555"
       >
-        Cancelar pedido
-      </button>
-    </div>
+      <label for="paymentMethod">Forma de pago</label>
+      <select id="paymentMethod" name="paymentMethod">
+        <option value="">Seleccioná una forma de pago</option>
+        <option value="TARJETA">TARJETA</option>
+        <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+        <option value="EFECTIVO">EFECTIVO</option>
+      </select>
+      <p id="checkoutMessage" class="form-message"></p>
+      <div class="cart-actions">
+        <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+        <button
+          type="button"
+          id="clearCartButton"
+          class="cart-cancel-button"
+          title="Elimina el carrito"
+        >
+          Vaciar carrito
+        </button>
+        <button type="submit" class="cart-confirm-button">Confirmar pedido</button>
+      </div>
+    </form>
   `;
 
+  const checkoutForm = cartContent.querySelector<HTMLFormElement>("#checkoutForm");
+  const checkoutMessage =
+    cartContent.querySelector<HTMLParagraphElement>("#checkoutMessage");
   const clearCartButton =
     cartContent.querySelector<HTMLButtonElement>("#clearCartButton");
   const removeButtons =
     cartContent.querySelectorAll<HTMLButtonElement>(".cart-remove-button");
   const quantityInputs =
     cartContent.querySelectorAll<HTMLInputElement>(".cart-quantity-input");
+  const phoneInput = cartContent.querySelector<HTMLInputElement>("#phone");
+  const paymentMethodSelect =
+    cartContent.querySelector<HTMLSelectElement>("#paymentMethod");
+
+  const setCheckoutMessage = (text: string, isError = false): void => {
+    if (!checkoutMessage) {
+      return;
+    }
+
+    checkoutMessage.textContent = text;
+    checkoutMessage.className = isError
+      ? "form-message form-message-error"
+      : "form-message form-message-success";
+  };
 
   removeButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -181,6 +233,37 @@ const renderCart = (): void => {
 
     clearCart();
     renderCart();
+  });
+
+  checkoutForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const user = getUser();
+
+    if (!user) {
+      navigate(ROUTES.login);
+      return;
+    }
+
+    const phone = phoneInput?.value ?? "";
+    const paymentMethod = paymentMethodSelect?.value ?? "";
+    const validationError = validateCheckout(phone, paymentMethod);
+
+    if (validationError) {
+      setCheckoutMessage(validationError, true);
+      return;
+    }
+
+    const order = createOrderFromCart(
+      getCart(),
+      user,
+      phone,
+      paymentMethod as "TARJETA" | "TRANSFERENCIA" | "EFECTIVO"
+    );
+
+    saveOrders([...getOrders(), order]);
+    clearCart();
+    navigate(ROUTES.clientOrders);
   });
 };
 
