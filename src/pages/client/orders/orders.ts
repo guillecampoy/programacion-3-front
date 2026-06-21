@@ -2,14 +2,53 @@ import "../../../main";
 import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
+import { fetchOrders, fetchProducts } from "../../../utils/api";
 import { logout } from "../../../utils/auth";
+import {
+  buildOrderHistory,
+  type OrderProductName,
+  type OrderHistoryItem,
+} from "../../../utils/orderHistory";
 import { getUser } from "../../../utils/localStorage";
+import { getOrders } from "../../../utils/orders";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
+const ordersMessage = document.querySelector<HTMLParagraphElement>("#ordersMessage");
+const ordersList = document.querySelector<HTMLDivElement>("#ordersList");
+const orderDetailModal = document.querySelector<HTMLDivElement>("#orderDetailModal");
+const closeOrderDetailButton = document.querySelector<HTMLButtonElement>(
+  "#closeOrderDetailButton"
+);
+const orderDetailStatus = document.querySelector<HTMLParagraphElement>(
+  "#orderDetailStatus"
+);
+const orderDetailTitle = document.querySelector<HTMLHeadingElement>(
+  "#orderDetailTitle"
+);
+const orderDetailMeta = document.querySelector<HTMLParagraphElement>(
+  "#orderDetailMeta"
+);
+const orderDetailSummary = document.querySelector<HTMLDivElement>(
+  "#orderDetailSummary"
+);
+const orderDetailItems = document.querySelector<HTMLDivElement>("#orderDetailItems");
 
-if (!buttonLogout || !loggedUserName || !logo) {
+if (
+  !buttonLogout ||
+  !loggedUserName ||
+  !logo ||
+  !ordersMessage ||
+  !ordersList ||
+  !orderDetailModal ||
+  !closeOrderDetailButton ||
+  !orderDetailStatus ||
+  !orderDetailTitle ||
+  !orderDetailMeta ||
+  !orderDetailSummary ||
+  !orderDetailItems
+) {
   throw new Error("No se encontraron los elementos necesarios de pedidos");
 }
 
@@ -19,3 +58,185 @@ buttonLogout.addEventListener("click", () => {
 
 logo.src = logoImage;
 loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
+
+const currencyFormatter = new Intl.NumberFormat("es-AR");
+const dateFormatter = new Intl.DateTimeFormat("es-AR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const statusLabels: Record<OrderHistoryItem["order"]["estado"], string> = {
+  PENDIENTE: "Pendiente",
+  CONFIRMADO: "Confirmado",
+  TERMINADO: "Terminado",
+  CANCELADO: "Cancelado",
+};
+
+const statusClassNames: Record<OrderHistoryItem["order"]["estado"], string> = {
+  PENDIENTE: "order-status-pendiente",
+  CONFIRMADO: "order-status-confirmado",
+  TERMINADO: "order-status-terminado",
+  CANCELADO: "order-status-cancelado",
+};
+
+let orderHistory: OrderHistoryItem[] = [];
+
+const formatOrderDate = (value: string): string =>
+  dateFormatter.format(new Date(`${value}T00:00:00Z`));
+
+const closeModal = (): void => {
+  orderDetailModal.hidden = true;
+};
+
+const renderOrderDetailModal = (orderItem: OrderHistoryItem): void => {
+  orderDetailStatus.textContent = statusLabels[orderItem.order.estado];
+  orderDetailStatus.className = `order-status-badge ${statusClassNames[orderItem.order.estado]}`;
+  orderDetailTitle.textContent = `Pedido ${orderItem.order.id}`;
+  orderDetailMeta.textContent = [
+    formatOrderDate(orderItem.order.fecha),
+    `Forma de pago: ${orderItem.order.formaPago}`,
+    `Teléfono: ${orderItem.order.telefono ?? "Sin informar"}`,
+  ].join(" · ");
+  orderDetailSummary.innerHTML = `
+    <div class="order-summary-item">
+      <span>Subtotal</span>
+      <strong>$${currencyFormatter.format(orderItem.subtotal)}</strong>
+    </div>
+    <div class="order-summary-item">
+      <span>Envío</span>
+      <strong>$${currencyFormatter.format(orderItem.envio)}</strong>
+    </div>
+    <div class="order-summary-item">
+      <span>Total</span>
+      <strong>$${currencyFormatter.format(orderItem.order.total)}</strong>
+    </div>
+  `;
+  orderDetailItems.innerHTML = `
+    <h3 class="order-detail-section-title">Detalle</h3>
+    <ul class="order-detail-list">
+      ${orderItem.details
+        .map(
+          (detail) => `
+            <li class="order-detail-list-item">
+              <div>
+                <strong>${detail.productName}</strong>
+                <p>Cantidad: ${detail.cantidad}</p>
+              </div>
+              <strong>$${currencyFormatter.format(detail.subtotal)}</strong>
+            </li>
+          `
+        )
+        .join("")}
+    </ul>
+  `;
+};
+
+const openModal = (orderItem: OrderHistoryItem): void => {
+  renderOrderDetailModal(orderItem);
+  orderDetailModal.hidden = false;
+};
+
+const renderOrders = (): void => {
+  ordersList.innerHTML = "";
+
+  if (orderHistory.length === 0) {
+    ordersMessage.textContent = "No tenés pedidos para mostrar.";
+    return;
+  }
+
+  ordersMessage.textContent = `${orderHistory.length} pedido${
+    orderHistory.length === 1 ? "" : "s"
+  } encontrado${orderHistory.length === 1 ? "" : "s"}.`;
+
+  orderHistory.forEach((orderItem) => {
+    const article = document.createElement("article");
+    article.className = "order-card";
+
+    article.innerHTML = `
+      <div class="order-card-header">
+        <div>
+          <p class="order-card-number">${orderItem.order.id}</p>
+          <p class="order-card-date">${formatOrderDate(orderItem.order.fecha)}</p>
+        </div>
+        <span class="order-status-badge ${statusClassNames[orderItem.order.estado]}">
+          ${statusLabels[orderItem.order.estado]}
+        </span>
+      </div>
+      <p class="order-card-total">Total: <strong>$${currencyFormatter.format(
+        orderItem.order.total
+      )}</strong></p>
+      <p class="order-card-items-count">${orderItem.itemCount} item${
+        orderItem.itemCount === 1 ? "" : "s"
+      }</p>
+      <ul class="order-preview-list">
+        ${orderItem.previewDetails
+          .map(
+            (detail) => `
+              <li class="order-preview-item">
+                <span>${detail.productName}</span>
+                <span>x${detail.cantidad}</span>
+              </li>
+            `
+          )
+          .join("")}
+      </ul>
+      ${orderItem.details.length > orderItem.previewDetails.length ? `<p class="order-preview-more">+${orderItem.details.length - orderItem.previewDetails.length} más</p>` : ""}
+      <button type="button" class="button-secondary order-detail-button">Ver detalle</button>
+    `;
+
+    const detailButton = article.querySelector<HTMLButtonElement>(".order-detail-button");
+    detailButton?.addEventListener("click", () => {
+      openModal(orderItem);
+    });
+
+    ordersList.appendChild(article);
+  });
+};
+
+const loadOrders = async (): Promise<void> => {
+  const currentUser = getUser();
+
+  if (!currentUser) {
+    ordersMessage.textContent = "No hay una sesión activa.";
+    ordersList.innerHTML = "";
+    return;
+  }
+
+  try {
+    const [remoteOrders, products] = await Promise.all([
+      fetchOrders(),
+      fetchProducts(),
+    ]);
+    const productNames: OrderProductName[] = products.map((product) => ({
+      id: product.id,
+      name: product.nombre,
+    }));
+
+    orderHistory = buildOrderHistory(
+      [...remoteOrders, ...getOrders()],
+      productNames,
+      currentUser.id
+    );
+  } catch {
+    orderHistory = buildOrderHistory(getOrders(), [], currentUser.id);
+  }
+
+  renderOrders();
+};
+
+closeOrderDetailButton.addEventListener("click", closeModal);
+orderDetailModal.addEventListener("click", (event) => {
+  if (event.target === orderDetailModal) {
+    closeModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !orderDetailModal.hidden) {
+    closeModal();
+  }
+});
+
+void loadOrders();

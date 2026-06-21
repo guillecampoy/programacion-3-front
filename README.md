@@ -53,13 +53,16 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - La cantidad respeta el stock restante y no permite agregar sin disponibilidad.
 - Al agregar, el producto queda en `localStorage.cart` con la cantidad elegida.
 
-### Carrito y pedido validado
+### Carrito, pedido e historial validado
 
 - El carrito muestra subtotal, envio y total.
 - El envio fijo actual es de `$2500`.
 - El checkout pide telefono y forma de pago.
 - El pedido se crea en `localStorage.orders` con estado `PENDIENTE`.
 - Al confirmar, el carrito se vacia y la navegacion pasa a `Mis pedidos`.
+- `Mis pedidos` carga `/data/pedidos.json` y lo combina con los pedidos locales del checkout.
+- El historial filtra por el usuario en sesion, muestra tarjetas con estado coloreado y abre un modal con el detalle completo.
+- Si no hay pedidos para el usuario, se muestra un estado vacio.
 
 ## Como ejecutar
 

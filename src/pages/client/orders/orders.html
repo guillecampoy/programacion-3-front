@@ -29,10 +29,23 @@
     <hr>
     <main class="client-orders-layout">
         <section class="client-orders-box">
-            <h2 class="client-section-title">Mis pedidos</h2>
-            <p class="empty-message">Próximamente se listarán aquí tus pedidos confirmados.</p>
+            <div class="orders-heading">
+                <h2 class="client-section-title">Mis pedidos</h2>
+                <p id="ordersMessage" class="empty-message"></p>
+            </div>
+            <div id="ordersList" class="orders-list" aria-live="polite"></div>
         </section>
     </main>
+    <div id="orderDetailModal" class="modal-overlay" hidden>
+        <article class="modal-content order-modal-content" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle">
+            <button id="closeOrderDetailButton" type="button" class="modal-close" aria-label="Cerrar detalle">Cerrar</button>
+            <p id="orderDetailStatus" class="order-status-badge"></p>
+            <h2 id="orderDetailTitle" class="modal-title"></h2>
+            <p id="orderDetailMeta" class="modal-category"></p>
+            <div id="orderDetailSummary" class="order-detail-summary"></div>
+            <div id="orderDetailItems" class="order-detail-items"></div>
+        </article>
+    </div>
     <hr>
     <footer>
         <p>&copy; 2026 Food Store. Todos los derechos reservados</p>

@@ -1,4 +1,5 @@
 import type { Rol } from "../types/Rol";
+import type { Order } from "../types/Order";
 import { resolveProductImageUrl } from "./productImages";
 
 export interface ApiUser {
@@ -29,6 +30,24 @@ export interface ApiProduct {
   disponible: boolean;
   eliminado: boolean;
   categoriaId: number;
+}
+
+export interface ApiOrderDetail {
+  idProducto: number;
+  cantidad: number;
+  subtotal: number;
+  productName?: string;
+}
+
+export interface ApiOrder {
+  id: string;
+  fecha: string;
+  estado: Order["estado"];
+  total: number;
+  formaPago: Order["formaPago"];
+  idUsuario: string;
+  telefono?: string;
+  detalles: ApiOrderDetail[];
 }
 
 const isApiUser = (value: unknown): value is ApiUser => {
@@ -85,6 +104,48 @@ const isApiProduct = (value: unknown): value is ApiProduct => {
   );
 };
 
+const isApiOrderDetail = (value: unknown): value is ApiOrderDetail => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const detail = value as Record<string, unknown>;
+
+  return (
+    typeof detail.idProducto === "number" &&
+    typeof detail.cantidad === "number" &&
+    typeof detail.subtotal === "number" &&
+    (typeof detail.productName === "string" ||
+      typeof detail.productName === "undefined")
+  );
+};
+
+const isApiOrder = (value: unknown): value is ApiOrder => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const order = value as Record<string, unknown>;
+
+  return (
+    typeof order.id === "string" &&
+    typeof order.fecha === "string" &&
+    (order.estado === "PENDIENTE" ||
+      order.estado === "CONFIRMADO" ||
+      order.estado === "TERMINADO" ||
+      order.estado === "CANCELADO") &&
+    typeof order.total === "number" &&
+    (order.formaPago === "TARJETA" ||
+      order.formaPago === "TRANSFERENCIA" ||
+      order.formaPago === "EFECTIVO") &&
+    typeof order.idUsuario === "string" &&
+    (typeof order.telefono === "string" ||
+      typeof order.telefono === "undefined") &&
+    Array.isArray(order.detalles) &&
+    order.detalles.every(isApiOrderDetail)
+  );
+};
+
 const fetchJsonArray = async <T>(
   path: string,
   isItem: (value: unknown) => value is T
@@ -127,6 +188,9 @@ export const fetchProducts = async (): Promise<ApiProduct[]> =>
       imagen: resolveProductImageUrl(product.imagen) || product.imagen,
     }))
   );
+
+export const fetchOrders = async (): Promise<ApiOrder[]> =>
+  fetchJsonArray("/data/pedidos.json", isApiOrder);
 
 export const mapApiRoleToRole = (role: ApiUser["rol"]): Rol =>
   role === "ADMIN" ? "admin" : "client";
