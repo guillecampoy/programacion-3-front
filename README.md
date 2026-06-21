@@ -71,6 +71,13 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - El acceso al panel sigue restringido al rol `ADMIN`.
 - La navegacion admin incluye acceso a dashboard, productos, categorias, pedidos y un enlace para volver a la tienda.
 
+### CRUD de categorias admin validado
+
+- Las categorias se cargan desde `/data/categorias.json` y se administran en memoria durante la sesion.
+- El alta y la edicion se resuelven en un modal con nombre, descripcion e imagen obligatorios.
+- La eliminacion pide confirmacion y oculta la fila de inmediato.
+- El selector de productos reutiliza las categorias visibles de la sesion actual.
+
 ## Como ejecutar
 
 ```bash
@@ -101,12 +108,12 @@ Los usuarios de referencia para el login viven en `public/data/usuarios.json`:
 Claves usadas en `localStorage`:
 
 - `userData`: usuario autenticado.
-- `categories`: categorias del catalogo.
 - `products`: productos del catalogo.
 - `orders`: pedidos de prueba o generados localmente.
 - `cart`: items del carrito.
 
 `users` quedo como almacenamiento legado de una version anterior y ya no participa en el login ni en el registro actual.
+`categories` quedo como almacenamiento legado de una version anterior y ya no participa en el CRUD actual de categorias.
 
 ## Rutas principales
 

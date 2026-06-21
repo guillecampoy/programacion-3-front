@@ -896,6 +896,18 @@ button:hover {
   gap: 16px;
 }
 
+.category-actions {
+  justify-content: flex-start;
+}
+
+.admin-category-image {
+  display: block;
+  width: 72px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
 .dashboard-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1161,6 +1173,11 @@ footer p {
   .dashboard-metrics,
   .dashboard-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-category-image {
+    width: 100%;
+    max-width: 96px;
   }
 
   .order-card-header,

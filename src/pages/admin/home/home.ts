@@ -9,16 +9,15 @@ import {
   fetchProducts,
   fetchUsers,
 } from "../../../utils/api";
+import { deleteAdminCategory, type AdminCategory, createAdminCategory, getVisibleAdminCategories, isCategoryNameTaken, updateAdminCategory } from "../../../utils/adminCategories";
 import { buildAdminDashboardStats } from "../../../utils/adminDashboard";
 import { logout } from "../../../utils/auth";
-import {
-  getCategories,
-  getNextCategoryId,
-  saveCategories,
-} from "../../../utils/categories";
 import { getUser } from "../../../utils/localStorage";
 import { getOrders } from "../../../utils/orders";
-import { productImageOptions } from "../../../utils/productImages";
+import {
+  productImageOptions,
+  resolveProductImageUrl,
+} from "../../../utils/productImages";
 import { getNextProductId, getProducts, saveProducts } from "../../../utils/products";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
@@ -31,6 +30,16 @@ const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName"
 const dashboardMessage = document.querySelector<HTMLParagraphElement>("#dashboardMessage");
 const dashboardMetrics = document.querySelector<HTMLDivElement>("#dashboardMetrics");
 const dashboardSummary = document.querySelector<HTMLDivElement>("#dashboardSummary");
+const openCategoryModalButton = document.querySelector<HTMLButtonElement>(
+  "#openCategoryModalButton"
+);
+const categoryModal = document.querySelector<HTMLDivElement>("#categoryModal");
+const closeCategoryModalButton = document.querySelector<HTMLButtonElement>(
+  "#closeCategoryModalButton"
+);
+const categoryModalTitle = document.querySelector<HTMLHeadingElement>(
+  "#categoryModalTitle"
+);
 const form = document.querySelector<HTMLFormElement>("#productForm");
 const productSection = document.querySelector<HTMLElement>("#productos");
 const productIdInput = document.querySelector<HTMLInputElement>("#productId");
@@ -65,8 +74,17 @@ const categoryForm = document.querySelector<HTMLFormElement>("#categoryForm");
 const categoryIdInput = document.querySelector<HTMLInputElement>("#categoryId");
 const categoryNameInput =
   document.querySelector<HTMLInputElement>("#categoryName");
+const categoryDescriptionInput = document.querySelector<HTMLTextAreaElement>(
+  "#categoryDescription"
+);
+const categoryImageSelect =
+  document.querySelector<HTMLSelectElement>("#categoryImage");
+const categoryImagePreview =
+  document.querySelector<HTMLImageElement>("#categoryImagePreview");
 const categoryMessage =
   document.querySelector<HTMLParagraphElement>("#categoryMessage");
+const categoriesMessage =
+  document.querySelector<HTMLParagraphElement>("#categoriesMessage");
 const categoriesTableBody =
   document.querySelector<HTMLTableSectionElement>("#categoriesTableBody");
 const cancelCategoryEditButton = document.querySelector<HTMLButtonElement>(
@@ -79,6 +97,10 @@ if (
   !dashboardMessage ||
   !dashboardMetrics ||
   !dashboardSummary ||
+  !openCategoryModalButton ||
+  !categoryModal ||
+  !closeCategoryModalButton ||
+  !categoryModalTitle ||
   !form ||
   !productSection ||
   !productIdInput ||
@@ -100,7 +122,11 @@ if (
   !categoryForm ||
   !categoryIdInput ||
   !categoryNameInput ||
+  !categoryDescriptionInput ||
+  !categoryImageSelect ||
+  !categoryImagePreview ||
   !categoryMessage ||
+  !categoriesMessage ||
   !categoriesTableBody ||
   !cancelCategoryEditButton
 ) {
@@ -116,7 +142,7 @@ const numberFormatter = new Intl.NumberFormat("es-AR");
 type FormMessageType = "success" | "error" | "info";
 
 let products = getProducts();
-let productCategories = getCategories();
+let productCategories: AdminCategory[] = [];
 
 const metricToneClass = {
   neutral: "dashboard-metric-neutral",
@@ -124,9 +150,6 @@ const metricToneClass = {
   success: "dashboard-metric-success",
   warning: "dashboard-metric-warning",
 } as const;
-
-const normalizeCategoryName = (categoryName: string): string =>
-  categoryName.replace(/\s+/g, "").toLowerCase();
 
 const normalizeSearchText = (value: string): string =>
   value
@@ -160,9 +183,50 @@ const resetForm = (clearMessage = true): void => {
   }
 };
 
+const updateCategoryImagePreview = (): void => {
+  if (!categoryImageSelect.value) {
+    categoryImagePreview.removeAttribute("src");
+    categoryImagePreview.alt = "Sin imagen seleccionada";
+    return;
+  }
+
+  categoryImagePreview.src = resolveProductImageUrl(categoryImageSelect.value);
+  categoryImagePreview.alt = categoryImageSelect.selectedOptions[0]?.textContent
+    ? `Vista previa de ${categoryImageSelect.selectedOptions[0].textContent}`
+    : "Vista previa de imagen seleccionada";
+};
+
+const renderCategoryImageOptions = (): void => {
+  categoryImageSelect.innerHTML = "";
+
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "";
+  emptyOption.textContent = "Seleccioná una imagen";
+  categoryImageSelect.appendChild(emptyOption);
+
+  productImageOptions.forEach((imageOption) => {
+    const option = document.createElement("option");
+    option.value = imageOption.fileName;
+    option.textContent = imageOption.label;
+    categoryImageSelect.appendChild(option);
+  });
+
+  updateCategoryImagePreview();
+};
+
+const openCategoryModal = (title: string): void => {
+  categoryModalTitle.textContent = title;
+  categoryModal.hidden = false;
+};
+
+const closeCategoryModal = (): void => {
+  categoryModal.hidden = true;
+};
+
 const resetCategoryForm = (clearMessage = true): void => {
   categoryForm.reset();
   categoryIdInput.value = "";
+  updateCategoryImagePreview();
 
   if (clearMessage) {
     clearFormMessage(categoryMessage);
@@ -172,10 +236,10 @@ const resetCategoryForm = (clearMessage = true): void => {
 const renderCategories = (): void => {
   categorySelect.innerHTML = "";
 
-  productCategories.forEach((category) => {
+  getVisibleAdminCategories(productCategories).forEach((category) => {
     const option = document.createElement("option");
-    option.value = category.name;
-    option.textContent = category.name;
+    option.value = category.nombre;
+    option.textContent = category.nombre;
     categorySelect.appendChild(option);
   });
 };
@@ -232,10 +296,22 @@ const selectProductImage = (imageUrl: string): void => {
 const renderCategoryTable = (): void => {
   categoriesTableBody.innerHTML = "";
 
-  productCategories.forEach((category) => {
+  const visibleCategories = getVisibleAdminCategories(productCategories);
+
+  categoriesMessage.textContent =
+    visibleCategories.length === 0 ? "No hay categorías cargadas." : "";
+
+  visibleCategories.forEach((category) => {
     const tr = document.createElement("tr");
+    const imageUrl = resolveProductImageUrl(category.imagen);
+
     tr.innerHTML = `
-      <td>${category.name}</td>
+      <td>${category.nombre}</td>
+      <td>${category.descripcion}</td>
+      <td>
+        <img class="admin-category-image" src="${imageUrl}" alt="${category.nombre}">
+      </td>
+      <td>Activa</td>
       <td>
         <button type="button" class="button-secondary btn-edit-category" data-id="${category.id}">Editar</button>
         <button type="button" class="btn-delete-category" data-id="${category.id}">Eliminar</button>
@@ -386,18 +462,53 @@ const persistProducts = (): void => {
   renderProducts();
 };
 
-const persistCategories = (): void => {
-  saveCategories(productCategories);
+const getFormCategory = (): Category => categorySelect.value as Category;
+
+const refreshCategoryViews = (): void => {
   renderCategories();
   renderCategoryTable();
 };
 
-const getFormCategory = (): Category => categorySelect.value as Category;
+const loadAdminCategories = async (): Promise<void> => {
+  productCategories = await fetchCategories().catch(() => []);
+  refreshCategoryViews();
+};
+
+const openCategoryEditor = (category?: AdminCategory): void => {
+  resetCategoryForm();
+  if (category) {
+    categoryIdInput.value = String(category.id);
+    categoryNameInput.value = category.nombre;
+    categoryDescriptionInput.value = category.descripcion;
+    categoryImageSelect.value = category.imagen;
+    updateCategoryImagePreview();
+  }
+
+  openCategoryModal(category ? "Editar categoría" : "Nueva categoría");
+  categoryNameInput.focus();
+};
+
+const updateProductsForCategoryRename = (
+  previousName: string,
+  nextName: string
+): void => {
+  if (previousName === nextName) {
+    return;
+  }
+
+  products = products.map((product) =>
+    product.category === previousName ? { ...product, category: nextName } : product
+  );
+  saveProducts(products);
+  renderProducts();
+};
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  if (productCategories.length === 0) {
+  const activeCategories = getVisibleAdminCategories(productCategories);
+
+  if (activeCategories.length === 0) {
     setFormMessage(
       message,
       "Creá una categoría antes de cargar productos.",
@@ -454,22 +565,19 @@ categoryForm.addEventListener("submit", (event) => {
 
   const categoryId = Number(categoryIdInput.value);
   const categoryName = categoryNameInput.value.trim();
-  const normalizedCategoryName = normalizeCategoryName(categoryName);
+  const categoryDescription = categoryDescriptionInput.value.trim();
+  const categoryImage = categoryImageSelect.value.trim();
   const currentCategory = productCategories.find(
     (category) => category.id === categoryId
   );
-  const categoryAlreadyExists = productCategories.some(
-    (category) =>
-      normalizeCategoryName(category.name) === normalizedCategoryName &&
-      category.id !== categoryId
+  const categoryAlreadyExists = isCategoryNameTaken(
+    productCategories,
+    categoryName,
+    categoryId || undefined
   );
 
-  if (!categoryName) {
-    setFormMessage(
-      categoryMessage,
-      "Completá el nombre de la categoría.",
-      "error"
-    );
+  if (!categoryName || !categoryDescription || !categoryImage) {
+    setFormMessage(categoryMessage, "Completá todos los campos.", "error");
     return;
   }
 
@@ -483,28 +591,23 @@ categoryForm.addEventListener("submit", (event) => {
   }
 
   if (categoryId && currentCategory) {
-    const previousCategoryName = currentCategory.name;
-
-    productCategories = productCategories.map((category) =>
-      category.id === categoryId ? { ...category, name: categoryName } : category
-    );
-    products = products.map((product) =>
-      product.category === previousCategoryName
-        ? { ...product, category: categoryName }
-        : product
-    );
-    saveProducts(products);
-    renderProducts();
+    productCategories = updateAdminCategory(productCategories, categoryId, {
+      name: categoryName,
+      description: categoryDescription,
+      image: categoryImage,
+    });
+    updateProductsForCategoryRename(currentCategory.nombre, categoryName);
     setFormMessage(
       categoryMessage,
       "Categoría actualizada correctamente.",
       "success"
     );
   } else {
-    productCategories = [
-      ...productCategories,
-      { id: getNextCategoryId(productCategories), name: categoryName },
-    ];
+    productCategories = createAdminCategory(productCategories, {
+      name: categoryName,
+      description: categoryDescription,
+      image: categoryImage,
+    });
     setFormMessage(
       categoryMessage,
       "Categoría creada correctamente.",
@@ -512,8 +615,9 @@ categoryForm.addEventListener("submit", (event) => {
     );
   }
 
-  persistCategories();
+  refreshCategoryViews();
   resetCategoryForm(false);
+  closeCategoryModal();
 });
 
 productsTableBody.addEventListener("click", (event) => {
@@ -574,34 +678,27 @@ categoriesTableBody.addEventListener("click", (event) => {
   }
 
   if (target.classList.contains("btn-edit-category")) {
-    categoryIdInput.value = category.id.toString();
-    categoryNameInput.value = category.name;
-    setFormMessage(categoryMessage, `Editando categoría: ${category.name}.`, "info");
+    openCategoryEditor(category);
+    setFormMessage(categoryMessage, `Editando categoría: ${category.nombre}.`, "info");
     return;
   }
 
   if (target.classList.contains("btn-delete-category")) {
-    const categoryHasProducts = products.some(
-      (product) => product.category === category.name
+    const confirmed = window.confirm(
+      `¿Eliminar la categoría ${category.nombre}?`
     );
 
-    if (categoryHasProducts) {
-      setFormMessage(
-        categoryMessage,
-        "No se puede eliminar una categoría con productos asociados.",
-        "error"
-      );
+    if (!confirmed) {
       return;
     }
 
-    const deletedCategoryName = category.name;
-
-    productCategories = productCategories.filter((item) => item.id !== categoryId);
-    persistCategories();
+    productCategories = deleteAdminCategory(productCategories, categoryId);
+    refreshCategoryViews();
     resetCategoryForm(false);
+    closeCategoryModal();
     setFormMessage(
       categoryMessage,
-      `Categoría eliminada: ${deletedCategoryName}.`,
+      `Categoría eliminada: ${category.nombre}.`,
       "success"
     );
   }
@@ -631,6 +728,22 @@ cancelEditButton.addEventListener("click", () => {
   );
 });
 
+openCategoryModalButton.addEventListener("click", () => {
+  openCategoryEditor();
+});
+
+closeCategoryModalButton.addEventListener("click", () => {
+  closeCategoryModal();
+});
+
+categoryModal.addEventListener("click", (event) => {
+  if (event.target === categoryModal) {
+    closeCategoryModal();
+  }
+});
+
+categoryImageSelect.addEventListener("change", updateCategoryImagePreview);
+
 cancelCategoryEditButton.addEventListener("click", () => {
   const wasEditing = categoryIdInput.value !== "";
 
@@ -642,11 +755,18 @@ cancelCategoryEditButton.addEventListener("click", () => {
       : "Formulario de categoría limpio.",
     "info"
   );
+  closeCategoryModal();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !categoryModal.hidden) {
+    closeCategoryModal();
+  }
 });
 
 renderProductImageOptions();
-renderCategories();
-renderCategoryTable();
+renderCategoryImageOptions();
 renderProducts();
 renderOrders();
+void loadAdminCategories();
 void renderDashboard();

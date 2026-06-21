@@ -118,23 +118,18 @@
             <section id="categorias" class="admin-section">
                 <h2 class="admin-section-title">ABM de categorías</h2>
                 <div class="admin-box category-admin-grid">
-                    <form id="categoryForm" class="category-form">
-                        <input id="categoryId" type="hidden">
-                        <div>
-                            <label for="categoryName">Nombre</label>
-                            <input id="categoryName" name="categoryName" placeholder="Ej: Milanesa" required>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit">Guardar categoría</button>
-                            <button type="button" id="cancelCategoryEditButton" class="button-secondary">Cancelar edición</button>
-                        </div>
-                        <p id="categoryMessage" class="form-message" aria-live="polite"></p>
-                    </form>
+                    <div class="form-actions category-actions">
+                        <button type="button" id="openCategoryModalButton">Nueva categoría</button>
+                    </div>
+                    <p id="categoriesMessage" class="empty-message"></p>
 
                     <table>
                         <thead>
                             <tr>
                                 <th>Categoría</th>
+                                <th>Descripción</th>
+                                <th>Imagen</th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -163,6 +158,37 @@
             </section>
         </div>
     </main>
+
+    <div id="categoryModal" class="modal-overlay" hidden>
+        <article class="modal-content" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+            <button id="closeCategoryModalButton" type="button" class="modal-close" aria-label="Cerrar formulario">Cerrar</button>
+            <h2 id="categoryModalTitle" class="modal-title">Nueva categoría</h2>
+            <form id="categoryForm" class="category-form">
+                <input id="categoryId" type="hidden">
+                <div>
+                    <label for="categoryName">Nombre</label>
+                    <input id="categoryName" name="categoryName" placeholder="Ej: Milanesa" required>
+                </div>
+                <div>
+                    <label for="categoryDescription">Descripción</label>
+                    <textarea id="categoryDescription" name="categoryDescription" rows="4" placeholder="Breve descripción de la categoría" required></textarea>
+                </div>
+                <div>
+                    <label for="categoryImage">Imagen</label>
+                    <select id="categoryImage" name="categoryImage" required></select>
+                </div>
+                <div class="product-preview-field">
+                    <label>Vista previa</label>
+                    <img id="categoryImagePreview" class="product-image-preview" alt="Vista previa de imagen seleccionada">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="saveCategoryButton">Guardar categoría</button>
+                    <button type="button" id="cancelCategoryEditButton" class="button-secondary">Cancelar edición</button>
+                </div>
+                <p id="categoryMessage" class="form-message" aria-live="polite"></p>
+            </form>
+        </article>
+    </div>
 
     <script type="module" src="./home.ts"></script>
 </body>
