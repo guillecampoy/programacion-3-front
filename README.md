@@ -130,7 +130,7 @@ Claves usadas en `localStorage`:
 
 `users` quedo como almacenamiento legado de una version anterior y ya no participa en el login ni en el registro actual.
 `categories` quedo como almacenamiento legado de una version anterior y ya no participa en el CRUD actual de categorias.
-`orders` sigue siendo la base local del checkout y la gestion admin la usa como estado combinado en memoria; el cambio de estado del admin no persiste en `localStorage`.
+`orders` sigue siendo la base local del checkout y la gestion admin la usa como estado combinado; el cambio de estado del admin se guarda en `localStorage.orders` para que no se pierda al navegar entre pantallas.
 
 ## Rutas principales
 

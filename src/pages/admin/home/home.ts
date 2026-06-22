@@ -37,7 +37,7 @@ import {
 } from "../../../utils/adminOrders";
 import { logout } from "../../../utils/auth";
 import { getUser } from "../../../utils/localStorage";
-import { getOrders } from "../../../utils/orders";
+import { getOrders, saveOrders } from "../../../utils/orders";
 import {
   productImageOptions,
   resolveProductImageUrl,
@@ -927,6 +927,7 @@ orderStatusSelect.addEventListener("change", () => {
   const nextStatus = orderStatusSelect.value as OrderStatus;
 
   adminOrders = updateAdminOrderStatus(adminOrders, activeOrderId, nextStatus);
+  saveOrders(adminOrders);
   renderOrders();
   syncOrderModal();
 });

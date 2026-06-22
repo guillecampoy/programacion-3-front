@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CartItem } from "../src/types/Cart";
 import type { IUser } from "../src/types/IUser";
 import { Rol } from "../src/types/Rol";
@@ -6,9 +6,35 @@ import {
   calculateCartSummary,
   createOrderFromCart,
   ENVIO,
+  getOrders,
+  saveOrders,
 } from "../src/utils/orders";
+import type { Order } from "../src/types/Order";
+
+const createLocalStorageMock = (): Storage => {
+  const store = new Map<string, string>();
+
+  return {
+    length: 0,
+    clear: () => {
+      store.clear();
+    },
+    getItem: (key: string) => store.get(key) ?? null,
+    key: (index: number) => Array.from(store.keys())[index] ?? null,
+    removeItem: (key: string) => {
+      store.delete(key);
+    },
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
+    },
+  } satisfies Storage;
+};
 
 describe("orders", () => {
+  beforeEach(() => {
+    vi.stubGlobal("localStorage", createLocalStorageMock());
+  });
+
   const cart: CartItem[] = [
     {
       product: {
@@ -51,5 +77,24 @@ describe("orders", () => {
     expect(order.telefono).toBe("1155555555");
     expect(order.detalles).toHaveLength(1);
     expect(order.total).toBe(36000 + ENVIO);
+  });
+
+  it("guarda y recupera estados de pedidos actualizados", () => {
+    const orders: Order[] = [
+      {
+        id: "PED-1001",
+        fecha: "2026-05-11",
+        estado: "CANCELADO",
+        total: 30000,
+        formaPago: "EFECTIVO",
+        idUsuario: "user-1",
+        telefono: "1111111111",
+        detalles: [],
+      },
+    ];
+
+    saveOrders(orders);
+
+    expect(getOrders()).toEqual(orders);
   });
 });
