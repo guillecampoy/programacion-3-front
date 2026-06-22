@@ -80,36 +80,54 @@ hr {
 .auth-page {
   min-height: 100vh;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  padding: 0;
+  background: linear-gradient(135deg, #ff694a 0%, #ff8e3a 100%);
+}
+
+.auth-stage {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 28px 56px 40px;
+  box-sizing: border-box;
 }
 
 .auth-card {
-  flex: 0 1 380px;
-  width: 100%;
-  max-width: 380px;
+  width: min(100%, 286px);
+  box-sizing: border-box;
+  padding: 28px 24px 18px;
   background: var(--color-blanco);
-  border: 1px solid var(--color-borde);
-  border-radius: 8px;
-  box-shadow: 0 12px 28px rgb(0 0 0 / 12%);
-  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgb(0 0 0 / 14%);
 }
 
-.auth-card .title {
-  margin-bottom: 20px;
+.auth-brand {
+  margin: 0;
+  color: var(--color-primario);
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.auth-heading {
+  margin: 8px 0 22px;
+  color: var(--color-texto);
+  font-size: 1.05rem;
+  line-height: 1.2;
   text-align: center;
 }
 
 .auth-form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  gap: 12px;
 }
 
 .auth-form div {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  gap: 6px;
 }
 
 .auth-form input,
@@ -118,12 +136,38 @@ hr {
   box-sizing: border-box;
 }
 
-.auth-card a {
+.auth-form button {
+  width: fit-content;
+  min-width: 78px;
+  padding: 9px 18px;
+  margin-top: 2px;
+}
+
+.auth-link {
   display: block;
-  margin-top: 16px;
+  margin-top: 14px;
   color: var(--color-primario);
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 700;
   text-align: center;
+}
+
+.auth-credentials {
+  display: grid;
+  gap: 2px;
+  margin-top: 14px;
+  color: color-mix(in srgb, var(--color-texto) 74%, var(--color-blanco));
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.auth-credentials p {
+  margin: 0;
+}
+
+.auth-credentials-title {
+  color: var(--color-texto);
+  font-weight: 700;
 }
 
 .search-form {
