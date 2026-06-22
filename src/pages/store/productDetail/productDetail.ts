@@ -24,6 +24,8 @@ const productDetailDescription = document.querySelector<HTMLParagraphElement>("#
 const productDetailPrice = document.querySelector<HTMLParagraphElement>("#productDetailPrice");
 const productDetailStock = document.querySelector<HTMLParagraphElement>("#productDetailStock");
 const productDetailStatus = document.querySelector<HTMLParagraphElement>("#productDetailStatus");
+const decreaseQuantityButton = document.querySelector<HTMLButtonElement>("#decreaseQuantityButton");
+const increaseQuantityButton = document.querySelector<HTMLButtonElement>("#increaseQuantityButton");
 const quantityInput = document.querySelector<HTMLInputElement>("#quantity");
 const addToCartButton = document.querySelector<HTMLButtonElement>("#addToCartButton");
 const productDetailMessage = document.querySelector<HTMLParagraphElement>("#productDetailMessage");
@@ -43,6 +45,8 @@ if (
   !productDetailPrice ||
   !productDetailStock ||
   !productDetailStatus ||
+  !decreaseQuantityButton ||
+  !increaseQuantityButton ||
   !quantityInput ||
   !addToCartButton ||
   !productDetailMessage
@@ -216,10 +220,20 @@ const renderDetail = async (): Promise<void> => {
     quantityInput.max = String(Math.max(remainingStock, 1));
     quantityInput.disabled = remainingStock <= 0;
     addToCartButton.disabled = remainingStock <= 0;
+    decreaseQuantityButton.disabled = remainingStock <= 0;
+    increaseQuantityButton.disabled = remainingStock <= 0;
     quantityInput.value = String(Math.min(1, remainingStock));
   };
 
   syncControls();
+
+  const changeQuantity = (delta: number): void => {
+    const currentQuantity = Number(quantityInput.value);
+    const nextQuantity = Number.isInteger(currentQuantity) ? currentQuantity + delta : 1;
+    const normalizedQuantity = Math.min(Math.max(nextQuantity, 1), remainingStock);
+
+    quantityInput.value = String(normalizedQuantity);
+  };
 
   quantityInput.addEventListener("input", () => {
     const quantity = Number(quantityInput.value);
@@ -228,6 +242,14 @@ const renderDetail = async (): Promise<void> => {
       : 1;
 
     quantityInput.value = String(normalizedQuantity);
+  });
+
+  decreaseQuantityButton.addEventListener("click", () => {
+    changeQuantity(-1);
+  });
+
+  increaseQuantityButton.addEventListener("click", () => {
+    changeQuantity(1);
   });
 
   addToCartButton.addEventListener("click", () => {

@@ -25,6 +25,7 @@ const searchInput = document.querySelector<HTMLInputElement>("#buscarProducto");
 const sortSelect = document.querySelector<HTMLSelectElement>("#sortProducts");
 const searchMessage = document.querySelector<HTMLParagraphElement>("#searchMessage");
 const productsTitle = document.querySelector<HTMLHeadingElement>("#productsTitle");
+const productsCount = document.querySelector<HTMLParagraphElement>("#productsCount");
 const showAllProductsButton = document.querySelector<HTMLButtonElement>(
   "#showAllProductsButton"
 );
@@ -41,6 +42,7 @@ if (
   !sortSelect ||
   !searchMessage ||
   !productsTitle ||
+  !productsCount ||
   !showAllProductsButton
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
@@ -79,8 +81,8 @@ const renderProductsTitle = (): void => {
   );
 
   productsTitle.textContent = selectedCategory
-    ? `Productos de ${selectedCategory.nombre}`
-    : "Productos";
+    ? selectedCategory.nombre
+    : "Todos los Productos";
 };
 
 const toCartProduct = (product: CatalogProduct): Product => ({
@@ -194,6 +196,7 @@ const renderProducts = (): void => {
 
   productList.innerHTML = "";
   searchMessage.textContent = "";
+  productsCount.textContent = `${products.length} ${products.length === 1 ? "producto" : "productos"}`;
 
   if (products.length === 0) {
     searchMessage.textContent = "No se encontraron productos con esos filtros.";
