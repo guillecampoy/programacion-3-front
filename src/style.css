@@ -5,6 +5,18 @@
   --color-blanco: #fff;
   --color-borde: #ddd;
   --color-focus: #ff4500;
+  --color-danger: #a92b2b;
+  --color-danger-hover: #7f1f1f;
+  --color-danger-soft: #fff3f3;
+  --color-danger-border: #d8a0a0;
+  --color-danger-text: #8f2424;
+  --color-success-soft: #eef8ef;
+  --color-success-border: #b9dfbf;
+  --color-success-text: #286b34;
+  --color-warning-soft: #fff7ed;
+  --color-warning-border: #ffc9a8;
+  --color-warning-text: #9b3f16;
+  --color-ink: #111111;
   --product-card-width: 260px;
 }
 
@@ -17,7 +29,7 @@ body {
   flex-direction: column;
   color: var(--color-texto);
   background: var(--color-fondo);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body > main {
@@ -156,7 +168,7 @@ hr {
 .empty-message:not(:empty) {
   background: var(--color-blanco);
   border: 1px solid var(--color-borde);
-  border-left: 4px solid var(--color-primario);
+  box-shadow: inset 0 4px 0 0 var(--color-primario);
   border-radius: 8px;
   padding: 12px;
 }
@@ -255,7 +267,7 @@ hr {
   padding: 14px;
   border: 1px solid var(--color-borde);
   border-radius: 8px;
-  background: #fffdf8;
+  background: var(--color-blanco);
 }
 
 .order-card-header {
@@ -280,7 +292,7 @@ hr {
 .order-card-date,
 .order-card-items-count,
 .order-preview-more {
-  color: #6b5f4f;
+  color: color-mix(in srgb, var(--color-texto) 72%, var(--color-blanco));
   font-size: 14px;
 }
 
@@ -327,23 +339,23 @@ hr {
 }
 
 .order-status-pendiente {
-  background: #fff0cc;
-  color: #8a5b00;
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
 }
 
 .order-status-confirmado {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
+  color: color-mix(in srgb, var(--color-primario) 72%, var(--color-texto));
 }
 
 .order-status-terminado {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
 }
 
 .order-status-cancelado {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
 }
 
 .order-modal-content {
@@ -363,7 +375,7 @@ hr {
   padding: 12px;
   border: 1px solid var(--color-borde);
   border-radius: 8px;
-  background: #fffdf8;
+  background: var(--color-blanco);
 }
 
 .order-detail-section-title {
@@ -379,7 +391,7 @@ hr {
 
 .order-detail-list-item p {
   margin: 4px 0 0;
-  color: #6b5f4f;
+  color: color-mix(in srgb, var(--color-texto) 72%, var(--color-blanco));
 }
 
 .product-detail-layout {
@@ -541,29 +553,29 @@ hr {
 
 .cart-cancel-button {
   appearance: none;
-  background-color: #a92b2b;
+  background-color: var(--color-danger);
   border: none;
   cursor: pointer;
   margin-top: 0;
 }
 
 .cart-cancel-button:hover {
-  background-color: #7f1f1f;
+  background-color: var(--color-danger-hover);
 }
 
 .cart-remove-button {
   appearance: none;
   height: 34px;
   min-height: 34px;
-  border: 1px solid #d8a0a0;
-  background-color: #fff3f3;
-  color: #8f2424;
+  border: 1px solid var(--color-danger-border);
+  background-color: var(--color-danger-soft);
+  color: var(--color-danger-text);
   cursor: pointer;
 }
 
 .cart-remove-button:hover {
-  background-color: #f8dddd;
-  border-color: #c57373;
+  background-color: color-mix(in srgb, var(--color-danger-soft) 88%, var(--color-blanco));
+  border-color: color-mix(in srgb, var(--color-danger-border) 85%, var(--color-danger-text));
 }
 
 .empty-cart-box {
@@ -676,8 +688,8 @@ hr {
 }
 
 .product-badge.available {
-  background: #eef8ef;
-  color: #286b34;
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
 }
 
 .modal-overlay {
@@ -795,7 +807,7 @@ button:hover {
 }
 
 .button-secondary:hover {
-  background-color: #111;
+  background-color: var(--color-ink);
 }
 
 .category-filter {
@@ -847,7 +859,7 @@ button:hover {
 }
 
 .admin-sidebar-nav a:hover {
-  background: #efe8de;
+  background: color-mix(in srgb, var(--color-fondo) 84%, var(--color-primario));
 }
 
 .admin-content {
@@ -943,23 +955,23 @@ button:hover {
 }
 
 .order-status-pendiente {
-  background: #fff7e8;
-  color: #9b5b00;
+  background: var(--color-warning-soft);
+  color: var(--color-warning-text);
 }
 
 .order-status-confirmado {
-  background: #eef4ff;
-  color: #24458f;
+  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
+  color: color-mix(in srgb, var(--color-primario) 72%, var(--color-texto));
 }
 
 .order-status-terminado {
-  background: #eef8ef;
-  color: #286b34;
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
 }
 
 .order-status-cancelado {
-  background: #fff3f3;
-  color: #8f2424;
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
 }
 
 .order-modal-summary {
@@ -1012,19 +1024,19 @@ button:hover {
 }
 
 .dashboard-metric-accent {
-  background: #fff6e8;
+  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
 }
 
 .dashboard-metric-neutral {
-  background: #f7f4ef;
+  background: color-mix(in srgb, var(--color-fondo) 75%, var(--color-blanco));
 }
 
 .dashboard-metric-success {
-  background: #eef8ef;
+  background: var(--color-success-soft);
 }
 
 .dashboard-metric-warning {
-  background: #fff3e6;
+  background: var(--color-warning-soft);
 }
 
 .dashboard-summary-grid {
@@ -1112,21 +1124,21 @@ button:hover {
 }
 
 .form-message-success {
-  background-color: #eef8ef;
-  border-color: #b9dfbf;
-  color: #286b34;
+  background-color: var(--color-success-soft);
+  border-color: var(--color-success-border);
+  color: var(--color-success-text);
 }
 
 .form-message-error {
-  background-color: #fff3f3;
-  border-color: #d8a0a0;
-  color: #8f2424;
+  background-color: var(--color-danger-soft);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger-text);
 }
 
 .form-message-info {
-  background-color: #fff7ed;
-  border-color: #ffc9a8;
-  color: #9b3f16;
+  background-color: var(--color-warning-soft);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning-text);
 }
 
 .checkbox-field {
