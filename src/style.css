@@ -410,6 +410,26 @@ hr {
   padding: 16px;
 }
 
+.product-detail-state {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-height: 120px;
+}
+
+.product-detail-state p {
+  margin: 0;
+  font-weight: bold;
+}
+
+.product-detail-state-loading {
+  color: var(--color-texto);
+}
+
+.product-detail-state-error {
+  color: var(--color-danger-text);
+}
+
 .product-detail-card {
   display: grid;
   grid-template-columns: 1.1fr 1fr;

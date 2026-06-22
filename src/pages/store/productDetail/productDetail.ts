@@ -15,7 +15,8 @@ const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
 const ordersLink = document.querySelector<HTMLAnchorElement>("#ordersLink");
 const cartLink = document.querySelector<HTMLAnchorElement>("#cartLink");
-const productDetailState = document.querySelector<HTMLParagraphElement>("#productDetailState");
+const productDetailLayout = document.querySelector<HTMLElement>("#productDetailLayout");
+const productDetailState = document.querySelector<HTMLElement>("#productDetailState");
 const productDetailCard = document.querySelector<HTMLElement>("#productDetailCard");
 const productDetailImage = document.querySelector<HTMLImageElement>("#productDetailImage");
 const productDetailCategory = document.querySelector<HTMLParagraphElement>("#productDetailCategory");
@@ -34,6 +35,7 @@ if (
   !logo ||
   !cartQuantity ||
   !productDetailState ||
+  !productDetailLayout ||
   !productDetailCard ||
   !productDetailImage ||
   !productDetailCategory ||
@@ -78,6 +80,21 @@ const setMessage = (text: string, isError = false): void => {
     : "form-message form-message-success";
 };
 
+const setBusy = (isBusy: boolean): void => {
+  productDetailLayout.setAttribute("aria-busy", String(isBusy));
+};
+
+const renderLoading = (): void => {
+  productDetailCard.hidden = true;
+  productDetailState.hidden = false;
+  productDetailState.className = "product-detail-state product-detail-state-loading";
+  productDetailState.replaceChildren();
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = "Cargando detalle del producto...";
+  productDetailState.appendChild(paragraph);
+};
+
 const getProductIdFromQuery = (): number | null => {
   const productId = Number(new URLSearchParams(window.location.search).get("id"));
 
@@ -99,7 +116,8 @@ const toCartProduct = (product: Awaited<ReturnType<typeof fetchProducts>>[number
 const renderError = (message: string): void => {
   productDetailCard.hidden = true;
   productDetailState.hidden = false;
-  productDetailState.className = "product-detail-state";
+  productDetailState.className = "product-detail-state product-detail-state-error";
+  setBusy(false);
 
   productDetailState.replaceChildren();
   const paragraph = document.createElement("p");
@@ -116,19 +134,30 @@ const renderDetail = async (): Promise<void> => {
   const productId = getProductIdFromQuery();
 
   if (!productId) {
-    renderError("No se indicó un producto válido.");
+    renderError("No pudimos abrir este producto porque el enlace no incluye un ID válido.");
     return;
   }
 
-  const [categories, products] = await Promise.all([
-    fetchCategories(),
-    fetchProducts(),
-  ]);
+  setBusy(true);
+  renderLoading();
+
+  let categories: Awaited<ReturnType<typeof fetchCategories>>;
+  let products: Awaited<ReturnType<typeof fetchProducts>>;
+
+  try {
+    [categories, products] = await Promise.all([
+      fetchCategories(),
+      fetchProducts(),
+    ]);
+  } catch {
+    renderError("No pudimos cargar el detalle del producto. Revisá tu conexión y volvé a intentar.");
+    return;
+  }
 
   const product = products.find((item) => item.id === productId);
 
   if (!product) {
-    renderError("No se encontró el producto solicitado.");
+    renderError("No encontramos ese producto. Volvé al catálogo y probá con otro artículo.");
     return;
   }
 
@@ -142,6 +171,7 @@ const renderDetail = async (): Promise<void> => {
   const canAdd =
     !isAdminUser && product.disponible && product.stock > 0 && remainingStock > 0;
 
+  setBusy(false);
   productDetailState.hidden = true;
   productDetailCard.hidden = false;
 
@@ -151,9 +181,11 @@ const renderDetail = async (): Promise<void> => {
   productDetailCategory.textContent = categoryName;
   productDetailTitle.textContent = product.nombre;
   productDetailDescription.textContent = product.descripcion;
-  productDetailPrice.innerHTML = `Precio: <strong>$${currencyFormatter.format(
-    product.precio
-  )}</strong>`;
+  productDetailPrice.replaceChildren();
+  productDetailPrice.append("Precio: ");
+  const priceValue = document.createElement("strong");
+  priceValue.textContent = `$${currencyFormatter.format(product.precio)}`;
+  productDetailPrice.appendChild(priceValue);
   productDetailStock.textContent = `Stock disponible: ${remainingStock}`;
   productDetailStatus.textContent = product.disponible && product.stock > 0
     ? "Estado: Disponible"
@@ -165,10 +197,10 @@ const renderDetail = async (): Promise<void> => {
     quantityInput.value = "1";
     setMessage(
       isAdminUser
-        ? "Las compras no están disponibles para administradores."
+        ? "Los administradores no pueden agregar productos al carrito."
         : product.stock <= 0
-        ? "Producto sin stock."
-        : "Producto no disponible.",
+        ? "Este producto no tiene stock disponible."
+        : "Este producto no está disponible en este momento.",
       true
     );
     return;
@@ -202,7 +234,7 @@ const renderDetail = async (): Promise<void> => {
     const quantity = Number(quantityInput.value);
 
     if (!Number.isInteger(quantity) || quantity <= 0 || quantity > remainingStock) {
-      setMessage("La cantidad no puede superar el stock disponible.", true);
+      setMessage("La cantidad no puede superar el stock disponible. Ajustá el número e intentá de nuevo.", true);
       return;
     }
 

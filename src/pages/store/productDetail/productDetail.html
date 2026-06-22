@@ -10,7 +10,7 @@
     <header>
         <div class="top-bar">
             <div class="header-container">
-                <img id="storeLogo" alt="Logo de Food Store" class="logo">
+                <img id="storeLogo" src="../../../assets/food-store/logo_bodegon.png" alt="Logo de Food Store" class="logo" decoding="async">
                 <h1 class="title">Food Store</h1>
             </div>
             <section class="session-box" aria-label="Usuario logueado">
@@ -18,18 +18,18 @@
                 <button id="logoutButton" type="button">Logout</button>
             </section>
         </div>
-        <nav>
+        <nav aria-label="Navegación principal">
             <a href="../home/home.html">Inicio</a> |
-            <a id="ordersLink" href="#">Mis pedidos</a> |
+            <a id="ordersLink" href="../../client/orders/orders.html">Mis pedidos</a> |
             <a id="cartLink" href="../cart/cart.html">Carrito(<span id="cartQuantity">0</span>)</a>
         </nav>
     </header>
     <hr>
 
-    <main class="product-detail-layout">
-        <section id="productDetailState" class="product-detail-state" hidden></section>
+    <main id="productDetailLayout" class="product-detail-layout" aria-busy="true">
+        <section id="productDetailState" class="product-detail-state" role="status" aria-live="polite" aria-atomic="true" hidden></section>
         <article id="productDetailCard" class="product-detail-card" hidden>
-            <img id="productDetailImage" class="product-detail-image" alt="">
+            <img id="productDetailImage" class="product-detail-image" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" hidden decoding="async">
             <div class="product-detail-content">
                 <p id="productDetailCategory" class="modal-category"></p>
                 <h2 id="productDetailTitle" class="modal-title"></h2>
