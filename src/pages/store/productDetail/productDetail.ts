@@ -100,10 +100,16 @@ const renderError = (message: string): void => {
   productDetailCard.hidden = true;
   productDetailState.hidden = false;
   productDetailState.className = "product-detail-state";
-  productDetailState.innerHTML = `
-    <p>${message}</p>
-    <a class="cart-return-link" href="${ROUTES.storeHome}">Volver al catálogo</a>
-  `;
+
+  productDetailState.replaceChildren();
+  const paragraph = document.createElement("p");
+  paragraph.textContent = message;
+  const link = document.createElement("a");
+  link.className = "cart-return-link";
+  link.href = ROUTES.storeHome;
+  link.textContent = "Volver al catálogo";
+
+  productDetailState.append(paragraph, link);
 };
 
 const renderDetail = async (): Promise<void> => {
@@ -141,6 +147,7 @@ const renderDetail = async (): Promise<void> => {
 
   productDetailImage.src = product.imagen;
   productDetailImage.alt = product.nombre;
+  productDetailImage.hidden = false;
   productDetailCategory.textContent = categoryName;
   productDetailTitle.textContent = product.nombre;
   productDetailDescription.textContent = product.descripcion;

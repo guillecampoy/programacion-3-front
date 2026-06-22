@@ -26,23 +26,6 @@ const productsTitle = document.querySelector<HTMLHeadingElement>("#productsTitle
 const showAllProductsButton = document.querySelector<HTMLButtonElement>(
   "#showAllProductsButton"
 );
-const productDetailModal =
-  document.querySelector<HTMLDivElement>("#productDetailModal");
-const closeProductDetailButton = document.querySelector<HTMLButtonElement>(
-  "#closeProductDetailButton"
-);
-const productDetailImage =
-  document.querySelector<HTMLImageElement>("#productDetailImage");
-const productDetailTitle =
-  document.querySelector<HTMLHeadingElement>("#productDetailTitle");
-const productDetailCategory = document.querySelector<HTMLParagraphElement>(
-  "#productDetailCategory"
-);
-const productDetailDescription = document.querySelector<HTMLParagraphElement>(
-  "#productDetailDescription"
-);
-const productDetailPrice =
-  document.querySelector<HTMLParagraphElement>("#productDetailPrice");
 const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
 const ordersLink = document.querySelector<HTMLAnchorElement>("#ordersLink");
 const cartLink = document.querySelector<HTMLAnchorElement>("#cartLink");
@@ -59,13 +42,6 @@ if (
   !searchMessage ||
   !productsTitle ||
   !showAllProductsButton ||
-  !productDetailModal ||
-  !closeProductDetailButton ||
-  !productDetailImage ||
-  !productDetailTitle ||
-  !productDetailCategory ||
-  !productDetailDescription ||
-  !productDetailPrice ||
   !cartQuantity ||
   !ordersLink ||
   !cartLink
@@ -144,8 +120,71 @@ const renderCategories = (): void => {
   });
 };
 
-const closeProductDetail = (): void => {
-  productDetailModal.hidden = true;
+const navigateToProductDetail = (productId: number): void => {
+  window.location.href = `../productDetail/productDetail.html?id=${productId}`;
+};
+
+const createTextParagraph = (className: string, text: string): HTMLParagraphElement => {
+  const paragraph = document.createElement("p");
+  paragraph.className = className;
+  paragraph.textContent = text;
+  return paragraph;
+};
+
+const createProductCard = (product: CatalogProduct): HTMLElement => {
+  const article = document.createElement("article");
+  article.className = "product-card";
+  article.dataset.id = String(product.id);
+  article.tabIndex = 0;
+  article.setAttribute("role", "link");
+  article.setAttribute("aria-label", `Abrir detalle de ${product.nombre}`);
+
+  const image = document.createElement("img");
+  image.src = product.imagen;
+  image.alt = product.nombre;
+  article.appendChild(image);
+
+  const title = document.createElement("h3");
+  title.className = "product-title";
+  title.textContent = product.nombre;
+  article.appendChild(title);
+
+  const badges = document.createElement("div");
+  badges.className = "product-badges";
+  const badge = document.createElement("span");
+  badge.className = "product-badge available";
+  badge.textContent = "Disponible";
+  badges.appendChild(badge);
+  article.appendChild(badges);
+
+  const description = createTextParagraph("product-description", product.descripcion);
+  article.appendChild(description);
+
+  const price = document.createElement("p");
+  price.className = "product-price";
+  price.append("Precio: ");
+  const priceValue = document.createElement("strong");
+  priceValue.textContent = `$${currencyFormatter.format(product.precio)}`;
+  price.appendChild(priceValue);
+  article.appendChild(price);
+
+  const detailButton = document.createElement("button");
+  detailButton.type = "button";
+  detailButton.className = "btn-detalle";
+  detailButton.dataset.id = String(product.id);
+  detailButton.textContent = "Ver detalle";
+  article.appendChild(detailButton);
+
+  if (!isAdminUser) {
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "btn-agregar";
+    addButton.dataset.id = String(product.id);
+    addButton.textContent = "Agregar al carrito";
+    article.appendChild(addButton);
+  }
+
+  return article;
 };
 
 const renderProducts = (): void => {
@@ -165,35 +204,7 @@ const renderProducts = (): void => {
   }
 
   products.forEach((product) => {
-    const article = document.createElement("article");
-    article.className = "product-card";
-    article.dataset.id = String(product.id);
-    article.tabIndex = 0;
-    article.setAttribute("role", "button");
-    article.setAttribute("aria-label", `Ver detalle de ${product.nombre}`);
-    article.innerHTML = `
-      <img src="${product.imagen}" alt="${product.nombre}">
-      <h3 class="product-title">${product.nombre}</h3>
-      <div class="product-badges">
-        <span class="product-badge available">Disponible</span>
-      </div>
-      <p class="product-description">${product.descripcion}</p>
-      <p class="product-price">Precio: <strong>$${currencyFormatter.format(
-        product.precio
-      )}</strong></p>
-      <button type="button" class="btn-detalle" data-id="${product.id}">
-        Ver detalle
-      </button>
-      ${
-        isAdminUser
-          ? ""
-          : `<button type="button" class="btn-agregar" data-id="${product.id}">
-        Agregar al carrito
-      </button>`
-      }
-    `;
-
-    productList.appendChild(article);
+    productList.appendChild(createProductCard(product));
   });
 };
 
@@ -283,22 +294,33 @@ document.addEventListener("click", (event) => {
   }
 
   if (button?.classList.contains("btn-detalle") || card) {
-    window.location.href = `../productDetail/productDetail.html?id=${product.id}`;
+    navigateToProductDetail(product.id);
   }
 });
 
-closeProductDetailButton.addEventListener("click", closeProductDetail);
-
-productDetailModal.addEventListener("click", (event) => {
-  if (event.target === productDetailModal) {
-    closeProductDetail();
+productList.addEventListener("keydown", (event) => {
+  if (!(event.target instanceof HTMLElement)) {
+    return;
   }
-});
 
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !productDetailModal.hidden) {
-    closeProductDetail();
+  const card = event.target.closest<HTMLElement>(".product-card");
+
+  if (!card || event.target !== card) {
+    return;
   }
+
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const productId = Number(card.dataset.id);
+
+  if (Number.isNaN(productId)) {
+    return;
+  }
+
+  event.preventDefault();
+  navigateToProductDetail(productId);
 });
 
 renderCartQuantity();

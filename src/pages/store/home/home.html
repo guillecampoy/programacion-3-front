@@ -12,7 +12,7 @@
     <header>
         <div class="top-bar">
             <div class="header-container">
-                <img id="storeLogo" alt="Logo de Food Store" class="logo">
+                <img id="storeLogo" src="../../../assets/food-store/logo_bodegon.png" alt="Logo de Food Store" class="logo" decoding="async">
                 <h1 class="title">Food Store</h1>
             </div>
             <section class="session-box" aria-label="Usuario logueado">
@@ -20,7 +20,7 @@
                 <button id="logoutButton" type="button">Logout</button>
             </section>
         </div>
-        <nav>
+        <nav aria-label="Navegación principal">
             <a href="#">Inicio</a> |
             <a id="ordersLink" href="../../client/orders/orders.html">Mis pedidos</a> |
             <a id="cartLink" href="../cart/cart.html">Carrito(<span id="cartQuantity">0</span>)</a>
@@ -54,20 +54,10 @@
         </aside>
         <section class="client-products">
             <h2 id="productsTitle" class="client-section-title">Productos</h2>
-            <p id="searchMessage" class="empty-message"></p>
+            <p id="searchMessage" class="empty-message" role="status" aria-live="polite"></p>
             <section id="contenedor-productos"></section>
         </section>
     </main>
-    <div id="productDetailModal" class="modal-overlay" hidden>
-        <article class="modal-content" role="dialog" aria-modal="true" aria-labelledby="productDetailTitle">
-            <button id="closeProductDetailButton" type="button" class="modal-close" aria-label="Cerrar detalle">Cerrar</button>
-            <img id="productDetailImage" class="modal-product-image" alt="">
-            <h2 id="productDetailTitle" class="modal-title"></h2>
-            <p id="productDetailCategory" class="modal-category"></p>
-            <p id="productDetailDescription" class="modal-description"></p>
-            <p id="productDetailPrice" class="product-price"></p>
-        </article>
-    </div>
     <hr>
     <footer>
         <p>&copy; 2026 Food Store. Todos los derechos reservados</p>
