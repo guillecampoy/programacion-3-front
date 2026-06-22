@@ -6,15 +6,14 @@ import { logout } from "../../../utils/auth";
 import { fetchCategories, fetchProducts } from "../../../utils/api";
 import { getCart, getCartQuantityForProduct, addProductToCart, getUser } from "../../../utils/localStorage";
 import { ROUTES } from "../../../utils/navigate";
+import { renderStoreNavigation } from "../../../utils/storeNavigation";
 import type { Product } from "../../../types/Product";
 import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
-const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
-const ordersLink = document.querySelector<HTMLAnchorElement>("#ordersLink");
-const cartLink = document.querySelector<HTMLAnchorElement>("#cartLink");
+const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const productDetailLayout = document.querySelector<HTMLElement>("#productDetailLayout");
 const productDetailState = document.querySelector<HTMLElement>("#productDetailState");
 const productDetailCard = document.querySelector<HTMLElement>("#productDetailCard");
@@ -33,7 +32,7 @@ if (
   !buttonLogout ||
   !loggedUserName ||
   !logo ||
-  !cartQuantity ||
+  !storeNavigation ||
   !productDetailState ||
   !productDetailLayout ||
   !productDetailCard ||
@@ -46,9 +45,7 @@ if (
   !productDetailStatus ||
   !quantityInput ||
   !addToCartButton ||
-  !productDetailMessage ||
-  !ordersLink ||
-  !cartLink
+  !productDetailMessage
 ) {
   throw new Error("No se encontraron los elementos necesarios del detalle");
 }
@@ -62,15 +59,18 @@ const currentUser = getUser();
 const isAdminUser = currentUser?.role === Rol.Admin;
 
 loggedUserName.textContent = currentUser?.name ?? currentUser?.email ?? "";
-ordersLink.hidden = isAdminUser;
-cartLink.hidden = isAdminUser;
+renderStoreNavigation(storeNavigation, {
+  isAdmin: isAdminUser,
+  cartQuantity: getCart().reduce((total, item) => total + item.quantity, 0),
+});
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
 const updateCartQuantity = (): void => {
-  cartQuantity.textContent = String(
-    getCart().reduce((total, item) => total + item.quantity, 0)
-  );
+  renderStoreNavigation(storeNavigation, {
+    isAdmin: isAdminUser,
+    cartQuantity: getCart().reduce((total, item) => total + item.quantity, 0),
+  });
 };
 
 const setMessage = (text: string, isError = false): void => {

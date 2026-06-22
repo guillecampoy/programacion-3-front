@@ -82,8 +82,14 @@ export const validateCheckout = (
   phone: string,
   paymentMethod: string
 ): string | null => {
-  if (!phone.trim()) {
+  const normalizedPhone = phone.trim();
+
+  if (!normalizedPhone) {
     return "El teléfono es requerido.";
+  }
+
+  if (!/^\d+$/.test(normalizedPhone)) {
+    return "El teléfono debe contener solo números.";
   }
 
   if (!paymentMethod.trim()) {

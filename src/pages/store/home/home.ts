@@ -10,12 +10,14 @@ import {
 import { logout } from "../../../utils/auth";
 import { fetchCategories, fetchProducts } from "../../../utils/api";
 import { getCart, getUser, addProductToCart } from "../../../utils/localStorage";
+import { renderStoreNavigation } from "../../../utils/storeNavigation";
 import type { Product } from "../../../types/Product";
 import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
+const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const categoryList = document.querySelector<HTMLUListElement>("#lista-categorias");
 const productList = document.querySelector<HTMLElement>("#contenedor-productos");
 const searchForm = document.querySelector<HTMLFormElement>("#searchForm");
@@ -26,14 +28,12 @@ const productsTitle = document.querySelector<HTMLHeadingElement>("#productsTitle
 const showAllProductsButton = document.querySelector<HTMLButtonElement>(
   "#showAllProductsButton"
 );
-const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
-const ordersLink = document.querySelector<HTMLAnchorElement>("#ordersLink");
-const cartLink = document.querySelector<HTMLAnchorElement>("#cartLink");
 
 if (
   !buttonLogout ||
   !loggedUserName ||
   !logo ||
+  !storeNavigation ||
   !categoryList ||
   !productList ||
   !searchForm ||
@@ -41,10 +41,7 @@ if (
   !sortSelect ||
   !searchMessage ||
   !productsTitle ||
-  !showAllProductsButton ||
-  !cartQuantity ||
-  !ordersLink ||
-  !cartLink
+  !showAllProductsButton
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
 }
@@ -58,8 +55,10 @@ const currentUser = getUser();
 const isAdminUser = currentUser?.role === Rol.Admin;
 
 loggedUserName.textContent = currentUser?.name ?? currentUser?.email ?? "";
-ordersLink.hidden = isAdminUser;
-cartLink.hidden = isAdminUser;
+renderStoreNavigation(storeNavigation, {
+  isAdmin: isAdminUser,
+  cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
+});
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
@@ -68,12 +67,10 @@ let catalogProducts: CatalogProduct[] = [];
 let selectedCategoryId: number | null = null;
 
 const renderCartQuantity = (): void => {
-  const totalQuantity = getCart().reduce(
-    (total, cartItem) => total + cartItem.quantity,
-    0
-  );
-
-  cartQuantity.textContent = String(totalQuantity);
+  renderStoreNavigation(storeNavigation, {
+    isAdmin: isAdminUser,
+    cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
+  });
 };
 
 const renderProductsTitle = (): void => {

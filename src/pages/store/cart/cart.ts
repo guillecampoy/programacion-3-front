@@ -156,14 +156,6 @@ const renderCart = (): void => {
       <p id="checkoutMessage" class="form-message"></p>
       <div class="cart-actions">
         <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
-        <button
-          type="button"
-          id="clearCartButton"
-          class="cart-cancel-button"
-          title="Elimina el carrito"
-        >
-          Vaciar carrito
-        </button>
         <button type="submit" class="cart-confirm-button">Confirmar pedido</button>
       </div>
     </form>
@@ -172,8 +164,6 @@ const renderCart = (): void => {
   const checkoutForm = cartContent.querySelector<HTMLFormElement>("#checkoutForm");
   const checkoutMessage =
     cartContent.querySelector<HTMLParagraphElement>("#checkoutMessage");
-  const clearCartButton =
-    cartContent.querySelector<HTMLButtonElement>("#clearCartButton");
   const removeButtons =
     cartContent.querySelectorAll<HTMLButtonElement>(".cart-remove-button");
   const quantityInputs =
@@ -220,19 +210,6 @@ const renderCart = (): void => {
       updateProductQuantityInCart(productId, quantity);
       renderCart();
     });
-  });
-
-  clearCartButton?.addEventListener("click", () => {
-    const shouldClearCart = window.confirm(
-      "¿Querés cancelar este pedido y limpiar el carrito?"
-    );
-
-    if (!shouldClearCart) {
-      return;
-    }
-
-    clearCart();
-    renderCart();
   });
 
   checkoutForm?.addEventListener("submit", (event) => {

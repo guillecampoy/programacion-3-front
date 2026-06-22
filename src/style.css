@@ -478,7 +478,6 @@ hr {
 }
 
 .cart-return-link,
-.cart-cancel-button,
 .cart-remove-button {
   display: inline-flex;
   align-items: center;
@@ -569,18 +568,6 @@ hr {
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
-}
-
-.cart-cancel-button {
-  appearance: none;
-  background-color: var(--color-danger);
-  border: none;
-  cursor: pointer;
-  margin-top: 0;
-}
-
-.cart-cancel-button:hover {
-  background-color: var(--color-danger-hover);
 }
 
 .cart-remove-button {
