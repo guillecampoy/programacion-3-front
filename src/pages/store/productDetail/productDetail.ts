@@ -7,11 +7,14 @@ import { fetchCategories, fetchProducts } from "../../../utils/api";
 import { getCart, getCartQuantityForProduct, addProductToCart, getUser } from "../../../utils/localStorage";
 import { ROUTES } from "../../../utils/navigate";
 import type { Product } from "../../../types/Product";
+import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
+const ordersLink = document.querySelector<HTMLAnchorElement>("#ordersLink");
+const cartLink = document.querySelector<HTMLAnchorElement>("#cartLink");
 const productDetailState = document.querySelector<HTMLParagraphElement>("#productDetailState");
 const productDetailCard = document.querySelector<HTMLElement>("#productDetailCard");
 const productDetailImage = document.querySelector<HTMLImageElement>("#productDetailImage");
@@ -41,7 +44,9 @@ if (
   !productDetailStatus ||
   !quantityInput ||
   !addToCartButton ||
-  !productDetailMessage
+  !productDetailMessage ||
+  !ordersLink ||
+  !cartLink
 ) {
   throw new Error("No se encontraron los elementos necesarios del detalle");
 }
@@ -51,7 +56,12 @@ buttonLogout.addEventListener("click", () => {
 });
 
 logo.src = logoImage;
-loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
+const currentUser = getUser();
+const isAdminUser = currentUser?.role === Rol.Admin;
+
+loggedUserName.textContent = currentUser?.name ?? currentUser?.email ?? "";
+ordersLink.hidden = isAdminUser;
+cartLink.hidden = isAdminUser;
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
@@ -123,7 +133,8 @@ const renderDetail = async (): Promise<void> => {
     product.stock - getCartQuantityForProduct(productId),
     0
   );
-  const canAdd = product.disponible && product.stock > 0 && remainingStock > 0;
+  const canAdd =
+    !isAdminUser && product.disponible && product.stock > 0 && remainingStock > 0;
 
   productDetailState.hidden = true;
   productDetailCard.hidden = false;
@@ -146,7 +157,9 @@ const renderDetail = async (): Promise<void> => {
     addToCartButton.disabled = true;
     quantityInput.value = "1";
     setMessage(
-      product.stock <= 0
+      isAdminUser
+        ? "Las compras no están disponibles para administradores."
+        : product.stock <= 0
         ? "Producto sin stock."
         : "Producto no disponible.",
       true

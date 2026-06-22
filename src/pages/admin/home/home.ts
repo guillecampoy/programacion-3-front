@@ -38,6 +38,7 @@ import {
 import { logout } from "../../../utils/auth";
 import { getUser } from "../../../utils/localStorage";
 import { getOrders, saveOrders } from "../../../utils/orders";
+import { navigate, ROUTES } from "../../../utils/navigate";
 import {
   productImageOptions,
   resolveProductImageUrl,
@@ -47,6 +48,12 @@ import type { Order, OrderStatus } from "../../../types/Order";
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 buttonLogout?.addEventListener("click", () => {
   logout();
+});
+
+const goToStoreLink = document.querySelector<HTMLAnchorElement>("#goToStoreLink");
+goToStoreLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  navigate(ROUTES.storeHome);
 });
 
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");

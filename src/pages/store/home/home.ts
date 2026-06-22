@@ -11,6 +11,7 @@ import { logout } from "../../../utils/auth";
 import { fetchCategories, fetchProducts } from "../../../utils/api";
 import { getCart, getUser, addProductToCart } from "../../../utils/localStorage";
 import type { Product } from "../../../types/Product";
+import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
@@ -43,6 +44,8 @@ const productDetailDescription = document.querySelector<HTMLParagraphElement>(
 const productDetailPrice =
   document.querySelector<HTMLParagraphElement>("#productDetailPrice");
 const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
+const ordersLink = document.querySelector<HTMLAnchorElement>("#ordersLink");
+const cartLink = document.querySelector<HTMLAnchorElement>("#cartLink");
 
 if (
   !buttonLogout ||
@@ -63,7 +66,9 @@ if (
   !productDetailCategory ||
   !productDetailDescription ||
   !productDetailPrice ||
-  !cartQuantity
+  !cartQuantity ||
+  !ordersLink ||
+  !cartLink
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
 }
@@ -73,7 +78,12 @@ buttonLogout.addEventListener("click", () => {
 });
 
 logo.src = logoImage;
-loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
+const currentUser = getUser();
+const isAdminUser = currentUser?.role === Rol.Admin;
+
+loggedUserName.textContent = currentUser?.name ?? currentUser?.email ?? "";
+ordersLink.hidden = isAdminUser;
+cartLink.hidden = isAdminUser;
 
 const currencyFormatter = new Intl.NumberFormat("es-AR");
 
@@ -174,9 +184,13 @@ const renderProducts = (): void => {
       <button type="button" class="btn-detalle" data-id="${product.id}">
         Ver detalle
       </button>
-      <button type="button" class="btn-agregar" data-id="${product.id}">
+      ${
+        isAdminUser
+          ? ""
+          : `<button type="button" class="btn-agregar" data-id="${product.id}">
         Agregar al carrito
-      </button>
+      </button>`
+      }
     `;
 
     productList.appendChild(article);

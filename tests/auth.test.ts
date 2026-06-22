@@ -15,7 +15,13 @@ vi.mock("../src/utils/navigate", () => ({
   },
 }));
 
-import { loginUser, redirectByRole, registerUser } from "../src/utils/auth";
+import {
+  canAccessRoute,
+  guardRoute,
+  loginUser,
+  redirectByRole,
+  registerUser,
+} from "../src/utils/auth";
 import { Rol } from "../src/types/Rol";
 import { validateRegistration } from "../src/utils/validation";
 
@@ -38,10 +44,18 @@ const createLocalStorageMock = (): Storage => {
   } satisfies Storage;
 };
 
+const mockWindow = {
+  location: {
+    pathname: "/src/pages/store/home/home.html",
+  },
+} as Window;
+
 describe("auth", () => {
   beforeEach(() => {
     navigateMock.mockReset();
     vi.stubGlobal("localStorage", createLocalStorageMock());
+    mockWindow.location.pathname = "/src/pages/store/home/home.html";
+    vi.stubGlobal("window", mockWindow);
   });
 
   it("inicia sesión desde usuarios.json y guarda la sesión sin password", async () => {
@@ -101,6 +115,41 @@ describe("auth", () => {
     navigateMock.mockClear();
 
     redirectByRole({ id: "2", email: "client@test.com", role: Rol.Client });
+    expect(navigateMock).toHaveBeenCalledWith("/src/pages/store/home/home.html");
+  });
+
+  it("permite a admin entrar a la tienda sin redirigirlo al panel", async () => {
+    localStorage.setItem(
+      "userData",
+      JSON.stringify({ id: "1", email: "admin@test.com", role: Rol.Admin })
+    );
+
+    await guardRoute();
+
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it("sigue bloqueando al cliente fuera del panel admin", () => {
+    expect(canAccessRoute(Rol.Client, "/src/pages/admin/home/home.html")).toBe(
+      false
+    );
+    expect(canAccessRoute(Rol.Admin, "/src/pages/store/home/home.html")).toBe(
+      true
+    );
+    expect(canAccessRoute(Rol.Admin, "/src/pages/store/cart/cart.html")).toBe(
+      false
+    );
+  });
+
+  it("redirige a tienda cuando admin intenta entrar al carrito", async () => {
+    localStorage.setItem(
+      "userData",
+      JSON.stringify({ id: "1", email: "admin@test.com", role: Rol.Admin })
+    );
+    mockWindow.location.pathname = "/src/pages/store/cart/cart.html";
+
+    await guardRoute();
+
     expect(navigateMock).toHaveBeenCalledWith("/src/pages/store/home/home.html");
   });
 

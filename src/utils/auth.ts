@@ -98,6 +98,24 @@ const getRequiredRole = (path: string): RolType | null => {
   return null;
 };
 
+export const canAccessRoute = (userRole: RolType, path: string): boolean => {
+  const requiredRole = getRequiredRole(path);
+
+  if (requiredRole === Rol.Admin) {
+    return userRole === Rol.Admin;
+  }
+
+  if (path === ROUTES.storeCart || path === ROUTES.clientOrders) {
+    return userRole === Rol.Client;
+  }
+
+  if (path === ROUTES.storeHome || path === ROUTES.storeProductDetail) {
+    return true;
+  }
+
+  return true;
+};
+
 export const guardRoute = async (): Promise<void> => {
   const path = window.location.pathname;
 
@@ -118,8 +136,8 @@ export const guardRoute = async (): Promise<void> => {
     return;
   }
 
-  if (currentUser.role !== requiredRole) {
-    redirectByRole(currentUser);
+  if (!canAccessRoute(currentUser.role, path)) {
+    navigate(ROUTES.storeHome);
   }
 };
 
