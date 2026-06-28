@@ -107,7 +107,7 @@ const renderCart = (): void => {
                     >
                   </td>
                   <td data-label="Producto">${cartItem.product.name}</td>
-                  <td data-label="Precio unitario">$${currencyFormatter.format(cartItem.product.price)}</td>
+                  <td data-label="Precio unitario">${currencyFormatter.format(cartItem.product.price)}</td>
                   <td data-label="Cantidad">
                     <div class="cart-qty-control">
                       <button
@@ -135,7 +135,7 @@ const renderCart = (): void => {
                     </div>
                     ${cartItem.product.stock !== undefined && cartItem.product.stock <= 5 ? `<span class="cart-stock-indicator">Stock: ${cartItem.product.stock}</span>` : ''}
                   </td>
-                  <td data-label="Subtotal">$${currencyFormatter.format(
+                  <td data-label="Subtotal">${currencyFormatter.format(
                     cartItem.product.price * cartItem.quantity
                   )}</td>
                   <td data-label="Acción">
@@ -157,15 +157,15 @@ const renderCart = (): void => {
     </div>
     <section class="cart-totalizer" aria-label="Subtotal">
       <span>Subtotal</span>
-      <strong>$${currencyFormatter.format(subtotal)}</strong>
+      <strong>${currencyFormatter.format(subtotal)}</strong>
     </section>
     <section class="cart-totalizer" aria-label="Costo de envío">
       <span>Envío</span>
-      <strong>$${currencyFormatter.format(envio)}</strong>
+      <strong>${currencyFormatter.format(envio)}</strong>
     </section>
     <section class="cart-totalizer" aria-label="Total del carrito">
       <span>Total</span>
-      <strong>$${currencyFormatter.format(total)}</strong>
+      <strong>${currencyFormatter.format(total)}</strong>
     </section>
     <form id="checkoutForm" class="cart-checkout-box">
       <h3 class="client-section-title">Checkout</h3>

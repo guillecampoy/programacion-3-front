@@ -191,7 +191,7 @@ const renderDetail = async (): Promise<void> => {
   productDetailPrice.replaceChildren();
   productDetailPrice.append("Precio: ");
   const priceValue = document.createElement("strong");
-  priceValue.textContent = `$${currencyFormatter.format(product.precio)}`;
+  priceValue.textContent = `${currencyFormatter.format(product.precio)}`;
   productDetailPrice.appendChild(priceValue);
   productDetailStock.textContent = `Stock disponible: ${remainingStock}`;
   productDetailStatus.textContent = product.disponible && product.stock > 0

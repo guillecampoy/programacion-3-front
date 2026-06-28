@@ -990,6 +990,15 @@ hr {
   background: var(--color-fondo);
 }
 
+.product-stock-empty {
+  margin: 0;
+  padding: 10px 12px;
+  color: var(--color-danger);
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

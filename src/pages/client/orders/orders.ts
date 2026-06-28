@@ -109,15 +109,15 @@ const renderOrderDetailModal = (orderItem: OrderHistoryItem): void => {
   orderDetailSummary.innerHTML = `
     <div class="order-summary-item">
       <span>Subtotal</span>
-      <strong>$${currencyFormatter.format(orderItem.subtotal)}</strong>
+      <strong>${currencyFormatter.format(orderItem.subtotal)}</strong>
     </div>
     <div class="order-summary-item">
       <span>Envío</span>
-      <strong>$${currencyFormatter.format(orderItem.envio)}</strong>
+      <strong>${currencyFormatter.format(orderItem.envio)}</strong>
     </div>
     <div class="order-summary-item">
       <span>Total</span>
-      <strong>$${currencyFormatter.format(orderItem.order.total)}</strong>
+      <strong>${currencyFormatter.format(orderItem.order.total)}</strong>
     </div>
   `;
   orderDetailItems.innerHTML = `
@@ -131,7 +131,7 @@ const renderOrderDetailModal = (orderItem: OrderHistoryItem): void => {
                 <strong>${detail.productName}</strong>
                 <p>Cantidad: ${detail.cantidad}</p>
               </div>
-              <strong>$${currencyFormatter.format(detail.subtotal)}</strong>
+              <strong>${currencyFormatter.format(detail.subtotal)}</strong>
             </li>
           `
         )
@@ -175,7 +175,7 @@ const renderOrders = (): void => {
           ${statusLabels[orderItem.order.estado]}
         </span>
       </div>
-      <p class="order-card-total">Total: <strong>$${currencyFormatter.format(
+      <p class="order-card-total">Total: <strong>${currencyFormatter.format(
         orderItem.order.total
       )}</strong></p>
       <p class="order-card-items-count">${orderItem.itemCount} item${

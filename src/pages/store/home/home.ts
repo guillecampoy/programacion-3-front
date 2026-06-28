@@ -9,7 +9,7 @@ import {
 } from "../../../utils/catalog";
 import { logout } from "../../../utils/auth";
 import { fetchCategories, fetchProducts } from "../../../utils/api";
-import { getCart, getUser, addProductToCart } from "../../../utils/localStorage";
+import { getCart, getUser, addProductToCart, getCartQuantityForProduct } from "../../../utils/localStorage";
 import { renderStoreNavigation } from "../../../utils/storeNavigation";
 import type { Product } from "../../../types/Product";
 import { Rol } from "../../../types/Rol";
@@ -157,7 +157,7 @@ const createProductCard = (product: CatalogProduct): HTMLElement => {
   price.className = "product-price";
   price.append("Precio: ");
   const priceValue = document.createElement("strong");
-  priceValue.textContent = `$${currencyFormatter.format(product.precio)}`;
+  priceValue.textContent = `${currencyFormatter.format(product.precio)}`;
   price.appendChild(priceValue);
   article.appendChild(price);
 
@@ -169,12 +169,21 @@ const createProductCard = (product: CatalogProduct): HTMLElement => {
   article.appendChild(detailButton);
 
   if (!isAdminUser) {
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "btn-agregar";
-    addButton.dataset.id = String(product.id);
-    addButton.textContent = "Agregar al carrito";
-    article.appendChild(addButton);
+    const remainingStock = product.stock - getCartQuantityForProduct(product.id);
+
+    if (product.stock > 0 && remainingStock > 0) {
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "btn-agregar";
+      addButton.dataset.id = String(product.id);
+      addButton.textContent = "Agregar al carrito";
+      article.appendChild(addButton);
+    } else {
+      const stockLabel = document.createElement("p");
+      stockLabel.className = "product-stock-empty";
+      stockLabel.textContent = "Sin stock";
+      article.appendChild(stockLabel);
+    }
   }
 
   return article;
@@ -297,6 +306,9 @@ document.addEventListener("click", (event) => {
   if (!product) return;
 
   if (button.classList.contains("btn-agregar")) {
+    const remainingStock = product.stock - getCartQuantityForProduct(product.id);
+    if (remainingStock <= 0) return;
+
     addProductToCart(toCartProduct(product));
     renderCartQuantity();
     showAddToCartToast(product.nombre);
