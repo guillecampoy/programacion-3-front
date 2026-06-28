@@ -452,13 +452,13 @@ hr {
 }
 
 .order-status-confirmado {
-  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
-  color: color-mix(in srgb, var(--color-primario) 72%, var(--color-texto));
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
 }
 
 .order-status-terminado {
-  background: var(--color-success-soft);
-  color: var(--color-success-text);
+  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
+  color: color-mix(in srgb, var(--color-primario) 72%, var(--color-texto));
 }
 
 .order-status-cancelado {
@@ -641,6 +641,7 @@ hr {
   line-height: 1.2;
   font-weight: bold;
   text-decoration: none;
+  color: var(--color-blanco);
 }
 
 .cart-heading {
@@ -1285,13 +1286,13 @@ button:disabled {
 }
 
 .order-status-confirmado {
-  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
-  color: color-mix(in srgb, var(--color-primario) 72%, var(--color-texto));
+  background: var(--color-success-soft);
+  color: var(--color-success-text);
 }
 
 .order-status-terminado {
-  background: var(--color-success-soft);
-  color: var(--color-success-text);
+  background: color-mix(in srgb, var(--color-primario) 12%, var(--color-blanco));
+  color: color-mix(in srgb, var(--color-primario) 72%, var(--color-texto));
 }
 
 .order-status-cancelado {
@@ -1319,6 +1320,11 @@ button:disabled {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.order-status-controls select,
+.order-status-controls button {
+  margin: 0;
 }
 
 
