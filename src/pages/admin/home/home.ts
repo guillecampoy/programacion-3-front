@@ -5,10 +5,7 @@ import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import {
   type ApiProduct,
   type ApiUser,
-  fetchCategories,
   fetchOrders,
-  fetchProducts,
-  fetchRawProducts,
   fetchUsers,
 } from "../../../utils/api";
 import {
@@ -36,6 +33,14 @@ import {
   type AdminOrderStatusFilter,
 } from "../../../utils/adminOrders";
 import { logout } from "../../../utils/auth";
+import {
+  getProductStock,
+  initCategories,
+  initProducts,
+  refundStock,
+  saveCategories,
+  saveProducts,
+} from "../../../utils/productState";
 import { getUser } from "../../../utils/localStorage";
 import { getOrders, saveOrders } from "../../../utils/orders";
 import { navigate, ROUTES } from "../../../utils/navigate";
@@ -447,7 +452,7 @@ const renderProductTable = (): void => {
       <td>${product.nombre}</td>
       <td>${product.descripcion}</td>
       <td>${currencyFormatter.format(product.precio)}</td>
-      <td>${product.stock}</td>
+      <td>${getProductStock(product.id)}</td>
       <td>${categoryName}</td>
       <td>
         <img class="admin-product-image" src="${imageUrl}" alt="${product.nombre}" loading="lazy">
@@ -632,8 +637,8 @@ const renderDashboard = async (): Promise<void> => {
   dashboardMessage.textContent = "Cargando dashboard...";
   try {
     const [apiCategories, apiProducts, apiUsers, apiOrders] = await Promise.all([
-      fetchCategories().catch(() => []),
-      fetchProducts().catch(() => []),
+      initCategories(),
+      initProducts(),
       fetchUsers().catch(() => []),
       fetchOrders().catch(() => []),
     ]);
@@ -706,7 +711,7 @@ const refreshCategoryViews = (): void => {
 
 const loadAdminCategories = async (): Promise<void> => {
   categoriesMessage.textContent = "Cargando categorías...";
-  productCategories = await fetchCategories().catch(() => []);
+  productCategories = await initCategories();
   categoriesMessage.textContent = "";
   refreshCategoryViews();
 };
@@ -718,7 +723,7 @@ const refreshProductViews = (): void => {
 
 const loadAdminProducts = async (): Promise<void> => {
   productsMessage.textContent = "Cargando productos...";
-  adminProducts = await fetchRawProducts().catch(() => []);
+  adminProducts = await initProducts();
   productsMessage.textContent = "";
   refreshProductViews();
 };
@@ -817,6 +822,7 @@ form.addEventListener("submit", (event) => {
       setFormMessage(message, "Producto creado correctamente.", "success");
     }
 
+    saveProducts(adminProducts);
     refreshProductViews();
     resetProductForm(false);
     closeProductModal();
@@ -884,6 +890,7 @@ categoryForm.addEventListener("submit", (event) => {
       );
     }
 
+    saveCategories(productCategories);
     refreshCategoryViews();
     resetCategoryForm(false);
     closeCategoryModal();
@@ -926,6 +933,7 @@ productsTableBody.addEventListener("click", (event) => {
     }
 
     adminProducts = deleteAdminProduct(adminProducts, productId);
+    saveProducts(adminProducts);
     refreshProductViews();
     resetProductForm(false);
     closeProductModal();
@@ -985,6 +993,8 @@ applyOrderStatusButton?.addEventListener("click", () => {
       orderStatusSelect.value = currentOrder.estado;
       return;
     }
+
+    refundStock(currentOrder.detalles);
   }
 
   adminOrders = updateAdminOrderStatus(adminOrders, activeOrderId, nextStatus);
@@ -1033,6 +1043,7 @@ categoriesTableBody.addEventListener("click", (event) => {
     }
 
     productCategories = deleteAdminCategory(productCategories, categoryId);
+    saveCategories(productCategories);
     refreshCategoryViews();
     resetCategoryForm(false);
     closeCategoryModal();

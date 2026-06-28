@@ -2,6 +2,7 @@ import type { CartItem } from "../types/Cart";
 import type { IUser } from "../types/IUser";
 import type { Product } from "../types/Product";
 import { Rol } from "../types/Rol";
+import { getProductStock as getEffectiveProductStock } from "./productState";
 
 const USERS_KEY = "users";
 const CURRENT_USER_KEY = "userData";
@@ -152,8 +153,10 @@ export const removeProductFromCart = (productId: Product["id"]): CartItem[] => {
 export const getCartQuantityForProduct = (productId: Product["id"]): number =>
   getCart().find((item) => item.product.id === productId)?.quantity ?? 0;
 
-const getProductStock = (product: Product): number | null =>
-  typeof product.stock === "number" && product.stock >= 0 ? product.stock : null;
+const getProductStock = (product: Product): number | null => {
+  const stock = getEffectiveProductStock(product.id);
+  return stock > 0 ? stock : null;
+};
 
 export const updateProductQuantityInCart = (
   productId: Product["id"],

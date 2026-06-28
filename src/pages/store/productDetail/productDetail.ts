@@ -5,6 +5,7 @@ import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import { logout } from "../../../utils/auth";
 import { fetchCategories, fetchProducts } from "../../../utils/api";
 import { getCart, getCartQuantityForProduct, addProductToCart, getUser } from "../../../utils/localStorage";
+import { getProductStock } from "../../../utils/productState";
 import { ROUTES } from "../../../utils/navigate";
 import { renderStoreNavigation } from "../../../utils/storeNavigation";
 import type { Product } from "../../../types/Product";
@@ -174,12 +175,13 @@ const renderDetail = async (): Promise<void> => {
   const categoryName =
     categories.find((category) => category.id === product.categoriaId)?.nombre ??
     "Sin categoría";
+  const effectiveStock = getProductStock(productId);
   let remainingStock = Math.max(
-    product.stock - getCartQuantityForProduct(productId),
+    effectiveStock - getCartQuantityForProduct(productId),
     0
   );
   const canAdd =
-    !isAdminUser && product.disponible && product.stock > 0 && remainingStock > 0;
+    !isAdminUser && product.disponible && effectiveStock > 0 && remainingStock > 0;
 
   setBusy(false);
   productDetailState.hidden = true;
@@ -197,7 +199,7 @@ const renderDetail = async (): Promise<void> => {
   priceValue.textContent = `${currencyFormatter.format(product.precio)}`;
   productDetailPrice.appendChild(priceValue);
   productDetailStock.textContent = `Stock disponible: ${remainingStock}`;
-  productDetailStatus.textContent = product.disponible && product.stock > 0
+  productDetailStatus.textContent = product.disponible && effectiveStock > 0
     ? "Estado: Disponible"
     : "Estado: No disponible";
 
@@ -208,7 +210,7 @@ const renderDetail = async (): Promise<void> => {
     setMessage(
       isAdminUser
         ? "Los administradores no pueden agregar productos al carrito."
-        : product.stock <= 0
+        : effectiveStock <= 0
         ? "Este producto no tiene stock disponible."
         : "Este producto no está disponible en este momento.",
       true
@@ -218,7 +220,7 @@ const renderDetail = async (): Promise<void> => {
 
   const syncControls = (): void => {
     remainingStock = Math.max(
-      product.stock - getCartQuantityForProduct(productId),
+      getProductStock(productId) - getCartQuantityForProduct(productId),
       0
     );
     productDetailStock.textContent = `Stock disponible: ${remainingStock}`;

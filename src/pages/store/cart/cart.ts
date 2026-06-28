@@ -13,6 +13,7 @@ import {
   removeProductFromCart,
   updateProductQuantityInCart,
 } from "../../../utils/localStorage";
+import { deductStock } from "../../../utils/productState";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
@@ -323,6 +324,7 @@ const renderCart = (): void => {
         paymentMethod as "TARJETA" | "TRANSFERENCIA" | "EFECTIVO"
       );
 
+      deductStock(order.detalles);
       saveOrders([...getOrders(), order]);
       clearCart();
       navigate(ROUTES.clientOrders);
