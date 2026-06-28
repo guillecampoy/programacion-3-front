@@ -17,7 +17,7 @@
             </div>
             <section class="session-box" aria-label="Usuario logueado">
                 <span id="loggedUserName"></span>
-                <button id="logoutButton" type="button">Logout</button>
+                <button id="logoutButton" type="button">Cerrar sesión</button>
             </section>
         </div>
     </header>
@@ -29,7 +29,6 @@
             <nav class="admin-sidebar-nav" aria-label="Navegación administrativa">
                 <a href="#dashboard">Dashboard</a>
                 <a href="#productos">Productos</a>
-                <a href="#listado-productos">Listado</a>
                 <a href="#categorias">Categorías</a>
                 <a href="#pedidos">Pedidos</a>
                 <a id="goToStoreLink" href="/src/pages/store/home/home.html">Ver tienda</a>
@@ -50,6 +49,12 @@
                     <div class="form-actions product-actions">
                         <button type="button" id="openProductModalButton">Nuevo producto</button>
                     </div>
+                    <form id="adminSearchForm" class="search-form">
+                        <label for="adminProductSearch">Buscar productos</label>
+                        <input id="adminProductSearch" name="adminProductSearch" placeholder="Ej: Milanesa">
+                        <button type="submit">Buscar</button>
+                    </form>
+                    <p id="adminSearchMessage" class="empty-message"></p>
                     <p id="productsMessage" class="empty-message"></p>
                     <div class="table-wrapper">
                         <table>
@@ -68,18 +73,6 @@
                             <tbody id="productsTableBody"></tbody>
                         </table>
                     </div>
-                </div>
-            </section>
-
-            <section id="listado-productos" class="admin-section">
-                <h2 class="admin-section-title">Listado de productos</h2>
-                <div class="admin-box">
-                    <form id="adminSearchForm" class="search-form">
-                        <label for="adminProductSearch">Buscar productos</label>
-                        <input id="adminProductSearch" name="adminProductSearch" placeholder="Ej: Milanesa">
-                        <button type="submit">Buscar</button>
-                    </form>
-                    <p id="adminSearchMessage" class="empty-message"></p>
                 </div>
             </section>
 
@@ -231,7 +224,10 @@
             </div>
             <div class="order-status-field">
                 <label for="orderStatusSelect">Estado</label>
-                <select id="orderStatusSelect" name="orderStatusSelect"></select>
+                <div class="order-status-controls">
+                    <select id="orderStatusSelect" name="orderStatusSelect"></select>
+                    <button id="applyOrderStatusButton" type="button" class="button-secondary">Aplicar cambio</button>
+                </div>
             </div>
             <div class="table-wrapper order-details-table-wrapper">
                 <table>

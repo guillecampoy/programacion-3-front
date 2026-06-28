@@ -62,7 +62,11 @@ renderStoreNavigation(storeNavigation, {
   cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
 });
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 0,
+});
 
 let categories: Awaited<ReturnType<typeof fetchCategories>> = [];
 let catalogProducts: CatalogProduct[] = [];
@@ -134,9 +138,7 @@ const createProductCard = (product: CatalogProduct): HTMLElement => {
   const article = document.createElement("article");
   article.className = "product-card";
   article.dataset.id = String(product.id);
-  article.tabIndex = 0;
-  article.setAttribute("role", "link");
-  article.setAttribute("aria-label", `Abrir detalle de ${product.nombre}`);
+
 
   const image = document.createElement("img");
   image.src = product.imagen;
@@ -147,14 +149,6 @@ const createProductCard = (product: CatalogProduct): HTMLElement => {
   title.className = "product-title";
   title.textContent = product.nombre;
   article.appendChild(title);
-
-  const badges = document.createElement("div");
-  badges.className = "product-badges";
-  const badge = document.createElement("span");
-  badge.className = "product-badge available";
-  badge.textContent = "Disponible";
-  badges.appendChild(badge);
-  article.appendChild(badges);
 
   const description = createTextParagraph("product-description", product.descripcion);
   article.appendChild(description);
@@ -215,6 +209,7 @@ const refreshProducts = (): void => {
 };
 
 const loadCatalog = async (): Promise<void> => {
+  searchMessage.textContent = "Cargando productos...";
   try {
     const [rawCategories, rawProducts] = await Promise.all([
       fetchCategories(),
@@ -231,12 +226,41 @@ const loadCatalog = async (): Promise<void> => {
   }
 };
 
+const showAddToCartToast = (productName: string): void => {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = `✓ ${productName} agregado al carrito`;
+
+  const container = document.getElementById("toastContainer") ?? (() => {
+    const c = document.createElement("div");
+    c.id = "toastContainer";
+    c.className = "toast-container";
+    document.body.appendChild(c);
+    return c;
+  })();
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("toast-leaving");
+    toast.addEventListener("animationend", () => toast.remove(), { once: true });
+  }, 2500);
+};
+
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   refreshProducts();
 });
 
-searchInput.addEventListener("input", refreshProducts);
+const debouncedRefresh = (() => {
+  let timer: ReturnType<typeof setTimeout>;
+  return () => {
+    clearTimeout(timer);
+    timer = setTimeout(refreshProducts, 150);
+  };
+})();
+
+searchInput.addEventListener("input", debouncedRefresh);
 sortSelect.addEventListener("change", refreshProducts);
 
 showAllProductsButton.dataset.categoryId = "";
@@ -261,66 +285,27 @@ categoryList.addEventListener("click", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  if (!(event.target instanceof Element)) {
-    return;
-  }
+  const button = event.target instanceof Element
+    ? event.target.closest<HTMLButtonElement>(".btn-agregar, .btn-detalle")
+    : null;
 
-  const button = event.target.closest<HTMLButtonElement>(".btn-agregar, .btn-detalle");
-  const card = event.target.closest<HTMLElement>(".product-card");
-  const targetElement = button ?? card;
+  if (!button) return;
 
-  if (!targetElement) {
-    return;
-  }
-
-  const productId = Number(targetElement.dataset.id);
+  const productId = Number(button.dataset.id);
   const product = catalogProducts.find((item) => item.id === productId);
 
-  if (!product) {
-    return;
-  }
+  if (!product) return;
 
-  if (button?.classList.contains("btn-agregar")) {
-    const cart = addProductToCart(toCartProduct(product));
-    const cartItem = cart.find((item) => item.product.id === product.id);
-
+  if (button.classList.contains("btn-agregar")) {
+    addProductToCart(toCartProduct(product));
     renderCartQuantity();
-    alert(
-      `Agregaste "${product.nombre}" a tu carrito de compra. Cantidad: ${
-        cartItem?.quantity ?? 1
-      }`
-    );
+    showAddToCartToast(product.nombre);
     return;
   }
 
-  if (button?.classList.contains("btn-detalle") || card) {
+  if (button.classList.contains("btn-detalle")) {
     navigateToProductDetail(product.id);
   }
-});
-
-productList.addEventListener("keydown", (event) => {
-  if (!(event.target instanceof HTMLElement)) {
-    return;
-  }
-
-  const card = event.target.closest<HTMLElement>(".product-card");
-
-  if (!card || event.target !== card) {
-    return;
-  }
-
-  if (event.key !== "Enter" && event.key !== " ") {
-    return;
-  }
-
-  const productId = Number(card.dataset.id);
-
-  if (Number.isNaN(productId)) {
-    return;
-  }
-
-  event.preventDefault();
-  navigateToProductDetail(productId);
 });
 
 renderCartQuantity();

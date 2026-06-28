@@ -29,6 +29,7 @@ const increaseQuantityButton = document.querySelector<HTMLButtonElement>("#incre
 const quantityInput = document.querySelector<HTMLInputElement>("#quantity");
 const addToCartButton = document.querySelector<HTMLButtonElement>("#addToCartButton");
 const productDetailMessage = document.querySelector<HTMLParagraphElement>("#productDetailMessage");
+const backToCatalogLink = document.querySelector<HTMLAnchorElement>("#backToCatalogLink");
 
 if (
   !buttonLogout ||
@@ -49,7 +50,8 @@ if (
   !increaseQuantityButton ||
   !quantityInput ||
   !addToCartButton ||
-  !productDetailMessage
+  !productDetailMessage ||
+  !backToCatalogLink
 ) {
   throw new Error("No se encontraron los elementos necesarios del detalle");
 }
@@ -59,6 +61,7 @@ buttonLogout.addEventListener("click", () => {
 });
 
 logo.src = logoImage;
+backToCatalogLink.href = ROUTES.storeHome;
 const currentUser = getUser();
 const isAdminUser = currentUser?.role === Rol.Admin;
 

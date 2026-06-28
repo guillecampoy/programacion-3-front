@@ -46,7 +46,10 @@ export const validatePassword = (password: string): string | null => {
 export const validateCredentials = (
   email: string,
   password: string
-): string | null => validateEmail(email) ?? validatePassword(password);
+): string | null => {
+  const errors = [validateEmail(email), validatePassword(password)].filter(Boolean);
+  return errors.length > 0 ? errors.join(" ") : null;
+};
 
 export const validateRegistration = (
   name: string,

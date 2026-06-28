@@ -59,7 +59,10 @@ buttonLogout.addEventListener("click", () => {
 logo.src = logoImage;
 loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+});
 const dateFormatter = new Intl.DateTimeFormat("es-AR", {
   day: "2-digit",
   month: "2-digit",
@@ -86,8 +89,12 @@ let orderHistory: OrderHistoryItem[] = [];
 const formatOrderDate = (value: string): string =>
   dateFormatter.format(new Date(`${value}T00:00:00Z`));
 
+let lastOrderTrigger: HTMLButtonElement | null = null;
+
 const closeModal = (): void => {
   orderDetailModal.hidden = true;
+  lastOrderTrigger?.focus();
+  lastOrderTrigger = null;
 };
 
 const renderOrderDetailModal = (orderItem: OrderHistoryItem): void => {
@@ -133,19 +140,23 @@ const renderOrderDetailModal = (orderItem: OrderHistoryItem): void => {
   `;
 };
 
-const openModal = (orderItem: OrderHistoryItem): void => {
+const openModal = (orderItem: OrderHistoryItem, trigger?: HTMLButtonElement): void => {
+  lastOrderTrigger = trigger ?? null;
   renderOrderDetailModal(orderItem);
   orderDetailModal.hidden = false;
+  closeOrderDetailButton.focus();
 };
 
 const renderOrders = (): void => {
   ordersList.innerHTML = "";
 
   if (orderHistory.length === 0) {
+    ordersMessage.className = "empty-message";
     ordersMessage.textContent = "No tenés pedidos para mostrar.";
     return;
   }
 
+  ordersMessage.className = "";
   ordersMessage.textContent = `${orderHistory.length} pedido${
     orderHistory.length === 1 ? "" : "s"
   } encontrado${orderHistory.length === 1 ? "" : "s"}.`;
@@ -188,7 +199,7 @@ const renderOrders = (): void => {
 
     const detailButton = article.querySelector<HTMLButtonElement>(".order-detail-button");
     detailButton?.addEventListener("click", () => {
-      openModal(orderItem);
+      openModal(orderItem, detailButton);
     });
 
     ordersList.appendChild(article);
@@ -199,10 +210,15 @@ const loadOrders = async (): Promise<void> => {
   const currentUser = getUser();
 
   if (!currentUser) {
+    ordersMessage.className = "empty-message";
     ordersMessage.textContent = "No hay una sesión activa.";
     ordersList.innerHTML = "";
     return;
   }
+
+  ordersMessage.className = "empty-message";
+  ordersMessage.textContent = "Cargando pedidos...";
+  ordersList.innerHTML = "";
 
   try {
     const [remoteOrders, products] = await Promise.all([

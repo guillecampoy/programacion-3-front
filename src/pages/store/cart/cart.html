@@ -8,7 +8,7 @@
     <title>Food Store - Carrito</title>
 </head>
 
-<body>
+<body class="store-page">
     <header>
         <div class="top-bar">
             <div class="header-container">
@@ -17,7 +17,7 @@
             </div>
             <section class="session-box" aria-label="Usuario logueado">
                 <span id="loggedUserName"></span>
-                <button id="logoutButton" type="button">Logout</button>
+                <button id="logoutButton" type="button">Cerrar sesión</button>
             </section>
         </div>
         <nav>
@@ -31,7 +31,9 @@
     <main class="client-cart-layout">
         <section class="client-cart-section">
             <div class="cart-heading">
+                <a class="cart-return-link" href="../home/home.html">← Volver</a>
                 <h2 class="client-section-title">Carrito</h2>
+                <button id="clearCartButton" type="button" class="cart-clear-button" hidden>Vaciar carrito</button>
             </div>
 
             <div id="cartContent" class="client-cart-box"></div>

@@ -228,7 +228,10 @@ if (
 logo.src = logoImage;
 loggedUserName.textContent = getUser()?.email ?? "";
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+});
 const numberFormatter = new Intl.NumberFormat("es-AR");
 
 type FormMessageType = "success" | "error" | "info";
@@ -303,10 +306,12 @@ const renderCategoryImageOptions = (): void => {
 const openCategoryModal = (title: string): void => {
   categoryModalTitle.textContent = title;
   categoryModal.hidden = false;
+  categoryNameInput.focus();
 };
 
 const closeCategoryModal = (): void => {
   categoryModal.hidden = true;
+  openCategoryModalButton.focus();
 };
 
 const resetCategoryForm = (clearMessage = true): void => {
@@ -335,7 +340,7 @@ const renderCategoryTable = (): void => {
       <td>${category.nombre}</td>
       <td>${category.descripcion}</td>
       <td>
-        <img class="admin-category-image" src="${imageUrl}" alt="${category.nombre}">
+        <img class="admin-category-image" src="${imageUrl}" alt="${category.nombre}" loading="lazy">
       </td>
       <td>Activa</td>
       <td>
@@ -441,11 +446,11 @@ const renderProductTable = (): void => {
     tr.innerHTML = `
       <td>${product.nombre}</td>
       <td>${product.descripcion}</td>
-      <td>$${currencyFormatter.format(product.precio)}</td>
+      <td>${currencyFormatter.format(product.precio)}</td>
       <td>${product.stock}</td>
       <td>${categoryName}</td>
       <td>
-        <img class="admin-product-image" src="${imageUrl}" alt="${product.nombre}">
+        <img class="admin-product-image" src="${imageUrl}" alt="${product.nombre}" loading="lazy">
       </td>
       <td>${product.disponible ? "Sí" : "No"}</td>
       <td>
@@ -461,10 +466,12 @@ const renderProductTable = (): void => {
 const openProductModal = (title: string): void => {
   productModalTitle.textContent = title;
   productModal.hidden = false;
+  nameInput.focus();
 };
 
 const closeProductModal = (): void => {
   productModal.hidden = true;
+  openProductModalButton.focus();
 };
 
 const resetProductForm = (clearMessage = true): void => {
@@ -529,7 +536,7 @@ const renderOrderDetails = (order: Order): void => {
     tr.innerHTML = `
       <td>${detail.productName ?? `Producto ${detail.idProducto}`}</td>
       <td>${detail.cantidad}</td>
-      <td>$${currencyFormatter.format(detail.subtotal)}</td>
+      <td>${currencyFormatter.format(detail.subtotal)}</td>
     `;
     orderDetailsTableBody.appendChild(tr);
   });
@@ -556,7 +563,7 @@ const syncOrderModal = (): void => {
   orderModalId.textContent = order.id;
   orderModalCustomer.textContent = customerName;
   orderModalDate.textContent = order.fecha;
-  orderModalTotal.textContent = `$${currencyFormatter.format(order.total)}`;
+  orderModalTotal.textContent = `${currencyFormatter.format(order.total)}`;
   orderModalPhone.textContent = order.telefono ?? "Sin teléfono";
   orderModalPayment.textContent = order.formaPago;
   orderStatusSelect.value = order.estado;
@@ -564,15 +571,21 @@ const syncOrderModal = (): void => {
   renderOrderDetails(order);
 };
 
-const openOrderModal = (order: Order): void => {
+let lastOrderTrigger: HTMLButtonElement | null = null;
+
+const openOrderModal = (order: Order, trigger?: HTMLButtonElement): void => {
   activeOrderId = order.id;
+  lastOrderTrigger = trigger ?? null;
   orderModal.hidden = false;
   syncOrderModal();
+  closeOrderModalButton.focus();
 };
 
 const closeOrderModal = (): void => {
   activeOrderId = null;
   orderModal.hidden = true;
+  lastOrderTrigger?.focus();
+  lastOrderTrigger = null;
 };
 
 const renderOrders = (): void => {
@@ -605,7 +618,7 @@ const renderOrders = (): void => {
       <td>${customerName}</td>
       <td>${order.fecha}</td>
       <td><span class="${getOrderStatusBadgeClass(order.estado)}">${order.estado}</span></td>
-      <td>$${currencyFormatter.format(order.total)}</td>
+      <td>${currencyFormatter.format(order.total)}</td>
       <td>
         <button type="button" class="button-secondary btn-view-order" data-id="${order.id}">Ver detalle</button>
       </td>
@@ -616,6 +629,7 @@ const renderOrders = (): void => {
 };
 
 const renderDashboard = async (): Promise<void> => {
+  dashboardMessage.textContent = "Cargando dashboard...";
   try {
     const [apiCategories, apiProducts, apiUsers, apiOrders] = await Promise.all([
       fetchCategories().catch(() => []),
@@ -691,7 +705,9 @@ const refreshCategoryViews = (): void => {
 };
 
 const loadAdminCategories = async (): Promise<void> => {
+  categoriesMessage.textContent = "Cargando categorías...";
   productCategories = await fetchCategories().catch(() => []);
+  categoriesMessage.textContent = "";
   refreshCategoryViews();
 };
 
@@ -701,11 +717,14 @@ const refreshProductViews = (): void => {
 };
 
 const loadAdminProducts = async (): Promise<void> => {
+  productsMessage.textContent = "Cargando productos...";
   adminProducts = await fetchRawProducts().catch(() => []);
+  productsMessage.textContent = "";
   refreshProductViews();
 };
 
 const loadAdminOrders = async (): Promise<void> => {
+  ordersMessage.textContent = "Cargando pedidos...";
   const [apiOrders, localOrders, users] = await Promise.all([
     fetchOrders().catch(() => []),
     Promise.resolve(getOrders()),
@@ -714,6 +733,7 @@ const loadAdminOrders = async (): Promise<void> => {
 
   adminUsers = users;
   adminOrders = sortAdminOrdersByDateDesc([...apiOrders, ...localOrders]);
+  ordersMessage.textContent = "";
   renderOrders();
 };
 
@@ -749,111 +769,127 @@ const openCategoryEditor = (category?: AdminCategory): void => {
   categoryNameInput.focus();
 };
 
+let isProductSubmitting = false;
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isProductSubmitting) return;
+  isProductSubmitting = true;
 
-  const activeCategories = getVisibleAdminCategories(productCategories);
+  try {
+    const activeCategories = getVisibleAdminCategories(productCategories);
 
-  if (activeCategories.length === 0) {
-    setFormMessage(
-      message,
-      "Creá una categoría antes de cargar productos.",
-      "error"
+    if (activeCategories.length === 0) {
+      setFormMessage(
+        message,
+        "Creá una categoría antes de cargar productos.",
+        "error"
+      );
+      return;
+    }
+
+    const productId = Number(productIdInput.value);
+    const productInput = {
+      nombre: nameInput.value.trim(),
+      descripcion: descriptionInput.value.trim(),
+      precio: Number(priceInput.value),
+      stock: Number(stockInput.value),
+      categoriaId: Number(categorySelect.value),
+      imagen: imageInput.value.trim(),
+      disponible: availableInput.checked,
+    };
+
+    const validationError = validateAdminProductInput(
+      productInput,
+      productCategories
     );
-    return;
+
+    if (validationError) {
+      setFormMessage(message, validationError, "error");
+      return;
+    }
+
+    if (productId) {
+      adminProducts = updateAdminProduct(adminProducts, productId, productInput);
+      setFormMessage(message, "Producto actualizado correctamente.", "success");
+    } else {
+      adminProducts = createAdminProduct(adminProducts, productInput);
+      setFormMessage(message, "Producto creado correctamente.", "success");
+    }
+
+    refreshProductViews();
+    resetProductForm(false);
+    closeProductModal();
+  } finally {
+    isProductSubmitting = false;
   }
-
-  const productId = Number(productIdInput.value);
-  const productInput = {
-    nombre: nameInput.value.trim(),
-    descripcion: descriptionInput.value.trim(),
-    precio: Number(priceInput.value),
-    stock: Number(stockInput.value),
-    categoriaId: Number(categorySelect.value),
-    imagen: imageInput.value.trim(),
-    disponible: availableInput.checked,
-  };
-
-  const validationError = validateAdminProductInput(
-    productInput,
-    productCategories
-  );
-
-  if (validationError) {
-    setFormMessage(message, validationError, "error");
-    return;
-  }
-
-  if (productId) {
-    adminProducts = updateAdminProduct(adminProducts, productId, productInput);
-    setFormMessage(message, "Producto actualizado correctamente.", "success");
-  } else {
-    adminProducts = createAdminProduct(adminProducts, productInput);
-    setFormMessage(message, "Producto creado correctamente.", "success");
-  }
-
-  refreshProductViews();
-  resetProductForm(false);
-  closeProductModal();
 });
+
+let isCategorySubmitting = false;
 
 categoryForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isCategorySubmitting) return;
+  isCategorySubmitting = true;
 
-  const categoryId = Number(categoryIdInput.value);
-  const categoryName = categoryNameInput.value.trim();
-  const categoryDescription = categoryDescriptionInput.value.trim();
-  const categoryImage = categoryImageSelect.value.trim();
-  const currentCategory = productCategories.find(
-    (category) => category.id === categoryId
-  );
-  const categoryAlreadyExists = isCategoryNameTaken(
-    productCategories,
-    categoryName,
-    categoryId || undefined
-  );
-
-  if (!categoryName || !categoryDescription || !categoryImage) {
-    setFormMessage(categoryMessage, "Completá todos los campos.", "error");
-    return;
-  }
-
-  if (categoryAlreadyExists) {
-    setFormMessage(
-      categoryMessage,
-      "Ya existe una categoría con ese nombre.",
-      "error"
+  try {
+    const categoryId = Number(categoryIdInput.value);
+    const categoryName = categoryNameInput.value.trim();
+    const categoryDescription = categoryDescriptionInput.value.trim();
+    const categoryImage = categoryImageSelect.value.trim();
+    const currentCategory = productCategories.find(
+      (category) => category.id === categoryId
     );
-    return;
-  }
-
-  if (categoryId && currentCategory) {
-    productCategories = updateAdminCategory(productCategories, categoryId, {
-      name: categoryName,
-      description: categoryDescription,
-      image: categoryImage,
-    });
-    setFormMessage(
-      categoryMessage,
-      "Categoría actualizada correctamente.",
-      "success"
+    const categoryAlreadyExists = isCategoryNameTaken(
+      productCategories,
+      categoryName,
+      categoryId || undefined
     );
-  } else {
-    productCategories = createAdminCategory(productCategories, {
-      name: categoryName,
-      description: categoryDescription,
-      image: categoryImage,
-    });
-    setFormMessage(
-      categoryMessage,
-      "Categoría creada correctamente.",
-      "success"
-    );
-  }
 
-  refreshCategoryViews();
-  resetCategoryForm(false);
-  closeCategoryModal();
+    if (!categoryName || !categoryDescription || !categoryImage) {
+      setFormMessage(categoryMessage, "Completá todos los campos.", "error");
+      return;
+    }
+
+    if (categoryAlreadyExists) {
+      setFormMessage(
+        categoryMessage,
+        "Ya existe una categoría con ese nombre.",
+        "error"
+      );
+      return;
+    }
+
+    if (categoryId && currentCategory) {
+      productCategories = updateAdminCategory(productCategories, categoryId, {
+        name: categoryName,
+        description: categoryDescription,
+        image: categoryImage,
+      });
+      setFormMessage(
+        categoryMessage,
+        "Categoría actualizada correctamente.",
+        "success"
+      );
+    } else {
+      productCategories = createAdminCategory(productCategories, {
+        name: categoryName,
+        description: categoryDescription,
+        image: categoryImage,
+      });
+      setFormMessage(
+        categoryMessage,
+        "Categoría creada correctamente.",
+        "success"
+      );
+    }
+
+    refreshCategoryViews();
+    resetCategoryForm(false);
+    closeCategoryModal();
+  } finally {
+    isCategorySubmitting = false;
+  }
 });
 
 productsTableBody.addEventListener("click", (event) => {
@@ -914,7 +950,7 @@ ordersTableBody.addEventListener("click", (event) => {
     return;
   }
 
-  openOrderModal(order);
+  openOrderModal(order, target);
 });
 
 ordersFilterForm.addEventListener("submit", (event) => {
@@ -926,12 +962,30 @@ orderStatusFilter.addEventListener("change", () => {
   renderOrders();
 });
 
-orderStatusSelect.addEventListener("change", () => {
-  if (!activeOrderId) {
-    return;
-  }
+const applyOrderStatusButton = document.querySelector<HTMLButtonElement>("#applyOrderStatusButton");
+
+const isDestructiveStatusChange = (from: OrderStatus, to: OrderStatus): boolean =>
+  to === "CANCELADO" && from !== "CANCELADO";
+
+applyOrderStatusButton?.addEventListener("click", () => {
+  if (!activeOrderId) return;
+
+  const currentOrder = adminOrders.find((item) => item.id === activeOrderId);
+  if (!currentOrder) return;
 
   const nextStatus = orderStatusSelect.value as OrderStatus;
+
+  if (nextStatus === currentOrder.estado) return;
+
+  if (isDestructiveStatusChange(currentOrder.estado, nextStatus)) {
+    const confirmed = window.confirm(
+      `¿Cancelar el pedido ${activeOrderId}? Esta acción no se puede deshacer.`
+    );
+    if (!confirmed) {
+      orderStatusSelect.value = currentOrder.estado;
+      return;
+    }
+  }
 
   adminOrders = updateAdminOrderStatus(adminOrders, activeOrderId, nextStatus);
   saveOrders(adminOrders);
@@ -995,9 +1049,15 @@ adminSearchForm.addEventListener("submit", (event) => {
   renderProductTable();
 });
 
-adminSearchInput.addEventListener("input", () => {
-  renderProductTable();
-});
+const debouncedAdminSearch = (() => {
+  let timer: ReturnType<typeof setTimeout>;
+  return () => {
+    clearTimeout(timer);
+    timer = setTimeout(renderProductTable, 150);
+  };
+})();
+
+adminSearchInput.addEventListener("input", debouncedAdminSearch);
 
 openProductModalButton.addEventListener("click", () => {
   const hasCategories = getVisibleAdminCategories(productCategories).length > 0;
@@ -1064,6 +1124,10 @@ cancelCategoryEditButton.addEventListener("click", () => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !categoryModal.hidden) {
     closeCategoryModal();
+  }
+
+  if (event.key === "Escape" && !productModal.hidden) {
+    closeProductModal();
   }
 
   if (event.key === "Escape" && !orderModal.hidden) {

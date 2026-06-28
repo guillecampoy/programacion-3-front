@@ -17,7 +17,7 @@
             <form id="form" class="auth-form">
                 <div>
                     <label for="name">Nombre</label>
-                    <input type="text" id="name" name="name" autocomplete="name" maxlength="80" required placeholder="Tu nombre">
+                    <input type="text" id="name" name="name" autocomplete="name" maxlength="80" required autofocus placeholder="Tu nombre">
                 </div>
                 <div>
                     <label for="email">Email</label>
@@ -26,6 +26,7 @@
                 <div>
                     <label for="password">Contraseña</label>
                     <input type="password" id="password" name="password" autocomplete="new-password" minlength="6" maxlength="20" required placeholder="Ingresa tu contraseña">
+                    <button type="button" id="passwordToggle" class="password-toggle">Mostrar</button>
                     <small>Usá al menos 6 caracteres.</small>
                 </div>
                 <p id="message" class="form-message" aria-live="polite"></p>

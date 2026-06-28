@@ -26,7 +26,7 @@
         <main id="productDetailLayout" class="product-detail-layout product-detail-page" aria-busy="true">
             <section id="productDetailState" class="product-detail-state" role="status" aria-live="polite" aria-atomic="true" hidden></section>
             <article id="productDetailCard" class="product-detail-card" hidden>
-                <img id="productDetailImage" class="product-detail-image" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" hidden decoding="async">
+                <img id="productDetailImage" class="product-detail-image" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" width="600" height="600" hidden decoding="async">
                 <div class="product-detail-content">
                     <p id="productDetailCategory" class="modal-category"></p>
                     <h2 id="productDetailTitle" class="modal-title"></h2>
@@ -43,7 +43,7 @@
                         </div>
                         <div class="product-detail-actions">
                             <button id="addToCartButton" type="button" class="product-detail-primary-button">Agregar al Carrito</button>
-                            <a class="cart-return-link product-detail-secondary-button" href="../home/home.html">← Volver</a>
+                            <a id="backToCatalogLink" class="button-secondary product-detail-secondary-button" href="../home/home.html">← Volver</a>
                         </div>
                     </div>
                     <p id="productDetailMessage" class="form-message"></p>
