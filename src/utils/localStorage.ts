@@ -154,7 +154,11 @@ export const getCartQuantityForProduct = (productId: Product["id"]): number =>
   getCart().find((item) => item.product.id === productId)?.quantity ?? 0;
 
 const getProductStock = (product: Product): number | null => {
-  const stock = getEffectiveProductStock(product.id);
+  const effectiveStock = getEffectiveProductStock(product.id);
+  const fallbackStock =
+    typeof product.stock === "number" && product.stock > 0 ? product.stock : 0;
+  const stock = effectiveStock > 0 ? effectiveStock : fallbackStock;
+
   return stock > 0 ? stock : null;
 };
 

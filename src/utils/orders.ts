@@ -11,49 +11,6 @@ const ORDERS_KEY = "orders";
 
 export const ENVIO = 2500;
 
-const defaultOrders: Order[] = [
-  {
-    id: "PED-1001",
-    fecha: "2026-05-11",
-    estado: "PENDIENTE",
-    total: 30000,
-    formaPago: "EFECTIVO",
-    idUsuario: "user-1",
-    telefono: "1111111111",
-    detalles: [
-      {
-        idProducto: 1,
-        cantidad: 1,
-        subtotal: 18000,
-        productName: "Milanesa Napolitana",
-      },
-      {
-        idProducto: 6,
-        cantidad: 1,
-        subtotal: 9500,
-        productName: "Papas Baston",
-      },
-    ],
-  },
-  {
-    id: "PED-1002",
-    fecha: "2026-05-11",
-    estado: "CONFIRMADO",
-    total: 28500,
-    formaPago: "TARJETA",
-    idUsuario: "user-1",
-    telefono: "2222222222",
-    detalles: [
-      {
-        idProducto: 4,
-        cantidad: 2,
-        subtotal: 26000,
-        productName: "Choripan",
-      },
-    ],
-  },
-];
-
 const ORDER_STATUS_VALUES: OrderStatus[] = [
   "PENDIENTE",
   "CONFIRMADO",
@@ -208,16 +165,14 @@ export const getOrders = (): Order[] => {
   const ordersFromStorage = localStorage.getItem(ORDERS_KEY);
 
   if (!ordersFromStorage) {
-    saveOrders(defaultOrders);
-    return defaultOrders;
+    return [];
   }
 
   try {
     const parsedOrders = JSON.parse(ordersFromStorage) as unknown;
 
     if (!Array.isArray(parsedOrders)) {
-      saveOrders(defaultOrders);
-      return defaultOrders;
+      return [];
     }
 
     const normalizedOrders = parsedOrders
@@ -232,8 +187,7 @@ export const getOrders = (): Order[] => {
 
     return normalizedOrders;
   } catch {
-    saveOrders(defaultOrders);
-    return defaultOrders;
+    return [];
   }
 };
 

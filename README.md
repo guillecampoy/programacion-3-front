@@ -22,7 +22,7 @@ La base ya integra estos modulos del front:
 - persistencia client-side con `localStorage`.
 
 No hay backend en esta entrega. La sesion, los usuarios, los productos, las categorias, los pedidos y el carrito viven en el navegador.
-El README describe el estado validado del proyecto, no solo la consigna.
+Este README describe el estado validado del proyecto y el cierre final del frontend respecto del TPI.
 
 ### Login validado
 
@@ -95,6 +95,35 @@ El README describe el estado validado del proyecto, no solo la consigna.
 - El detalle se abre en un modal con la informacion principal del pedido y los items incluidos.
 - El cambio de estado se aplica sobre el estado en memoria de la sesion.
 
+## Cierre TPI Frontend
+
+### Validación final
+
+1. `npm test`: 49 tests pasados.
+2. `npx vitest run --coverage`: 82.46% statements, 83.01% lines, 92% functions.
+3. `npm run build`: compilacion y empaquetado correctos.
+
+### Cobertura funcional
+
+1. Login y registro con `localStorage` y fetch local a `public/data/usuarios.json`.
+2. Catalogo de cliente con filtros, busqueda, ordenamiento y detalle de producto.
+3. Carrito local con checkout, envio fijo documentado y creacion de pedidos.
+4. Historial de pedidos del cliente con modal de detalle.
+5. Panel admin con dashboard, ABM de categorias, ABM de productos y gestion de pedidos.
+6. Guards por rol, con `ADMIN` habilitado para ver tienda en modo solo lectura y `USUARIO` habilitado para compra.
+
+### Extensiones incorporadas
+
+1. El area admin tiene paginas de entrada separadas para categorias, productos y pedidos, pero sigue reutilizando la implementacion central para no duplicar logica.
+2. La base de pedidos ya no depende de semilla hardcoded; parte de `public/data/pedidos.json` y la sesion solo agrega el overlay local del checkout y cambios de estado.
+3. El dashboard agrega un resumen extra de usuarios admin/cliente. Es una lectura adicional, no un requisito del TPI.
+
+### Cierres técnicos
+
+1. El clamp de stock del carrito quedó corregido en los helpers compartidos y la suite lo valida.
+2. No quedaron semillas de pedidos codificadas en el frontend; la base de datos simulada vive en JSON local.
+3. El split admin quedó materializado como páginas de entrada separadas para cada módulo.
+
 ## Como ejecutar
 
 ```bash
@@ -131,13 +160,16 @@ Claves usadas en `localStorage`:
 
 `users` quedo como almacenamiento legado de una version anterior y ya no participa en el login ni en el registro actual.
 `categories` quedo como almacenamiento legado de una version anterior y ya no participa en el CRUD actual de categorias.
-`orders` sigue siendo la base local del checkout y la gestion admin la usa como estado combinado; el cambio de estado del admin se guarda en `localStorage.orders` para que no se pierda al navegar entre pantallas.
+`orders` parte de `public/data/pedidos.json` como base simulada de backend; el checkout y la gestion admin suman cambios en `localStorage.orders` como overlay de sesion para no perder el estado entre pantallas.
 
 ## Rutas principales
 
 - Login: `/src/pages/auth/login/login.html`
 - Registro: `/src/pages/auth/registro/registro.html`
 - Admin: `/src/pages/admin/home/home.html`
+- Categorias admin: `/src/pages/admin/categories/categories.html`
+- Productos admin: `/src/pages/admin/products/products.html`
+- Pedidos admin: `/src/pages/admin/orders/orders.html`
 - Catalogo: `/src/pages/store/home/home.html`
 - Detalle de producto: `/src/pages/store/productDetail/productDetail.html`
 - Carrito: `/src/pages/store/cart/cart.html`
@@ -149,6 +181,9 @@ Claves usadas en `localStorage`:
 - `src/pages/store/home/`: catalogo del cliente.
 - `src/pages/store/cart/`: carrito y cierre local.
 - `src/pages/admin/home/`: panel de administracion.
+- `src/pages/admin/categories/`: entrada al ABM de categorias.
+- `src/pages/admin/products/`: entrada al ABM de productos.
+- `src/pages/admin/orders/`: entrada a gestion de pedidos.
 - `src/utils/`: auth, navegacion, validaciones y persistencia.
 - `src/data/data.ts`: semilla inicial de categorias y productos.
 - `src/types/`: contratos de dominio del front.
