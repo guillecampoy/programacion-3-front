@@ -71,7 +71,10 @@ renderStoreNavigation(storeNavigation, {
   cartQuantity: getCart().reduce((total, item) => total + item.quantity, 0),
 });
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+});
 
 const updateCartQuantity = (): void => {
   renderStoreNavigation(storeNavigation, {
