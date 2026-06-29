@@ -43,10 +43,11 @@
                         required
                         placeholder="Ingresa tu contraseña"
                     >
-                    <button type="button" id="passwordToggle" class="password-toggle">Mostrar</button>
+                    <button type="button" id="passwordToggle" class="password-toggle" aria-pressed="false" aria-label="Mostrar contraseña">Mostrar</button>
+                    <small>Mínimo 8 caracteres, con letras y números.</small>
                 </div>
                 <p id="message" class="form-message" aria-live="polite"></p>
-                <button type="submit">Ingresar</button>
+                <button type="submit">Iniciar sesión</button>
             </form>
 
             <a class="auth-link" href="../registro/registro.html">¿No tienes cuenta? Regístrate</a>

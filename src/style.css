@@ -376,6 +376,11 @@ hr {
   border: 1px solid var(--color-borde);
   border-radius: 8px;
   background: var(--color-blanco);
+  transition: border-color 0.15s ease;
+}
+
+.order-card:hover {
+  border-color: color-mix(in srgb, var(--color-primario) 40%, var(--color-borde));
 }
 
 .order-card-header {
@@ -744,7 +749,7 @@ hr {
 }
 
 .cart-qty-btn:hover {
-  background: var(--color-bg);
+  background: var(--color-fondo);
 }
 
 .cart-qty-dec {
@@ -950,6 +955,11 @@ hr {
   border: 1px solid var(--color-borde);
   border-radius: 8px;
   padding: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.product-card:hover {
+  border-color: color-mix(in srgb, var(--color-primario) 40%, var(--color-borde));
 }
 
 .product-card img {

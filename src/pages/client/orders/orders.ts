@@ -9,12 +9,15 @@ import {
   type OrderProductName,
   type OrderHistoryItem,
 } from "../../../utils/orderHistory";
-import { getUser } from "../../../utils/localStorage";
+import { getCart, getUser } from "../../../utils/localStorage";
 import { getOrders } from "../../../utils/orders";
+import { renderStoreNavigation } from "../../../utils/storeNavigation";
+import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
+const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const ordersMessage = document.querySelector<HTMLParagraphElement>("#ordersMessage");
 const ordersList = document.querySelector<HTMLDivElement>("#ordersList");
 const orderDetailModal = document.querySelector<HTMLDivElement>("#orderDetailModal");
@@ -39,6 +42,7 @@ if (
   !buttonLogout ||
   !loggedUserName ||
   !logo ||
+  !storeNavigation ||
   !ordersMessage ||
   !ordersList ||
   !orderDetailModal ||
@@ -58,6 +62,18 @@ buttonLogout.addEventListener("click", () => {
 
 logo.src = logoImage;
 loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
+
+const currentUser = getUser();
+const isAdminUser = currentUser?.role === Rol.Admin;
+
+const renderNavigation = (): void => {
+  renderStoreNavigation(storeNavigation, {
+    isAdmin: isAdminUser,
+    cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
+  });
+};
+
+renderNavigation();
 
 const currencyFormatter = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -152,7 +168,7 @@ const renderOrders = (): void => {
 
   if (orderHistory.length === 0) {
     ordersMessage.className = "empty-message";
-    ordersMessage.textContent = "No tenés pedidos para mostrar.";
+    ordersMessage.textContent = "Todavía no tenés pedidos. Explorá nuestros productos y hacé tu primer pedido.";
     return;
   }
 
@@ -211,13 +227,13 @@ const loadOrders = async (): Promise<void> => {
 
   if (!currentUser) {
     ordersMessage.className = "empty-message";
-    ordersMessage.textContent = "No hay una sesión activa.";
+    ordersMessage.textContent = "No pudimos identificar tu cuenta. Iniciá sesión para ver tus pedidos.";
     ordersList.innerHTML = "";
     return;
   }
 
   ordersMessage.className = "empty-message";
-  ordersMessage.textContent = "Cargando pedidos...";
+  ordersMessage.textContent = "Cargando pedidos…";
   ordersList.innerHTML = "";
 
   try {

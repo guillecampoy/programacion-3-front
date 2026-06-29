@@ -697,7 +697,7 @@ const renderDashboard = async (): Promise<void> => {
       </article>
     `;
   } catch {
-    dashboardMessage.textContent = "No se pudo cargar el dashboard.";
+    dashboardMessage.textContent = "No pudimos cargar los datos del panel. Verificá tu conexión y recargá la página.";
     dashboardMetrics.innerHTML = "";
     dashboardSummary.innerHTML = "";
   }
@@ -925,7 +925,7 @@ productsTableBody.addEventListener("click", (event) => {
 
   if (target.classList.contains("btn-delete-product")) {
     const confirmed = window.confirm(
-      `¿Eliminar el producto ${product.nombre}?`
+      `¿Eliminar el producto ${product.nombre}? Esta acción no se puede deshacer.`
     );
 
     if (!confirmed) {
@@ -1035,7 +1035,7 @@ categoriesTableBody.addEventListener("click", (event) => {
 
   if (target.classList.contains("btn-delete-category")) {
     const confirmed = window.confirm(
-      `¿Eliminar la categoría ${category.nombre}?`
+      `¿Eliminar la categoría ${category.nombre}? Los productos de esta categoría no se eliminarán.`
     );
 
     if (!confirmed) {

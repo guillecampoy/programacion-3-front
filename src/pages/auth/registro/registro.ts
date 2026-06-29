@@ -21,6 +21,8 @@ passwordToggle.addEventListener("click", () => {
   const isPassword = inputPassword.type === "password";
   inputPassword.type = isPassword ? "text" : "password";
   passwordToggle.textContent = isPassword ? "Ocultar" : "Mostrar";
+  passwordToggle.setAttribute("aria-pressed", String(isPassword));
+  passwordToggle.setAttribute("aria-label", isPassword ? "Ocultar contraseña" : "Mostrar contraseña");
 });
 
 const currentUser = getUser();
@@ -49,7 +51,7 @@ form.addEventListener("submit", async (e) => {
   const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = "Registrando…";
+    submitBtn.textContent = "Creando tu cuenta…";
   }
 
   try {
@@ -65,11 +67,11 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    message.textContent = "Usuario registrado correctamente.";
+    message.textContent = "Tu cuenta fue creada correctamente.";
     navigate(ROUTES.storeHome);
   } catch {
     message.className = "form-message form-message-error";
-    message.textContent = "Error de conexión. Intentá de nuevo.";
+    message.textContent = "No pudimos conectarnos al servidor para registrarte. Verificá tu conexión y volvé a intentar.";
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.textContent = "Registrarse";

@@ -14,15 +14,17 @@ import {
   updateProductQuantityInCart,
 } from "../../../utils/localStorage";
 import { deductStock } from "../../../utils/productState";
+import { renderStoreNavigation } from "../../../utils/storeNavigation";
+import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
-const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
+const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const cartContent = document.querySelector<HTMLDivElement>("#cartContent");
 const clearCartButton = document.querySelector<HTMLButtonElement>("#clearCartButton");
 
-if (!loggedUserName || !logo || !cartQuantity || !cartContent || !buttonLogout || !clearCartButton) {
+if (!loggedUserName || !logo || !storeNavigation || !cartContent || !buttonLogout || !clearCartButton) {
   throw new Error("No se encontraron los elementos necesarios del carrito");
 }
 
@@ -40,7 +42,10 @@ clearCartButton.addEventListener("click", () => {
 logo.src = logoImage;
 loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
 
-if (!getUser()) {
+const currentUser = getUser();
+const isAdminUser = currentUser?.role === Rol.Admin;
+
+if (!currentUser) {
   navigate(ROUTES.login);
 }
 
@@ -50,9 +55,10 @@ const currencyFormatter = new Intl.NumberFormat("es-AR", {
 });
 
 const renderCartQuantity = (): void => {
-  cartQuantity.textContent = String(
-    getCart().reduce((total, cartItem) => total + cartItem.quantity, 0)
-  );
+  renderStoreNavigation(storeNavigation, {
+    isAdmin: isAdminUser,
+    cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
+  });
 };
 
 const renderEmptyState = (): void => {
@@ -169,7 +175,7 @@ const renderCart = (): void => {
       <strong>${currencyFormatter.format(total)}</strong>
     </section>
     <form id="checkoutForm" class="cart-checkout-box">
-      <h3 class="client-section-title">Checkout</h3>
+      <h3 class="client-section-title">Finalizar pedido</h3>
       <label for="phone">Teléfono</label>
       <input
         type="tel"
@@ -180,6 +186,7 @@ const renderCart = (): void => {
         inputmode="numeric"
         required
       >
+      <small style="margin-top: -10px; margin-bottom: 10px; display: block; color: color-mix(in srgb, var(--color-texto) 72%, var(--color-blanco)); font-size: 12px;">Ingresá tu número sin espacios ni guiones, con código de área.</small>
       <label for="paymentMethod">Forma de pago</label>
       <select id="paymentMethod" name="paymentMethod" required>
         <option value="">Seleccioná una forma de pago</option>
@@ -187,7 +194,7 @@ const renderCart = (): void => {
         <option value="TRANSFERENCIA">Transferencia</option>
         <option value="EFECTIVO">Efectivo</option>
       </select>
-      <p id="checkoutMessage" class="form-message"></p>
+      <p id="checkoutMessage" class="form-message" aria-live="polite"></p>
       <div class="cart-actions">
         <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
         <button type="submit" class="cart-confirm-button">Confirmar pedido</button>
@@ -313,7 +320,7 @@ const renderCart = (): void => {
 
     if (confirmButton) {
       confirmButton.disabled = true;
-      confirmButton.textContent = "Confirmando…";
+      confirmButton.textContent = "Confirmando tu pedido…";
     }
 
     try {
@@ -329,7 +336,7 @@ const renderCart = (): void => {
       clearCart();
       navigate(ROUTES.clientOrders);
     } catch {
-      setCheckoutMessage("Error al confirmar el pedido. Intentá de nuevo.", true);
+      setCheckoutMessage("No pudimos confirmar tu pedido. Verificá tus datos y volvé a intentar.", true);
 
       if (confirmButton) {
         confirmButton.disabled = false;

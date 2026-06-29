@@ -19,6 +19,8 @@ passwordToggle.addEventListener("click", () => {
   const isPassword = inputPassword.type === "password";
   inputPassword.type = isPassword ? "text" : "password";
   passwordToggle.textContent = isPassword ? "Ocultar" : "Mostrar";
+  passwordToggle.setAttribute("aria-pressed", String(isPassword));
+  passwordToggle.setAttribute("aria-label", isPassword ? "Ocultar contraseña" : "Mostrar contraseña");
 });
 
 const currentUser = getUser();
@@ -47,7 +49,7 @@ form.addEventListener("submit", async (e) => {
   const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = "Ingresando…";
+    submitBtn.textContent = "Iniciando sesión…";
   }
 
   try {
@@ -55,10 +57,10 @@ form.addEventListener("submit", async (e) => {
 
     if (!user) {
       message.className = "form-message form-message-error";
-      message.textContent = "Credenciales inválidas.";
+      message.textContent = "El email o la contraseña no son correctos. Verificá los datos e intentá de nuevo.";
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Ingresar";
+        submitBtn.textContent = "Iniciar sesión";
       }
       return;
     }
@@ -66,10 +68,10 @@ form.addEventListener("submit", async (e) => {
     redirectByRole(user);
   } catch {
     message.className = "form-message form-message-error";
-    message.textContent = "Error de conexión. Intentá de nuevo.";
+    message.textContent = "No pudimos conectarnos al servidor. Verificá tu conexión a internet y volvé a intentar.";
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Ingresar";
+      submitBtn.textContent = "Iniciar sesión";
     }
   }
 });

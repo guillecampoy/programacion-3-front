@@ -23,7 +23,7 @@ export const buildCatalogProducts = (
     .filter((product) => product.disponible && !product.eliminado)
     .map((product) => ({
       ...product,
-      categoryName: categoriesById.get(product.categoriaId)?.nombre ?? "Sin categoria",
+      categoryName: categoriesById.get(product.categoriaId)?.nombre ?? "Sin categoría",
     }));
 };
 

@@ -104,7 +104,9 @@ const toCartProduct = (product: CatalogProduct): Product => ({
 
 const setActiveCategoryButton = (): void => {
   document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
-    button.classList.toggle("active", button.dataset.categoryId === String(selectedCategoryId ?? ""));
+    const isActive = button.dataset.categoryId === String(selectedCategoryId ?? "");
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
 };
 
@@ -118,6 +120,7 @@ const renderCategories = (): void => {
     button.type = "button";
     button.className = "button-secondary category-filter";
     button.dataset.categoryId = String(category.id);
+    button.setAttribute("aria-pressed", "false");
     button.textContent = category.nombre;
     li.appendChild(button);
     categoryList.appendChild(li);
@@ -220,7 +223,7 @@ const refreshProducts = (): void => {
 };
 
 const loadCatalog = async (): Promise<void> => {
-  searchMessage.textContent = "Cargando productos...";
+  searchMessage.textContent = "Cargando productos…";
   try {
     const [rawCategories, rawProducts] = await Promise.all([
       fetchCategories(),
@@ -233,7 +236,7 @@ const loadCatalog = async (): Promise<void> => {
     renderCategories();
     refreshProducts();
   } catch {
-    searchMessage.textContent = "No se pudo cargar el catálogo.";
+    searchMessage.textContent = "No pudimos cargar los productos. Verificá tu conexión y recargá la página.";
   }
 };
 

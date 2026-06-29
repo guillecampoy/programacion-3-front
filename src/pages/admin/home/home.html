@@ -31,20 +31,20 @@
                 <a href="../products/products.html">Productos</a>
                 <a href="../categories/categories.html">Categorías</a>
                 <a href="../orders/orders.html">Pedidos</a>
-                <a id="goToStoreLink" href="/src/pages/store/home/home.html">Ver tienda</a>
+                <a id="goToStoreLink" href="../../store/home/home.html">Ver tienda</a>
             </nav>
         </aside>
 
         <div class="admin-content">
             <section id="dashboard" class="admin-section">
-                <h2 class="admin-section-title">Dashboard</h2>
+                <h2 class="admin-section-title">Resumen</h2>
                 <p id="dashboardMessage" class="empty-message" aria-live="polite"></p>
                 <div id="dashboardMetrics" class="dashboard-metrics"></div>
                 <div id="dashboardSummary" class="dashboard-summary-grid"></div>
             </section>
 
             <section id="productos" class="admin-section">
-                <h2 class="admin-section-title">ABM de productos</h2>
+                <h2 class="admin-section-title">Productos</h2>
                 <div class="admin-box product-admin-grid">
                     <div class="form-actions product-actions">
                         <button type="button" id="openProductModalButton">Nuevo producto</button>
@@ -77,7 +77,7 @@
             </section>
 
             <section id="categorias" class="admin-section">
-                <h2 class="admin-section-title">ABM de categorías</h2>
+                <h2 class="admin-section-title">Categorías</h2>
                 <div class="admin-box category-admin-grid">
                     <div class="form-actions category-actions">
                         <button type="button" id="openCategoryModalButton">Nueva categoría</button>
@@ -170,19 +170,19 @@
                 <input id="productId" type="hidden">
                 <div>
                     <label for="productName">Nombre</label>
-                    <input id="productName" name="productName" required>
+                    <input id="productName" name="productName" placeholder="Ej: Milanesa Napolitana" required>
                 </div>
                 <div>
                     <label for="productDescription">Descripción</label>
-                    <textarea id="productDescription" name="productDescription" rows="4" required></textarea>
+                    <textarea id="productDescription" name="productDescription" rows="4" placeholder="Una o dos oraciones sobre el producto" required></textarea>
                 </div>
                 <div>
                     <label for="productPrice">Precio</label>
-                    <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" required>
+                    <input id="productPrice" name="productPrice" inputmode="numeric" pattern="[0-9]+" placeholder="Ej: 1500" required>
                 </div>
                 <div>
                     <label for="productStock">Stock</label>
-                    <input id="productStock" name="productStock" inputmode="numeric" pattern="[0-9]+" required>
+                    <input id="productStock" name="productStock" inputmode="numeric" pattern="[0-9]+" placeholder="Ej: 50" required>
                 </div>
                 <div>
                     <label for="productCategory">Categoría</label>
