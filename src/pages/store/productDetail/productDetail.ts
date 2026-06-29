@@ -16,7 +16,6 @@ const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName"
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const productDetailLayout = document.querySelector<HTMLElement>("#productDetailLayout");
-const productDetailState = document.querySelector<HTMLElement>("#productDetailState");
 const productDetailCard = document.querySelector<HTMLElement>("#productDetailCard");
 const productDetailImage = document.querySelector<HTMLImageElement>("#productDetailImage");
 const productDetailCategory = document.querySelector<HTMLParagraphElement>("#productDetailCategory");
@@ -37,7 +36,6 @@ if (
   !loggedUserName ||
   !logo ||
   !storeNavigation ||
-  !productDetailState ||
   !productDetailLayout ||
   !productDetailCard ||
   !productDetailImage ||
@@ -95,15 +93,10 @@ const setBusy = (isBusy: boolean): void => {
   productDetailLayout.setAttribute("aria-busy", String(isBusy));
 };
 
-const renderLoading = (): void => {
-  productDetailCard.hidden = true;
-  productDetailState.hidden = false;
-  productDetailState.className = "product-detail-state product-detail-state-loading";
-  productDetailState.replaceChildren();
+const clearStatus = (): void => {
+  const existingStatus = document.querySelector<HTMLElement>("#productDetailStatusBlock");
 
-  const paragraph = document.createElement("p");
-  paragraph.textContent = "Cargando detalle del producto...";
-  productDetailState.appendChild(paragraph);
+  existingStatus?.remove();
 };
 
 const getProductIdFromQuery = (): number | null => {
@@ -126,19 +119,24 @@ const toCartProduct = (product: Awaited<ReturnType<typeof fetchProducts>>[number
 
 const renderError = (message: string): void => {
   productDetailCard.hidden = true;
-  productDetailState.hidden = false;
-  productDetailState.className = "product-detail-state product-detail-state-error";
   setBusy(false);
+  clearStatus();
 
-  productDetailState.replaceChildren();
+  const statusBlock = document.createElement("div");
+  statusBlock.id = "productDetailStatusBlock";
+  statusBlock.className = "product-detail-error";
+  statusBlock.setAttribute("role", "alert");
+
   const paragraph = document.createElement("p");
   paragraph.textContent = message;
+
   const link = document.createElement("a");
   link.className = "cart-return-link";
   link.href = ROUTES.storeHome;
   link.textContent = "Volver al catálogo";
 
-  productDetailState.append(paragraph, link);
+  statusBlock.append(paragraph, link);
+  productDetailLayout.prepend(statusBlock);
 };
 
 const renderDetail = async (): Promise<void> => {
@@ -150,7 +148,8 @@ const renderDetail = async (): Promise<void> => {
   }
 
   setBusy(true);
-  renderLoading();
+  productDetailCard.hidden = true;
+  clearStatus();
 
   let categories: Awaited<ReturnType<typeof fetchCategories>>;
   let products: Awaited<ReturnType<typeof fetchProducts>>;
@@ -184,7 +183,6 @@ const renderDetail = async (): Promise<void> => {
     !isAdminUser && product.disponible && effectiveStock > 0 && remainingStock > 0;
 
   setBusy(false);
-  productDetailState.hidden = true;
   productDetailCard.hidden = false;
 
   productDetailImage.src = product.imagen;
