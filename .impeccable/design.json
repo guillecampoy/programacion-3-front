@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-22T00:00:00-03:00",
+  "title": "Design System: Food Store",
+  "extensions": {
+    "colorMeta": {
+      "brand": {
+        "role": "primary",
+        "displayName": "Tomato Orange",
+        "canonical": "#ff6347",
+        "tonalRamp": [
+          "oklch(28% 0.20 30)",
+          "oklch(38% 0.22 30)",
+          "oklch(48% 0.23 30)",
+          "oklch(58% 0.24 30)",
+          "oklch(68% 0.18 30)",
+          "oklch(78% 0.12 30)",
+          "oklch(88% 0.07 30)",
+          "oklch(96% 0.03 30)"
+        ]
+      },
+      "brand-hover": {
+        "role": "primary",
+        "displayName": "Signal Orange",
+        "canonical": "#ff4500",
+        "tonalRamp": [
+          "oklch(28% 0.22 35)",
+          "oklch(38% 0.24 35)",
+          "oklch(48% 0.25 35)",
+          "oklch(58% 0.25 35)",
+          "oklch(68% 0.19 35)",
+          "oklch(78% 0.13 35)",
+          "oklch(88% 0.08 35)",
+          "oklch(96% 0.03 35)"
+        ]
+      },
+      "bg": {
+        "role": "neutral",
+        "displayName": "Cloud Gray",
+        "canonical": "#f0f0f0",
+        "tonalRamp": [
+          "oklch(18% 0.01 260)",
+          "oklch(28% 0.01 260)",
+          "oklch(38% 0.01 260)",
+          "oklch(48% 0.01 260)",
+          "oklch(58% 0.01 260)",
+          "oklch(72% 0.01 260)",
+          "oklch(84% 0.01 260)",
+          "oklch(96% 0.01 260)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Card White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(16% 0 0)",
+          "oklch(28% 0 0)",
+          "oklch(40% 0 0)",
+          "oklch(52% 0 0)",
+          "oklch(64% 0 0)",
+          "oklch(78% 0 0)",
+          "oklch(90% 0 0)",
+          "oklch(98% 0 0)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Ink Gray",
+        "canonical": "#333333",
+        "tonalRamp": [
+          "oklch(18% 0 0)",
+          "oklch(28% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(48% 0 0)",
+          "oklch(58% 0 0)",
+          "oklch(68% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(92% 0 0)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Deep Ink",
+        "canonical": "#111111",
+        "tonalRamp": [
+          "oklch(14% 0 0)",
+          "oklch(24% 0 0)",
+          "oklch(34% 0 0)",
+          "oklch(44% 0 0)",
+          "oklch(54% 0 0)",
+          "oklch(66% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(94% 0 0)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border Gray",
+        "canonical": "#dddddd",
+        "tonalRamp": [
+          "oklch(24% 0.005 260)",
+          "oklch(34% 0.005 260)",
+          "oklch(44% 0.005 260)",
+          "oklch(54% 0.005 260)",
+          "oklch(64% 0.005 260)",
+          "oklch(74% 0.005 260)",
+          "oklch(84% 0.005 260)",
+          "oklch(94% 0.005 260)"
+        ]
+      },
+      "overlay": {
+        "role": "neutral",
+        "displayName": "Overlay Black",
+        "canonical": "#0000008c",
+        "tonalRamp": [
+          "oklch(12% 0 0)",
+          "oklch(24% 0 0)",
+          "oklch(36% 0 0)",
+          "oklch(48% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Alert Red",
+        "canonical": "#a92b2b",
+        "tonalRamp": [
+          "oklch(26% 0.16 25)",
+          "oklch(36% 0.17 25)",
+          "oklch(46% 0.18 25)",
+          "oklch(56% 0.18 25)",
+          "oklch(66% 0.14 25)",
+          "oklch(76% 0.10 25)",
+          "oklch(86% 0.06 25)",
+          "oklch(96% 0.03 25)"
+        ]
+      },
+      "danger-hover": {
+        "role": "semantic",
+        "displayName": "Alert Red Dark",
+        "canonical": "#7f1f1f",
+        "tonalRamp": [
+          "oklch(22% 0.16 25)",
+          "oklch(32% 0.17 25)",
+          "oklch(42% 0.18 25)",
+          "oklch(52% 0.18 25)",
+          "oklch(62% 0.14 25)",
+          "oklch(72% 0.10 25)",
+          "oklch(82% 0.06 25)",
+          "oklch(94% 0.03 25)"
+        ]
+      },
+      "danger-soft": {
+        "role": "semantic",
+        "displayName": "Alert Tint",
+        "canonical": "#fff3f3",
+        "tonalRamp": [
+          "oklch(22% 0.03 25)",
+          "oklch(34% 0.03 25)",
+          "oklch(46% 0.03 25)",
+          "oklch(58% 0.03 25)",
+          "oklch(70% 0.03 25)",
+          "oklch(82% 0.02 25)",
+          "oklch(92% 0.01 25)",
+          "oklch(98% 0.005 25)"
+        ]
+      },
+      "danger-border": {
+        "role": "semantic",
+        "displayName": "Alert Border",
+        "canonical": "#d8a0a0",
+        "tonalRamp": [
+          "oklch(30% 0.04 25)",
+          "oklch(42% 0.04 25)",
+          "oklch(54% 0.04 25)",
+          "oklch(66% 0.04 25)",
+          "oklch(76% 0.03 25)",
+          "oklch(84% 0.02 25)",
+          "oklch(90% 0.015 25)",
+          "oklch(96% 0.01 25)"
+        ]
+      },
+      "danger-text": {
+        "role": "semantic",
+        "displayName": "Alert Text",
+        "canonical": "#8f2424",
+        "tonalRamp": [
+          "oklch(24% 0.13 25)",
+          "oklch(34% 0.14 25)",
+          "oklch(44% 0.15 25)",
+          "oklch(54% 0.15 25)",
+          "oklch(64% 0.11 25)",
+          "oklch(74% 0.08 25)",
+          "oklch(84% 0.05 25)",
+          "oklch(94% 0.03 25)"
+        ]
+      },
+      "success-soft": {
+        "role": "semantic",
+        "displayName": "Success Tint",
+        "canonical": "#eef8ef",
+        "tonalRamp": [
+          "oklch(22% 0.03 145)",
+          "oklch(34% 0.03 145)",
+          "oklch(46% 0.03 145)",
+          "oklch(58% 0.03 145)",
+          "oklch(70% 0.03 145)",
+          "oklch(82% 0.02 145)",
+          "oklch(92% 0.01 145)",
+          "oklch(98% 0.005 145)"
+        ]
+      },
+      "success-border": {
+        "role": "semantic",
+        "displayName": "Success Border",
+        "canonical": "#b9dfbf",
+        "tonalRamp": [
+          "oklch(30% 0.06 145)",
+          "oklch(42% 0.06 145)",
+          "oklch(54% 0.06 145)",
+          "oklch(66% 0.06 145)",
+          "oklch(76% 0.05 145)",
+          "oklch(84% 0.03 145)",
+          "oklch(90% 0.02 145)",
+          "oklch(96% 0.01 145)"
+        ]
+      },
+      "success-text": {
+        "role": "semantic",
+        "displayName": "Success Text",
+        "canonical": "#286b34",
+        "tonalRamp": [
+          "oklch(24% 0.11 145)",
+          "oklch(34% 0.12 145)",
+          "oklch(44% 0.13 145)",
+          "oklch(54% 0.13 145)",
+          "oklch(64% 0.10 145)",
+          "oklch(74% 0.07 145)",
+          "oklch(84% 0.04 145)",
+          "oklch(94% 0.02 145)"
+        ]
+      },
+      "warning-soft": {
+        "role": "semantic",
+        "displayName": "Warning Tint",
+        "canonical": "#fff7ed",
+        "tonalRamp": [
+          "oklch(22% 0.04 65)",
+          "oklch(34% 0.04 65)",
+          "oklch(46% 0.04 65)",
+          "oklch(58% 0.04 65)",
+          "oklch(70% 0.03 65)",
+          "oklch(82% 0.02 65)",
+          "oklch(92% 0.01 65)",
+          "oklch(98% 0.005 65)"
+        ]
+      },
+      "warning-border": {
+        "role": "semantic",
+        "displayName": "Warning Border",
+        "canonical": "#ffc9a8",
+        "tonalRamp": [
+          "oklch(30% 0.08 65)",
+          "oklch(42% 0.09 65)",
+          "oklch(54% 0.09 65)",
+          "oklch(66% 0.09 65)",
+          "oklch(76% 0.07 65)",
+          "oklch(84% 0.05 65)",
+          "oklch(90% 0.03 65)",
+          "oklch(96% 0.015 65)"
+        ]
+      },
+      "warning-text": {
+        "role": "semantic",
+        "displayName": "Warning Text",
+        "canonical": "#9b3f16",
+        "tonalRamp": [
+          "oklch(24% 0.11 55)",
+          "oklch(34% 0.12 55)",
+          "oklch(44% 0.13 55)",
+          "oklch(54% 0.13 55)",
+          "oklch(64% 0.10 55)",
+          "oklch(74% 0.07 55)",
+          "oklch(84% 0.04 55)",
+          "oklch(94% 0.02 55)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page titles and the strongest visible headings."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles such as catalog and admin blocks."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Product names and dialog titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Paragraphs, descriptions, labels, and table content."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels and button text."
+      }
+    },
+    "shadows": [
+      {
+        "name": "auth-lift",
+        "value": "0 12px 28px rgb(0 0 0 / 12%)",
+        "purpose": "Login card elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "background-color 0.3s ease",
+        "purpose": "Simple hover transitions on buttons."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action button for submits and important task completion.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Guardar producto</button>",
+      "css": ".ds-btn-primary { background: var(--color-brand, #ff6347); color: #fff; padding: 12px; border: none; border-radius: 4px; font: 700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; cursor: pointer; transition: background-color 0.3s ease; } .ds-btn-primary:hover { background: var(--color-brand-hover, #ff4500); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-brand-hover, #ff4500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Alternative action button for canceling edits or switching state.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Cancelar edición</button>",
+      "css": ".ds-btn-secondary { background: var(--color-text, #333333); color: #fff; padding: 12px; border: none; border-radius: 4px; font: 700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; cursor: pointer; transition: background-color 0.3s ease; } .ds-btn-secondary:hover { background: var(--color-ink, #111111); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--color-brand-hover, #ff4500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Plain form control used for text, email, password, and numeric fields.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"example@example.com\"></label>",
+      "css": ".ds-field { display: grid; gap: 5px; font: 700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; color: var(--color-text, #333333); } .ds-input { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid var(--color-border, #dddddd); border-radius: 4px; background: var(--color-surface, #ffffff); color: var(--color-text, #333333); font: 400 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-input:focus-visible { outline: none; border: 2px solid var(--color-brand-hover, #ff4500); }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "surface-card",
+      "description": "Generic white container for filters, summaries, and grouped content.",
+      "html": "<section class=\"ds-card\"><h3 class=\"ds-card-title\">Categorías</h3><p class=\"ds-card-copy\">Lista de filtros y acciones relacionadas.</p></section>",
+      "css": ".ds-card { background: var(--color-surface, #ffffff); color: var(--color-text, #333333); border: 1px solid var(--color-border, #dddddd); border-radius: 8px; padding: 16px; font: 400 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-card-title { margin: 0 0 8px; font: 700 18px/1.25 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-card-copy { margin: 0; }"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Plain inline navigation links used in the header.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navegación\"><a class=\"ds-nav-link\" href=\"#\">Inicio</a><a class=\"ds-nav-link\" href=\"#\">Carrito</a></nav>",
+      "css": ".ds-nav { display: flex; flex-wrap: wrap; gap: 8px; font: 700 14px/1.2 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-nav-link { color: var(--color-text, #333333); text-decoration: none; padding: 10px; border-radius: 4px; background: var(--color-bg, #f0f0f0); } .ds-nav-link:hover { color: var(--color-brand-hover, #ff4500); } .ds-nav-link:focus-visible { outline: 2px solid var(--color-brand-hover, #ff4500); outline-offset: 2px; }"
+    },
+    {
+      "name": "Modal Panel",
+      "kind": "custom",
+      "refersTo": "modal-panel",
+      "description": "Centered overlay panel for product details and other one-off interruptive views.",
+      "html": "<div class=\"ds-modal-shell\"><article class=\"ds-modal\"><h3 class=\"ds-modal-title\">Detalle del producto</h3><p class=\"ds-modal-copy\">Contenido del modal.</p></article></div>",
+      "css": ".ds-modal-shell { position: fixed; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(0 0 0 / 55%); } .ds-modal { width: min(100%, 520px); max-height: 90vh; overflow: auto; background: var(--color-surface, #ffffff); color: var(--color-text, #333333); border: 1px solid var(--color-border, #dddddd); border-radius: 8px; padding: 16px; font: 400 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-modal-title { margin: 0 0 8px; font: 700 18px/1.25 system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; } .ds-modal-copy { margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trusted Counter",
+    "overview": "This system is a practical storefront, not a performance. It should feel like a clean, familiar counter in a small food shop: clear labels, fast decisions, and no decorative detours. The existing UI already points in that direction with a soft gray canvas, white surfaces, tomato-orange accents, and a single sans family used everywhere.\n\nThe interface favors quick comprehension over atmosphere. Pages are dense where they need to be, but the hierarchy stays calm: headers lead, panels contain, and actions are obvious. The responsive behavior is structural rather than theatrical, collapsing from a two-column layout to a single column at smaller widths so the workflow stays intact on mobile.\n\nThis system explicitly rejects anything extravagant, ornamental, or hard to use. It should never feel cluttered, flashy, or clever for its own sake. Familiar patterns win because the product is a university prototype and the job is to show the flow clearly.",
+    "keyCharacteristics": [
+      "Clear task-first hierarchy.",
+      "Familiar browser-native interactions.",
+      "Compact, readable forms and tables.",
+      "Orange as a functional accent, not decoration.",
+      "White surfaces, soft borders, and restrained elevation."
+    ],
+    "rules": [
+      {
+        "name": "The Accent Is Work Rule",
+        "body": "Tomato orange is reserved for primary actions, active states, and important totals. If everything is orange, nothing is.",
+        "section": "colors"
+      },
+      {
+        "name": "The Neutral First Rule",
+        "body": "Most of the screen should be gray, white, or ink. The surface carries the interface; the accent carries the intent.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "One sans family is enough for this app. Keep headings, controls, and data in the same voice.",
+        "section": "typography"
+      },
+      {
+        "name": "The Small-UI Rule",
+        "body": "Keep type fixed and compact. No fluid scaling, no display theatrics, and no oversized headers that break the dashboard rhythm.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Do not stack shadows on cards and controls. Flat surfaces with borders are the default; shadow is reserved for the few places that need true lift.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Lift Rule",
+        "body": "When depth appears, it should signal a single state change, not decorate every container.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the primary path obvious on every screen: login, browse, cart, admin.",
+      "Do use the existing gray-and-white surfaces as the base of the interface.",
+      "Do reserve tomato orange for primary actions, active states, and totals.",
+      "Do keep forms, cards, and tables compact and easy to scan.",
+      "Do preserve the familiar browser-native feel of the current prototype.",
+      "Do collapse the layout structurally on small screens so the flow stays usable.",
+      "Do use simple feedback blocks for success, error, and info states."
+    ],
+    "donts": [
+      "Don't make the interface extravagant, ornamental, or hard to use.",
+      "Don't add flashy motion, decorative effects, or clever interactions that slow the task down.",
+      "Don't introduce a new font family or a second visual voice.",
+      "Don't replace the current neutral background-and-surface system with a tinted or saturated full-page treatment.",
+      "Don't turn the accent color into decoration; it is functional.",
+      "Don't make cards, buttons, or inputs feel overdesigned or unusually rounded.",
+      "Don't obscure standard form and navigation behavior behind custom UI."
+    ]
+  }
+}

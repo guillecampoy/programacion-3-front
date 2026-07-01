@@ -1,126 +1,38 @@
 import type { IUser } from "../types/IUser";
 import { Rol, type Rol as RolType } from "../types/Rol";
-import {
-  getUser,
-  getUsers,
-  removeUser,
-  saveUser,
-  saveUsers,
-} from "./localStorage";
-import { hashPassword, isSha256Hash } from "./hash";
+import type { ApiUser } from "./api";
+import { fetchUserByEmail, fetchUsers, mapApiRoleToRole } from "./api";
+import { getUser, removeUser, saveUser } from "./localStorage";
 import { navigate, ROUTES } from "./navigate";
 
-const seedUsers: IUser[] = [
-  {
-    id: "admin-seed",
-    email: "admin@test.com",
-    password: "Admin1234",
-    role: Rol.Admin,
-  },
-  {
-    id: "client-seed",
-    email: "client@test.com",
-    password: "Client1234",
-    role: Rol.Client,
-  },
-];
-
-const hashUserPassword = async (user: IUser): Promise<IUser> => ({
-  ...user,
-  password: await hashPassword(user.password),
+const mapApiUserToSessionUser = (user: ApiUser): IUser => ({
+  id: user.id,
+  name: `${user.nombre} ${user.apellido}`.trim(),
+  email: user.mail.trim(),
+  role: mapApiRoleToRole(user.rol),
 });
 
-const migrateUsersIfNeeded = async (): Promise<IUser[]> => {
-  const users = getUsers();
-  let usersWereMigrated = false;
-
-  const migratedUsers = await Promise.all(
-    users.map(async (user) => {
-      if (isSha256Hash(user.password)) {
-        return user;
-      }
-
-      usersWereMigrated = true;
-      return hashUserPassword(user);
-    })
-  );
-
-  if (usersWereMigrated) {
-    saveUsers(migratedUsers);
-  }
-
-  return migratedUsers;
-};
-
-export const seedUsersIfNeeded = async (): Promise<void> => {
-  if (!localStorage.getItem("users")) {
-    saveUsers(await Promise.all(seedUsers.map(hashUserPassword)));
-    return;
-  }
-
-  const users = await migrateUsersIfNeeded();
-  const hashedSeedUsers = await Promise.all(seedUsers.map(hashUserPassword));
-  let usersWereUpdated = false;
-
-  const syncedUsers = users.map((user) => {
-    const matchingSeedUser = hashedSeedUsers.find(
-      (seedUser) => seedUser.id === user.id && seedUser.email === user.email
-    );
-
-    if (!matchingSeedUser || user.password === matchingSeedUser.password) {
-      return user;
-    }
-
-    usersWereUpdated = true;
-    return {
-      ...user,
-      password: matchingSeedUser.password,
-    };
-  });
-
-  if (usersWereUpdated) {
-    saveUsers(syncedUsers);
-  }
-
-  const hasAdmin = syncedUsers.some((user) => user.role === Rol.Admin);
-  const hasClient = syncedUsers.some((user) => user.role === Rol.Client);
-  const missingSeedUsers = seedUsers.filter((seedUser) => {
-    const roleIsMissing =
-      (seedUser.role === Rol.Admin && !hasAdmin) ||
-      (seedUser.role === Rol.Client && !hasClient);
-    const emailExists = syncedUsers.some((user) => user.email === seedUser.email);
-
-    return roleIsMissing && !emailExists;
-  });
-
-  if (missingSeedUsers.length > 0) {
-    saveUsers([
-      ...syncedUsers,
-      ...(await Promise.all(missingSeedUsers.map(hashUserPassword))),
-    ]);
-  }
-};
-
 export const registerUser = async (
+  name: string,
   email: string,
-  password: string
+  _password: string
 ): Promise<string | null> => {
+  const normalizedName = name.trim();
   const normalizedEmail = email.trim();
-  const users = await migrateUsersIfNeeded();
-  const userExists = users.some((user) => user.email === normalizedEmail);
+  const existingUser = await fetchUserByEmail(normalizedEmail).catch(() => null);
 
-  if (userExists) {
+  if (existingUser) {
     return "Ya existe un usuario con ese email.";
   }
 
   const newUser: IUser = {
     id: `user-${Date.now().toString()}`,
+    name: normalizedName,
     email: normalizedEmail,
-    password: await hashPassword(password),
     role: Rol.Client,
   };
 
-  saveUsers([...users, newUser]);
+  saveUser(newUser);
   return null;
 };
 
@@ -129,20 +41,20 @@ export const loginUser = async (
   password: string
 ): Promise<IUser | null> => {
   const normalizedEmail = email.trim();
-  const users = await migrateUsersIfNeeded();
-  const hashedPassword = await hashPassword(password);
+  const users = await fetchUsers().catch(() => []);
   const user = users.find(
     (storedUser) =>
-      storedUser.email === normalizedEmail &&
-      storedUser.password === hashedPassword
+      storedUser.mail.trim() === normalizedEmail &&
+      storedUser.password === password
   );
 
   if (!user) {
     return null;
   }
 
-  saveUser(user);
-  return user;
+  const sessionUser = mapApiUserToSessionUser(user);
+  saveUser(sessionUser);
+  return sessionUser;
 };
 
 export const redirectByRole = (user: IUser): void => {
@@ -186,9 +98,25 @@ const getRequiredRole = (path: string): RolType | null => {
   return null;
 };
 
-export const guardRoute = async (): Promise<void> => {
-  await seedUsersIfNeeded();
+export const canAccessRoute = (userRole: RolType, path: string): boolean => {
+  const requiredRole = getRequiredRole(path);
 
+  if (requiredRole === Rol.Admin) {
+    return userRole === Rol.Admin;
+  }
+
+  if (path === ROUTES.storeCart || path === ROUTES.clientOrders) {
+    return userRole === Rol.Client;
+  }
+
+  if (path === ROUTES.storeHome || path === ROUTES.storeProductDetail) {
+    return true;
+  }
+
+  return true;
+};
+
+export const guardRoute = async (): Promise<void> => {
   const path = window.location.pathname;
 
   if (isPublicRoute(path)) {
@@ -208,8 +136,8 @@ export const guardRoute = async (): Promise<void> => {
     return;
   }
 
-  if (currentUser.role !== requiredRole) {
-    redirectByRole(currentUser);
+  if (!canAccessRoute(currentUser.role, path)) {
+    navigate(ROUTES.storeHome);
   }
 };
 

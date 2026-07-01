@@ -3,6 +3,9 @@ import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
 import { logout } from "../../../utils/auth";
+import { calculateCartSummary, createOrderFromCart, saveOrders, getOrders } from "../../../utils/orders";
+import { navigate, ROUTES } from "../../../utils/navigate";
+import { validateCheckout } from "../../../utils/validation";
 import {
   clearCart,
   getCart,
@@ -10,55 +13,82 @@ import {
   removeProductFromCart,
   updateProductQuantityInCart,
 } from "../../../utils/localStorage";
+import { deductStock } from "../../../utils/productState";
+import { renderStoreNavigation } from "../../../utils/storeNavigation";
+import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
-buttonLogout?.addEventListener("click", () => {
-  logout();
-});
-
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
-const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
+const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const cartContent = document.querySelector<HTMLDivElement>("#cartContent");
+const clearCartButton = document.querySelector<HTMLButtonElement>("#clearCartButton");
 
-if (!loggedUserName || !logo || !cartQuantity || !cartContent) {
+if (!loggedUserName || !logo || !storeNavigation || !cartContent || !buttonLogout || !clearCartButton) {
   throw new Error("No se encontraron los elementos necesarios del carrito");
 }
 
-logo.src = logoImage;
-loggedUserName.textContent = getUser()?.email ?? "";
+buttonLogout.addEventListener("click", () => {
+  logout();
+});
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+clearCartButton.addEventListener("click", () => {
+  if (confirm("¿Vaciar el carrito? Se eliminarán todos los productos.")) {
+    clearCart();
+    renderCart();
+  }
+});
+
+logo.src = logoImage;
+loggedUserName.textContent = getUser()?.name ?? getUser()?.email ?? "";
+
+const currentUser = getUser();
+const isAdminUser = currentUser?.role === Rol.Admin;
+
+if (!currentUser) {
+  navigate(ROUTES.login);
+}
+
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+});
+
+const renderCartQuantity = (): void => {
+  renderStoreNavigation(storeNavigation, {
+    isAdmin: isAdminUser,
+    cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
+  });
+};
+
+const renderEmptyState = (): void => {
+  cartContent.className = "client-cart-box empty-cart-box";
+  cartContent.innerHTML = `
+    <div class="cart-empty-state">
+      <p class="empty-message">Tu carrito está vacío.</p>
+      <p>No tenés productos cargados en el pedido.</p>
+    </div>
+    <div class="cart-actions">
+      <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+    </div>
+  `;
+};
 
 const renderCart = (): void => {
   const cart = getCart();
-  const totalQuantity = cart.reduce(
-    (total, cartItem) => total + cartItem.quantity,
-    0
-  );
-  const totalAmount = cart.reduce(
-    (total, cartItem) => total + cartItem.product.price * cartItem.quantity,
-    0
-  );
+  const { subtotal, envio, total } = calculateCartSummary(cart);
 
-  cartQuantity.textContent = String(totalQuantity);
+  renderCartQuantity();
+  clearCartButton.hidden = cart.length === 0;
 
   if (cart.length === 0) {
-    cartContent.className = "client-cart-box empty-cart-box";
-    cartContent.innerHTML = `
-      <div class="cart-empty-state">
-        <p class="empty-message">Tu carrito está vacío.</p>
-        <p>No tenés productos cargados en el pedido.</p>
-      </div>
-      <div class="cart-actions">
-        <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
-      </div>
-    `;
+    renderEmptyState();
     return;
   }
 
   cartContent.className = "client-cart-box";
   cartContent.innerHTML = `
+    <p class="cart-help-text">Revisá los productos y ajustá las cantidades. Completá teléfono y forma de pago para confirmar el pedido.</p>
     <div class="cart-table-wrapper">
       <table class="cart-table">
         <thead>
@@ -76,36 +106,51 @@ const renderCart = (): void => {
             .map(
               (cartItem) => `
                 <tr>
-                  <td>
+                  <td data-label="Imagen">
                     <img
                       class="cart-product-image"
                       src="${cartItem.product.image}"
                       alt="${cartItem.product.name}"
                     >
                   </td>
-                  <td>${cartItem.product.name}</td>
-                  <td>$${currencyFormatter.format(cartItem.product.price)}</td>
-                  <td>
-                    <input
-                      type="number"
-                      class="cart-quantity-input"
-                      data-product-id="${cartItem.product.id}"
-                      value="${cartItem.quantity}"
-                      min="1"
-                      step="1"
-                      aria-label="Cantidad de ${cartItem.product.name}"
-                    >
+                  <td data-label="Producto">${cartItem.product.name}</td>
+                  <td data-label="Precio unitario">${currencyFormatter.format(cartItem.product.price)}</td>
+                  <td data-label="Cantidad">
+                    <div class="cart-qty-control">
+                      <button
+                        type="button"
+                        class="cart-qty-btn cart-qty-dec"
+                        data-product-id="${cartItem.product.id}"
+                        aria-label="Reducir cantidad de ${cartItem.product.name}"
+                      >−</button>
+                      <input
+                        type="number"
+                        class="cart-quantity-input"
+                        data-product-id="${cartItem.product.id}"
+                        value="${cartItem.quantity}"
+                        min="1"
+                        max="${cartItem.product.stock ?? cartItem.quantity}"
+                        step="1"
+                        aria-label="Cantidad de ${cartItem.product.name}"
+                      >
+                      <button
+                        type="button"
+                        class="cart-qty-btn cart-qty-inc"
+                        data-product-id="${cartItem.product.id}"
+                        aria-label="Aumentar cantidad de ${cartItem.product.name}"
+                      >+</button>
+                    </div>
+                    ${cartItem.product.stock !== undefined && cartItem.product.stock <= 5 ? `<span class="cart-stock-indicator">Stock: ${cartItem.product.stock}</span>` : ''}
                   </td>
-                  <td>$${currencyFormatter.format(
+                  <td data-label="Subtotal">${currencyFormatter.format(
                     cartItem.product.price * cartItem.quantity
                   )}</td>
-                  <td>
+                  <td data-label="Acción">
                     <button
                       type="button"
                       class="cart-remove-button"
                       data-product-id="${cartItem.product.id}"
                       aria-label="Eliminar ${cartItem.product.name} del carrito"
-                      title="Eliminar artículo"
                     >
                       Eliminar
                     </button>
@@ -117,35 +162,81 @@ const renderCart = (): void => {
         </tbody>
       </table>
     </div>
+    <section class="cart-totalizer" aria-label="Subtotal">
+      <span>Subtotal</span>
+      <strong>${currencyFormatter.format(subtotal)}</strong>
+    </section>
+    <section class="cart-totalizer" aria-label="Costo de envío">
+      <span>Envío</span>
+      <strong>${currencyFormatter.format(envio)}</strong>
+    </section>
     <section class="cart-totalizer" aria-label="Total del carrito">
       <span>Total</span>
-      <strong>$${currencyFormatter.format(totalAmount)}</strong>
+      <strong>${currencyFormatter.format(total)}</strong>
     </section>
-    <div class="cart-actions">
-      <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
-      <button
-        type="button"
-        id="clearCartButton"
-        class="cart-cancel-button"
-        title="Elimina el carrito"
+    <form id="checkoutForm" class="cart-checkout-box">
+      <h3 class="client-section-title">Finalizar pedido</h3>
+      <label for="phone">Teléfono</label>
+      <input
+        type="tel"
+        id="phone"
+        name="phone"
+        autocomplete="tel"
+        placeholder="Ej: 1155555555"
+        inputmode="numeric"
+        required
       >
-        Cancelar pedido
-      </button>
-    </div>
+      <small style="margin-top: -10px; margin-bottom: 10px; display: block; color: color-mix(in srgb, var(--color-texto) 72%, var(--color-blanco)); font-size: 12px;">Ingresá tu número sin espacios ni guiones, con código de área.</small>
+      <label for="paymentMethod">Forma de pago</label>
+      <select id="paymentMethod" name="paymentMethod" required>
+        <option value="">Seleccioná una forma de pago</option>
+        <option value="TARJETA">Tarjeta</option>
+        <option value="TRANSFERENCIA">Transferencia</option>
+        <option value="EFECTIVO">Efectivo</option>
+      </select>
+      <p id="checkoutMessage" class="form-message" aria-live="polite"></p>
+      <div class="cart-actions">
+        <a class="cart-return-link" href="../home/home.html">Agregar más productos</a>
+        <button type="submit" class="cart-confirm-button">Confirmar pedido</button>
+      </div>
+    </form>
   `;
 
-  const clearCartButton =
-    cartContent.querySelector<HTMLButtonElement>("#clearCartButton");
+  const checkoutForm = cartContent.querySelector<HTMLFormElement>("#checkoutForm");
+  const checkoutMessage =
+    cartContent.querySelector<HTMLParagraphElement>("#checkoutMessage");
   const removeButtons =
     cartContent.querySelectorAll<HTMLButtonElement>(".cart-remove-button");
   const quantityInputs =
     cartContent.querySelectorAll<HTMLInputElement>(".cart-quantity-input");
+  const qtyDecButtons =
+    cartContent.querySelectorAll<HTMLButtonElement>(".cart-qty-dec");
+  const qtyIncButtons =
+    cartContent.querySelectorAll<HTMLButtonElement>(".cart-qty-inc");
+  const phoneInput = cartContent.querySelector<HTMLInputElement>("#phone");
+  const paymentMethodSelect =
+    cartContent.querySelector<HTMLSelectElement>("#paymentMethod");
+
+  const setCheckoutMessage = (text: string, isError = false): void => {
+    if (!checkoutMessage) {
+      return;
+    }
+
+    checkoutMessage.textContent = text;
+    checkoutMessage.className = isError
+      ? "form-message form-message-error"
+      : "form-message form-message-success";
+  };
 
   removeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const productId = Number(button.dataset.productId);
 
       if (Number.isNaN(productId)) {
+        return;
+      }
+
+      if (!confirm("¿Eliminar este producto del carrito?")) {
         return;
       }
 
@@ -170,17 +261,88 @@ const renderCart = (): void => {
     });
   });
 
-  clearCartButton?.addEventListener("click", () => {
-    const shouldClearCart = window.confirm(
-      "¿Querés cancelar este pedido y limpiar el carrito?"
-    );
+  qtyDecButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const productId = Number(button.dataset.productId);
+      const input = cartContent.querySelector<HTMLInputElement>(
+        `.cart-quantity-input[data-product-id="${productId}"]`
+      );
 
-    if (!shouldClearCart) {
+      if (!input || Number(input.value) <= 1) {
+        return;
+      }
+
+      input.value = String(Number(input.value) - 1);
+      input.dispatchEvent(new Event("change"));
+    });
+  });
+
+  qtyIncButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const productId = Number(button.dataset.productId);
+      const input = cartContent.querySelector<HTMLInputElement>(
+        `.cart-quantity-input[data-product-id="${productId}"]`
+      );
+
+      if (!input || Number(input.value) >= Number(input.max)) {
+        return;
+      }
+
+      input.value = String(Number(input.value) + 1);
+      input.dispatchEvent(new Event("change"));
+    });
+  });
+
+  checkoutForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const confirmButton = checkoutForm.querySelector<HTMLButtonElement>(".cart-confirm-button");
+
+    if (confirmButton?.disabled) {
       return;
     }
 
-    clearCart();
-    renderCart();
+    const user = getUser();
+
+    if (!user) {
+      navigate(ROUTES.login);
+      return;
+    }
+
+    const phone = phoneInput?.value ?? "";
+    const paymentMethod = paymentMethodSelect?.value ?? "";
+    const validationError = validateCheckout(phone, paymentMethod);
+
+    if (validationError) {
+      setCheckoutMessage(validationError, true);
+      return;
+    }
+
+    if (confirmButton) {
+      confirmButton.disabled = true;
+      confirmButton.textContent = "Confirmando tu pedido…";
+    }
+
+    try {
+      const order = createOrderFromCart(
+        getCart(),
+        user,
+        phone,
+        paymentMethod as "TARJETA" | "TRANSFERENCIA" | "EFECTIVO"
+      );
+
+      deductStock(order.detalles);
+      saveOrders([...getOrders(), order]);
+      clearCart();
+      navigate(ROUTES.clientOrders);
+    } catch {
+      setCheckoutMessage("No pudimos confirmar tu pedido. Verificá tus datos y volvé a intentar.", true);
+
+      if (confirmButton) {
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Confirmar pedido";
+      }
+    }
   });
 };
 

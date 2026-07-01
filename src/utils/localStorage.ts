@@ -2,12 +2,17 @@ import type { CartItem } from "../types/Cart";
 import type { IUser } from "../types/IUser";
 import type { Product } from "../types/Product";
 import { Rol } from "../types/Rol";
+import { getProductStock as getEffectiveProductStock } from "./productState";
 
 const USERS_KEY = "users";
 const CURRENT_USER_KEY = "userData";
 const CART_KEY = "cart";
 
-const isUser = (value: unknown): value is IUser => {
+export interface IStoredUser extends IUser {
+  password: string;
+}
+
+const isSessionUser = (value: unknown): value is IUser => {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -16,13 +21,26 @@ const isUser = (value: unknown): value is IUser => {
 
   return (
     typeof user.id === "string" &&
+    (typeof user.name === "string" || typeof user.name === "undefined") &&
     typeof user.email === "string" &&
-    typeof user.password === "string" &&
     (user.role === Rol.Admin || user.role === Rol.Client)
   );
 };
 
-export const getUsers = (): IUser[] => {
+const isStoredUser = (value: unknown): value is IStoredUser => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const user = value as Record<string, unknown>;
+
+  return (
+    isSessionUser(user) &&
+    typeof user.password === "string"
+  );
+};
+
+export const getUsers = (): IStoredUser[] => {
   const usersFromStorage = localStorage.getItem(USERS_KEY);
 
   if (!usersFromStorage) {
@@ -36,13 +54,13 @@ export const getUsers = (): IUser[] => {
       return [];
     }
 
-    return parsedUsers.filter(isUser);
+    return parsedUsers.filter(isStoredUser);
   } catch {
     return [];
   }
 };
 
-export const saveUsers = (users: IUser[]): void => {
+export const saveUsers = (users: IStoredUser[]): void => {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
@@ -59,7 +77,7 @@ export const getUser = (): IUser | null => {
 
   try {
     const parsedUser = JSON.parse(userFromStorage) as unknown;
-    return isUser(parsedUser) ? parsedUser : null;
+    return isSessionUser(parsedUser) ? parsedUser : null;
   } catch {
     return null;
   }
@@ -132,6 +150,18 @@ export const removeProductFromCart = (productId: Product["id"]): CartItem[] => {
   return cart;
 };
 
+export const getCartQuantityForProduct = (productId: Product["id"]): number =>
+  getCart().find((item) => item.product.id === productId)?.quantity ?? 0;
+
+const getProductStock = (product: Product): number | null => {
+  const effectiveStock = getEffectiveProductStock(product.id);
+  const fallbackStock =
+    typeof product.stock === "number" && product.stock > 0 ? product.stock : 0;
+  const stock = effectiveStock > 0 ? effectiveStock : fallbackStock;
+
+  return stock > 0 ? stock : null;
+};
+
 export const updateProductQuantityInCart = (
   productId: Product["id"],
   quantity: number
@@ -140,22 +170,57 @@ export const updateProductQuantityInCart = (
     return getCart();
   }
 
-  const cart = getCart().map((item) =>
-    item.product.id === productId ? { ...item, quantity } : item
-  );
+  const cart = getCart().map((item) => {
+    if (item.product.id !== productId) {
+      return item;
+    }
+
+    const maxQuantity = getProductStock(item.product);
+
+    if (maxQuantity === 0) {
+      return item;
+    }
+
+    const nextQuantity =
+      typeof maxQuantity === "number" ? Math.min(quantity, maxQuantity) : quantity;
+
+    return { ...item, quantity: nextQuantity };
+  });
 
   saveCart(cart);
   return cart;
 };
 
-export const addProductToCart = (product: Product): CartItem[] => {
+export const addProductToCart = (product: Product, quantity = 1): CartItem[] => {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return getCart();
+  }
+
   const cart = getCart();
   const cartItem = cart.find((item) => item.product.id === product.id);
+  const maxQuantity = getProductStock(product);
+  const currentQuantity = cartItem?.quantity ?? 0;
 
   if (cartItem) {
-    cartItem.quantity += 1;
+    if (maxQuantity === 0) {
+      return cart;
+    }
+
+    const nextQuantity =
+      typeof maxQuantity === "number"
+        ? Math.min(currentQuantity + quantity, maxQuantity)
+        : currentQuantity + quantity;
+
+    cartItem.quantity = nextQuantity;
   } else {
-    cart.push({ product, quantity: 1 });
+    const nextQuantity =
+      typeof maxQuantity === "number" ? Math.min(quantity, maxQuantity) : quantity;
+
+    if (nextQuantity <= 0) {
+      return cart;
+    }
+
+    cart.push({ product, quantity: nextQuantity });
   }
 
   saveCart(cart);

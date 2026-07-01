@@ -2,47 +2,144 @@ import "../../../main";
 import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
-import type { Category, Product } from "../../../types/Product";
+import {
+  type ApiProduct,
+  type ApiUser,
+  fetchOrders,
+  fetchUsers,
+} from "../../../utils/api";
+import {
+  createAdminCategory,
+  deleteAdminCategory,
+  getVisibleAdminCategories,
+  isCategoryNameTaken,
+  updateAdminCategory,
+  type AdminCategory,
+} from "../../../utils/adminCategories";
+import {
+  createAdminProduct,
+  deleteAdminProduct,
+  getAdminProductCategoryName,
+  validateAdminProductInput,
+  updateAdminProduct,
+} from "../../../utils/adminProducts";
+import { buildAdminDashboardStats } from "../../../utils/adminDashboard";
+import {
+  filterAdminOrdersByStatus,
+  getAdminOrderCustomerName,
+  getAdminOrderItemCount,
+  sortAdminOrdersByDateDesc,
+  updateAdminOrderStatus,
+  type AdminOrderStatusFilter,
+} from "../../../utils/adminOrders";
 import { logout } from "../../../utils/auth";
 import {
-  getCategories,
-  getNextCategoryId,
+  getProductStock,
+  initCategories,
+  initProducts,
+  refundStock,
   saveCategories,
-} from "../../../utils/categories";
+  saveProducts,
+} from "../../../utils/productState";
 import { getUser } from "../../../utils/localStorage";
-import { getOrders } from "../../../utils/orders";
-import { productImageOptions } from "../../../utils/productImages";
-import { getNextProductId, getProducts, saveProducts } from "../../../utils/products";
+import { getOrders, saveOrders } from "../../../utils/orders";
+import { navigate, ROUTES } from "../../../utils/navigate";
+import {
+  productImageOptions,
+  resolveProductImageUrl,
+} from "../../../utils/productImages";
+import type { Order, OrderStatus } from "../../../types/Order";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
 buttonLogout?.addEventListener("click", () => {
   logout();
 });
 
+const goToStoreLink = document.querySelector<HTMLAnchorElement>("#goToStoreLink");
+goToStoreLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  navigate(ROUTES.storeHome);
+});
+
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
+const dashboardMessage = document.querySelector<HTMLParagraphElement>("#dashboardMessage");
+const dashboardMetrics = document.querySelector<HTMLDivElement>("#dashboardMetrics");
+const dashboardSummary = document.querySelector<HTMLDivElement>("#dashboardSummary");
+const openCategoryModalButton = document.querySelector<HTMLButtonElement>(
+  "#openCategoryModalButton"
+);
+const categoryModal = document.querySelector<HTMLDivElement>("#categoryModal");
+const closeCategoryModalButton = document.querySelector<HTMLButtonElement>(
+  "#closeCategoryModalButton"
+);
+const categoryModalTitle = document.querySelector<HTMLHeadingElement>(
+  "#categoryModalTitle"
+);
+const openProductModalButton = document.querySelector<HTMLButtonElement>(
+  "#openProductModalButton"
+);
+const productModal = document.querySelector<HTMLDivElement>("#productModal");
+const closeProductModalButton = document.querySelector<HTMLButtonElement>(
+  "#closeProductModalButton"
+);
+const productModalTitle = document.querySelector<HTMLHeadingElement>(
+  "#productModalTitle"
+);
 const form = document.querySelector<HTMLFormElement>("#productForm");
-const productSection = document.querySelector<HTMLElement>("#productos");
 const productIdInput = document.querySelector<HTMLInputElement>("#productId");
 const nameInput = document.querySelector<HTMLInputElement>("#productName");
-const categorySelect =
-  document.querySelector<HTMLSelectElement>("#productCategory");
-const priceInput = document.querySelector<HTMLInputElement>("#productPrice");
-const imageInput = document.querySelector<HTMLSelectElement>("#productImage");
-const imagePreview =
-  document.querySelector<HTMLImageElement>("#productImagePreview");
 const descriptionInput =
   document.querySelector<HTMLTextAreaElement>("#productDescription");
-const longDescriptionInput = document.querySelector<HTMLTextAreaElement>(
-  "#productLongDescription"
-);
-const featuredInput =
-  document.querySelector<HTMLInputElement>("#productFeatured");
+const priceInput = document.querySelector<HTMLInputElement>("#productPrice");
+const stockInput = document.querySelector<HTMLInputElement>("#productStock");
+const categorySelect =
+  document.querySelector<HTMLSelectElement>("#productCategory");
+const imageInput = document.querySelector<HTMLSelectElement>("#productImage");
+const availableInput = document.querySelector<HTMLInputElement>("#productAvailable");
+const imagePreview =
+  document.querySelector<HTMLImageElement>("#productImagePreview");
 const message = document.querySelector<HTMLParagraphElement>("#productMessage");
 const productsTableBody =
   document.querySelector<HTMLTableSectionElement>("#productsTableBody");
+const productsMessage =
+  document.querySelector<HTMLParagraphElement>("#productsMessage");
 const ordersTableBody =
   document.querySelector<HTMLTableSectionElement>("#ordersTableBody");
+const ordersMessage =
+  document.querySelector<HTMLParagraphElement>("#ordersMessage");
+const ordersFilterForm = document.querySelector<HTMLFormElement>(
+  "#ordersFilterForm"
+);
+const orderStatusFilter = document.querySelector<HTMLSelectElement>(
+  "#orderStatusFilter"
+);
+const orderModal = document.querySelector<HTMLDivElement>("#orderModal");
+const closeOrderModalButton = document.querySelector<HTMLButtonElement>(
+  "#closeOrderModalButton"
+);
+const orderModalTitle = document.querySelector<HTMLHeadingElement>(
+  "#orderModalTitle"
+);
+const orderModalStatusBadge = document.querySelector<HTMLParagraphElement>(
+  "#orderModalStatusBadge"
+);
+const orderModalId = document.querySelector<HTMLSpanElement>("#orderModalId");
+const orderModalCustomer = document.querySelector<HTMLSpanElement>(
+  "#orderModalCustomer"
+);
+const orderModalDate = document.querySelector<HTMLSpanElement>("#orderModalDate");
+const orderModalTotal = document.querySelector<HTMLSpanElement>("#orderModalTotal");
+const orderModalPhone = document.querySelector<HTMLSpanElement>("#orderModalPhone");
+const orderModalPayment = document.querySelector<HTMLSpanElement>(
+  "#orderModalPayment"
+);
+const orderStatusSelect = document.querySelector<HTMLSelectElement>(
+  "#orderStatusSelect"
+);
+const orderDetailsTableBody = document.querySelector<HTMLTableSectionElement>(
+  "#orderDetailsTableBody"
+);
 const cancelEditButton =
   document.querySelector<HTMLButtonElement>("#cancelEditButton");
 const adminSearchForm =
@@ -55,8 +152,17 @@ const categoryForm = document.querySelector<HTMLFormElement>("#categoryForm");
 const categoryIdInput = document.querySelector<HTMLInputElement>("#categoryId");
 const categoryNameInput =
   document.querySelector<HTMLInputElement>("#categoryName");
+const categoryDescriptionInput = document.querySelector<HTMLTextAreaElement>(
+  "#categoryDescription"
+);
+const categoryImageSelect =
+  document.querySelector<HTMLSelectElement>("#categoryImage");
+const categoryImagePreview =
+  document.querySelector<HTMLImageElement>("#categoryImagePreview");
 const categoryMessage =
   document.querySelector<HTMLParagraphElement>("#categoryMessage");
+const categoriesMessage =
+  document.querySelector<HTMLParagraphElement>("#categoriesMessage");
 const categoriesTableBody =
   document.querySelector<HTMLTableSectionElement>("#categoriesTableBody");
 const cancelCategoryEditButton = document.querySelector<HTMLButtonElement>(
@@ -66,20 +172,46 @@ const cancelCategoryEditButton = document.querySelector<HTMLButtonElement>(
 if (
   !logo ||
   !loggedUserName ||
+  !dashboardMessage ||
+  !dashboardMetrics ||
+  !dashboardSummary ||
+  !openCategoryModalButton ||
+  !categoryModal ||
+  !closeCategoryModalButton ||
+  !categoryModalTitle ||
+  !openProductModalButton ||
+  !productModal ||
+  !closeProductModalButton ||
+  !productModalTitle ||
   !form ||
-  !productSection ||
   !productIdInput ||
   !nameInput ||
-  !categorySelect ||
-  !priceInput ||
-  !imageInput ||
-  !imagePreview ||
   !descriptionInput ||
-  !longDescriptionInput ||
-  !featuredInput ||
+  !priceInput ||
+  !stockInput ||
+  !categorySelect ||
+  !imageInput ||
+  !availableInput ||
+  !imagePreview ||
   !message ||
   !productsTableBody ||
+  !productsMessage ||
   !ordersTableBody ||
+  !ordersMessage ||
+  !ordersFilterForm ||
+  !orderStatusFilter ||
+  !orderModal ||
+  !closeOrderModalButton ||
+  !orderModalTitle ||
+  !orderModalStatusBadge ||
+  !orderModalId ||
+  !orderModalCustomer ||
+  !orderModalDate ||
+  !orderModalTotal ||
+  !orderModalPhone ||
+  !orderModalPayment ||
+  !orderStatusSelect ||
+  !orderDetailsTableBody ||
   !cancelEditButton ||
   !adminSearchForm ||
   !adminSearchInput ||
@@ -87,7 +219,11 @@ if (
   !categoryForm ||
   !categoryIdInput ||
   !categoryNameInput ||
+  !categoryDescriptionInput ||
+  !categoryImageSelect ||
+  !categoryImagePreview ||
   !categoryMessage ||
+  !categoriesMessage ||
   !categoriesTableBody ||
   !cancelCategoryEditButton
 ) {
@@ -97,15 +233,27 @@ if (
 logo.src = logoImage;
 loggedUserName.textContent = getUser()?.email ?? "";
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+});
+const numberFormatter = new Intl.NumberFormat("es-AR");
 
 type FormMessageType = "success" | "error" | "info";
 
-let products = getProducts();
-let productCategories = getCategories();
+let productCategories: AdminCategory[] = [];
+let adminProducts: ApiProduct[] = [];
+let adminUsers: ApiUser[] = [];
+let adminOrders: Order[] = [];
+let selectedOrderStatus: AdminOrderStatusFilter = "TODOS";
+let activeOrderId: string | null = null;
 
-const normalizeCategoryName = (categoryName: string): string =>
-  categoryName.replace(/\s+/g, "").toLowerCase();
+const metricToneClass = {
+  neutral: "dashboard-metric-neutral",
+  accent: "dashboard-metric-accent",
+  success: "dashboard-metric-success",
+  warning: "dashboard-metric-warning",
+} as const;
 
 const normalizeSearchText = (value: string): string =>
   value
@@ -129,48 +277,117 @@ const clearFormMessage = (element: HTMLParagraphElement): void => {
   element.removeAttribute("role");
 };
 
-const resetForm = (clearMessage = true): void => {
-  form.reset();
-  productIdInput.value = "";
-  updateImagePreview();
-
-  if (clearMessage) {
-    clearFormMessage(message);
+const updateCategoryImagePreview = (): void => {
+  if (!categoryImageSelect.value) {
+    categoryImagePreview.removeAttribute("src");
+    categoryImagePreview.alt = "Sin imagen seleccionada";
+    return;
   }
+
+  categoryImagePreview.src = resolveProductImageUrl(categoryImageSelect.value);
+  categoryImagePreview.alt = categoryImageSelect.selectedOptions[0]?.textContent
+    ? `Vista previa de ${categoryImageSelect.selectedOptions[0].textContent}`
+    : "Vista previa de imagen seleccionada";
+};
+
+const renderCategoryImageOptions = (): void => {
+  categoryImageSelect.innerHTML = "";
+
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "";
+  emptyOption.textContent = "Seleccioná una imagen";
+  categoryImageSelect.appendChild(emptyOption);
+
+  productImageOptions.forEach((imageOption) => {
+    const option = document.createElement("option");
+    option.value = imageOption.fileName;
+    option.textContent = imageOption.label;
+    categoryImageSelect.appendChild(option);
+  });
+
+  updateCategoryImagePreview();
+};
+
+const openCategoryModal = (title: string): void => {
+  categoryModalTitle.textContent = title;
+  categoryModal.hidden = false;
+  categoryNameInput.focus();
+};
+
+const closeCategoryModal = (): void => {
+  categoryModal.hidden = true;
+  openCategoryModalButton.focus();
 };
 
 const resetCategoryForm = (clearMessage = true): void => {
   categoryForm.reset();
   categoryIdInput.value = "";
+  updateCategoryImagePreview();
 
   if (clearMessage) {
     clearFormMessage(categoryMessage);
   }
 };
 
-const renderCategories = (): void => {
-  categorySelect.innerHTML = "";
+const renderCategoryTable = (): void => {
+  categoriesTableBody.innerHTML = "";
 
-  productCategories.forEach((category) => {
-    const option = document.createElement("option");
-    option.value = category.name;
-    option.textContent = category.name;
-    categorySelect.appendChild(option);
+  const visibleCategories = getVisibleAdminCategories(productCategories);
+
+  categoriesMessage.textContent =
+    visibleCategories.length === 0 ? "No hay categorías cargadas." : "";
+
+  visibleCategories.forEach((category) => {
+    const tr = document.createElement("tr");
+    const imageUrl = resolveProductImageUrl(category.imagen);
+
+    tr.innerHTML = `
+      <td>${category.nombre}</td>
+      <td>${category.descripcion}</td>
+      <td>
+        <img class="admin-category-image" src="${imageUrl}" alt="${category.nombre}" loading="lazy">
+      </td>
+      <td>Activa</td>
+      <td>
+        <button type="button" class="button-secondary btn-edit-category" data-id="${category.id}">Editar</button>
+        <button type="button" class="btn-delete-category" data-id="${category.id}">Eliminar</button>
+      </td>
+    `;
+
+    categoriesTableBody.appendChild(tr);
   });
 };
 
-const updateImagePreview = (): void => {
-  const selectedOption = imageInput.selectedOptions[0];
+const renderProductCategoryOptions = (): void => {
+  categorySelect.innerHTML = "";
 
+  const visibleCategories = getVisibleAdminCategories(productCategories);
+
+  visibleCategories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = String(category.id);
+    option.textContent = category.nombre;
+    categorySelect.appendChild(option);
+  });
+
+  if (visibleCategories.length === 0) {
+    const emptyOption = document.createElement("option");
+    emptyOption.value = "";
+    emptyOption.textContent = "Creá una categoría primero";
+    categorySelect.appendChild(emptyOption);
+  }
+};
+
+const updateProductImagePreview = (): void => {
   if (!imageInput.value) {
     imagePreview.removeAttribute("src");
     imagePreview.alt = "Sin imagen seleccionada";
     return;
   }
 
-  imagePreview.src = imageInput.value;
-  imagePreview.alt = selectedOption?.textContent
-    ? `Vista previa de ${selectedOption.textContent}`
+  imagePreview.src = resolveProductImageUrl(imageInput.value);
+  imagePreview.alt = imageInput.selectedOptions[0]?.textContent
+    ? `Vista previa de ${imageInput.selectedOptions[0].textContent}`
     : "Vista previa de imagen seleccionada";
 };
 
@@ -184,17 +401,97 @@ const renderProductImageOptions = (): void => {
 
   productImageOptions.forEach((imageOption) => {
     const option = document.createElement("option");
-    option.value = imageOption.url;
+    option.value = imageOption.fileName;
     option.textContent = imageOption.label;
     imageInput.appendChild(option);
   });
 
-  updateImagePreview();
+  updateProductImagePreview();
+};
+
+const renderProductTable = (): void => {
+  productsTableBody.innerHTML = "";
+
+  const searchText = normalizeSearchText(adminSearchInput.value.trim());
+  const productsToRender = adminProducts.filter((product) => {
+    if (!searchText) {
+      return true;
+    }
+
+    const categoryName = getAdminProductCategoryName(
+      product.categoriaId,
+      productCategories
+    );
+
+    return (
+      normalizeSearchText(product.nombre).includes(searchText) ||
+      normalizeSearchText(product.descripcion).includes(searchText) ||
+      normalizeSearchText(categoryName ?? "").includes(searchText)
+    );
+  });
+
+  adminSearchMessage.textContent =
+    searchText && productsToRender.length === 0
+      ? "No se encontraron productos con ese nombre."
+      : "";
+  productsMessage.textContent =
+    productsToRender.length === 0 ? "No hay productos para mostrar." : "";
+
+  if (productsToRender.length === 0) {
+    return;
+  }
+
+  productsToRender.forEach((product) => {
+    const tr = document.createElement("tr");
+    const categoryName =
+      getAdminProductCategoryName(product.categoriaId, productCategories) ??
+      "Categoría eliminada";
+    const imageUrl = resolveProductImageUrl(product.imagen);
+
+    tr.innerHTML = `
+      <td>${product.nombre}</td>
+      <td>${product.descripcion}</td>
+      <td>${currencyFormatter.format(product.precio)}</td>
+      <td>${getProductStock(product.id)}</td>
+      <td>${categoryName}</td>
+      <td>
+        <img class="admin-product-image" src="${imageUrl}" alt="${product.nombre}" loading="lazy">
+      </td>
+      <td>${product.disponible ? "Sí" : "No"}</td>
+      <td>
+        <button type="button" class="button-secondary btn-edit-product" data-id="${product.id}">Editar</button>
+        <button type="button" class="btn-delete-product" data-id="${product.id}">Eliminar</button>
+      </td>
+    `;
+
+    productsTableBody.appendChild(tr);
+  });
+};
+
+const openProductModal = (title: string): void => {
+  productModalTitle.textContent = title;
+  productModal.hidden = false;
+  nameInput.focus();
+};
+
+const closeProductModal = (): void => {
+  productModal.hidden = true;
+  openProductModalButton.focus();
+};
+
+const resetProductForm = (clearMessage = true): void => {
+  form.reset();
+  productIdInput.value = "";
+  updateProductImagePreview();
+
+  if (clearMessage) {
+    clearFormMessage(message);
+  }
 };
 
 const selectProductImage = (imageUrl: string): void => {
   const hasImageOption = productImageOptions.some(
-    (imageOption) => imageOption.url === imageUrl
+    (imageOption) => imageOption.fileName === imageUrl
   );
 
   if (!hasImageOption) {
@@ -205,225 +502,401 @@ const selectProductImage = (imageUrl: string): void => {
   }
 
   imageInput.value = imageUrl;
-  updateImagePreview();
+  updateProductImagePreview();
 };
 
-const renderCategoryTable = (): void => {
-  categoriesTableBody.innerHTML = "";
+const orderStatusOptions: Array<{ value: OrderStatus; label: string }> = [
+  { value: "PENDIENTE", label: "Pendiente" },
+  { value: "CONFIRMADO", label: "Confirmado" },
+  { value: "TERMINADO", label: "Terminado" },
+  { value: "CANCELADO", label: "Cancelado" },
+];
 
-  productCategories.forEach((category) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${category.name}</td>
-      <td>
-        <button type="button" class="button-secondary btn-edit-category" data-id="${category.id}">Editar</button>
-        <button type="button" class="btn-delete-category" data-id="${category.id}">Eliminar</button>
-      </td>
-    `;
+const getOrderStatusBadgeClass = (status: OrderStatus): string =>
+  `order-status-badge order-status-${status.toLowerCase()}`;
 
-    categoriesTableBody.appendChild(tr);
+const renderOrderStatusSelectOptions = (): void => {
+  orderStatusSelect.innerHTML = "";
+
+  orderStatusOptions.forEach((optionConfig) => {
+    const option = document.createElement("option");
+    option.value = optionConfig.value;
+    option.textContent = optionConfig.label;
+    orderStatusSelect.appendChild(option);
   });
 };
 
-const productMatchesSearch = (product: Product, searchText: string): boolean =>
-  normalizeSearchText(product.name).includes(normalizeSearchText(searchText));
+const renderOrderDetails = (order: Order): void => {
+  orderDetailsTableBody.innerHTML = "";
 
-const getFilteredProducts = (): Product[] => {
-  const searchText = adminSearchInput.value.trim();
-
-  if (!searchText) {
-    return products;
-  }
-
-  return products.filter((product) => productMatchesSearch(product, searchText));
-};
-
-const renderProducts = (productsToRender = getFilteredProducts()): void => {
-  productsTableBody.innerHTML = "";
-  adminSearchMessage.textContent = "";
-
-  if (productsToRender.length === 0) {
-    adminSearchMessage.textContent = "No se encontraron productos con ese nombre.";
+  if (order.detalles.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="3">El pedido no tiene productos.</td>`;
+    orderDetailsTableBody.appendChild(tr);
     return;
   }
 
-  productsToRender.forEach((product) => {
+  order.detalles.forEach((detail) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${product.name}</td>
-      <td>${product.category}</td>
-      <td>$${currencyFormatter.format(product.price)}</td>
-      <td>${product.destacado ? "Sí" : "No"}</td>
-      <td>
-        <button type="button" class="button-secondary btn-edit" data-id="${
-          product.id
-        }">Editar</button>
-        <button type="button" class="btn-delete" data-id="${
-          product.id
-        }">Eliminar</button>
-      </td>
+      <td>${detail.productName ?? `Producto ${detail.idProducto}`}</td>
+      <td>${detail.cantidad}</td>
+      <td>${currencyFormatter.format(detail.subtotal)}</td>
     `;
-
-    productsTableBody.appendChild(tr);
+    orderDetailsTableBody.appendChild(tr);
   });
+};
+
+const syncOrderModal = (): void => {
+  if (!activeOrderId) {
+    return;
+  }
+
+  const order = adminOrders.find((item) => item.id === activeOrderId);
+
+  if (!order) {
+    closeOrderModal();
+    return;
+  }
+
+  const customerName = getAdminOrderCustomerName(order, adminUsers);
+  const itemCount = getAdminOrderItemCount(order);
+
+  orderModalTitle.textContent = `Pedido ${order.id} · ${itemCount} items`;
+  orderModalStatusBadge.textContent = order.estado;
+  orderModalStatusBadge.className = getOrderStatusBadgeClass(order.estado);
+  orderModalId.textContent = order.id;
+  orderModalCustomer.textContent = customerName;
+  orderModalDate.textContent = order.fecha;
+  orderModalTotal.textContent = `${currencyFormatter.format(order.total)}`;
+  orderModalPhone.textContent = order.telefono ?? "Sin teléfono";
+  orderModalPayment.textContent = order.formaPago;
+  orderStatusSelect.value = order.estado;
+  orderStatusSelect.setAttribute("aria-label", `Cambiar estado de ${order.id}`);
+  renderOrderDetails(order);
+};
+
+let lastOrderTrigger: HTMLButtonElement | null = null;
+
+const openOrderModal = (order: Order, trigger?: HTMLButtonElement): void => {
+  activeOrderId = order.id;
+  lastOrderTrigger = trigger ?? null;
+  orderModal.hidden = false;
+  syncOrderModal();
+  closeOrderModalButton.focus();
+};
+
+const closeOrderModal = (): void => {
+  activeOrderId = null;
+  orderModal.hidden = true;
+  lastOrderTrigger?.focus();
+  lastOrderTrigger = null;
 };
 
 const renderOrders = (): void => {
   ordersTableBody.innerHTML = "";
 
-  getOrders().forEach((order) => {
+  const visibleOrders = filterAdminOrdersByStatus(
+    adminOrders,
+    selectedOrderStatus
+  );
+
+  ordersMessage.textContent =
+    visibleOrders.length === 0
+      ? selectedOrderStatus === "TODOS"
+        ? "No hay pedidos para mostrar."
+        : "No hay pedidos para ese estado."
+      : selectedOrderStatus === "TODOS"
+        ? ""
+        : `Pedidos filtrados por ${selectedOrderStatus.toLowerCase()}.`;
+
+  if (visibleOrders.length === 0) {
+    return;
+  }
+
+  visibleOrders.forEach((order) => {
     const tr = document.createElement("tr");
-    const itemCount = order.items.reduce(
-      (totalItems, item) => totalItems + item.quantity,
-      0
-    );
+    const customerName = getAdminOrderCustomerName(order, adminUsers);
 
     tr.innerHTML = `
       <td>${order.id}</td>
-      <td>${order.clientEmail}</td>
-      <td>${order.status}</td>
-      <td>${itemCount}</td>
-      <td>$${currencyFormatter.format(order.total)}</td>
-      <td>${order.createdAt}</td>
+      <td>${customerName}</td>
+      <td>${order.fecha}</td>
+      <td><span class="${getOrderStatusBadgeClass(order.estado)}">${order.estado}</span></td>
+      <td>${currencyFormatter.format(order.total)}</td>
+      <td>
+        <button type="button" class="button-secondary btn-view-order" data-id="${order.id}">Ver detalle</button>
+      </td>
     `;
 
     ordersTableBody.appendChild(tr);
   });
 };
 
-const persistProducts = (): void => {
-  saveProducts(products);
-  renderProducts();
+const renderDashboard = async (): Promise<void> => {
+  dashboardMessage.textContent = "Cargando dashboard...";
+  try {
+    const [apiCategories, apiProducts, apiUsers, apiOrders] = await Promise.all([
+      initCategories(),
+      initProducts(),
+      fetchUsers().catch(() => []),
+      fetchOrders().catch(() => []),
+    ]);
+
+    const stats = buildAdminDashboardStats({
+      categories: apiCategories,
+      products: apiProducts,
+      users: apiUsers,
+      orders: apiOrders,
+    });
+
+    dashboardMessage.textContent = "";
+    dashboardMetrics.innerHTML = `
+      <article class="dashboard-metric ${metricToneClass.accent}">
+        <span>Total categorías</span>
+        <strong>${numberFormatter.format(stats.totalCategories)}</strong>
+      </article>
+      <article class="dashboard-metric ${metricToneClass.neutral}">
+        <span>Total productos</span>
+        <strong>${numberFormatter.format(stats.totalProducts)}</strong>
+      </article>
+      <article class="dashboard-metric ${metricToneClass.warning}">
+        <span>Total pedidos</span>
+        <strong>${numberFormatter.format(stats.totalOrders)}</strong>
+      </article>
+      <article class="dashboard-metric ${metricToneClass.success}">
+        <span>Productos disponibles</span>
+        <strong>${numberFormatter.format(stats.availableProducts)}</strong>
+      </article>
+    `;
+
+    dashboardSummary.innerHTML = `
+      <article class="dashboard-summary-card">
+        <h3>Categorías</h3>
+        <p>Activas: <strong>${stats.activeCategories}</strong></p>
+        <p>Inactivas: <strong>${stats.inactiveCategories}</strong></p>
+      </article>
+      <article class="dashboard-summary-card">
+        <h3>Productos</h3>
+        <p>Disponibles: <strong>${stats.activeProducts}</strong></p>
+        <p>No disponibles: <strong>${stats.inactiveProducts}</strong></p>
+      </article>
+      <article class="dashboard-summary-card">
+        <h3>Usuarios</h3>
+        <p>Administradores: <strong>${stats.adminUsers}</strong></p>
+        <p>Clientes: <strong>${stats.clientUsers}</strong></p>
+      </article>
+      <article class="dashboard-summary-card dashboard-summary-card-wide">
+        <h3>Pedidos por estado</h3>
+        <ul class="dashboard-status-list">
+          <li>Pendientes: <strong>${stats.orderStatusCounts.PENDIENTE}</strong></li>
+          <li>Confirmados: <strong>${stats.orderStatusCounts.CONFIRMADO}</strong></li>
+          <li>Terminados: <strong>${stats.orderStatusCounts.TERMINADO}</strong></li>
+          <li>Cancelados: <strong>${stats.orderStatusCounts.CANCELADO}</strong></li>
+        </ul>
+      </article>
+    `;
+  } catch {
+    dashboardMessage.textContent = "No pudimos cargar los datos del panel. Verificá tu conexión y recargá la página.";
+    dashboardMetrics.innerHTML = "";
+    dashboardSummary.innerHTML = "";
+  }
 };
 
-const persistCategories = (): void => {
-  saveCategories(productCategories);
-  renderCategories();
+const refreshCategoryViews = (): void => {
+  renderProductCategoryOptions();
   renderCategoryTable();
+  renderProductTable();
 };
 
-const getFormCategory = (): Category => categorySelect.value as Category;
+const loadAdminCategories = async (): Promise<void> => {
+  categoriesMessage.textContent = "Cargando categorías...";
+  productCategories = await initCategories();
+  categoriesMessage.textContent = "";
+  refreshCategoryViews();
+};
+
+const refreshProductViews = (): void => {
+  renderProductCategoryOptions();
+  renderProductTable();
+};
+
+const loadAdminProducts = async (): Promise<void> => {
+  productsMessage.textContent = "Cargando productos...";
+  adminProducts = await initProducts();
+  productsMessage.textContent = "";
+  refreshProductViews();
+};
+
+const loadAdminOrders = async (): Promise<void> => {
+  ordersMessage.textContent = "Cargando pedidos...";
+  const [apiOrders, localOrders, users] = await Promise.all([
+    fetchOrders().catch(() => []),
+    Promise.resolve(getOrders()),
+    fetchUsers().catch(() => []),
+  ]);
+
+  adminUsers = users;
+  adminOrders = sortAdminOrdersByDateDesc([...apiOrders, ...localOrders]);
+  ordersMessage.textContent = "";
+  renderOrders();
+};
+
+const openProductEditor = (product?: ApiProduct): void => {
+  resetProductForm();
+
+  if (product) {
+    productIdInput.value = String(product.id);
+    nameInput.value = product.nombre;
+    descriptionInput.value = product.descripcion;
+    priceInput.value = String(product.precio);
+    stockInput.value = String(product.stock);
+    categorySelect.value = String(product.categoriaId);
+    selectProductImage(product.imagen);
+    availableInput.checked = product.disponible;
+  }
+
+  openProductModal(product ? "Editar producto" : "Nuevo producto");
+  nameInput.focus();
+};
+
+const openCategoryEditor = (category?: AdminCategory): void => {
+  resetCategoryForm();
+  if (category) {
+    categoryIdInput.value = String(category.id);
+    categoryNameInput.value = category.nombre;
+    categoryDescriptionInput.value = category.descripcion;
+    categoryImageSelect.value = category.imagen;
+    updateCategoryImagePreview();
+  }
+
+  openCategoryModal(category ? "Editar categoría" : "Nueva categoría");
+  categoryNameInput.focus();
+};
+
+let isProductSubmitting = false;
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isProductSubmitting) return;
+  isProductSubmitting = true;
 
-  if (productCategories.length === 0) {
-    setFormMessage(
-      message,
-      "Creá una categoría antes de cargar productos.",
-      "error"
+  try {
+    const activeCategories = getVisibleAdminCategories(productCategories);
+
+    if (activeCategories.length === 0) {
+      setFormMessage(
+        message,
+        "Creá una categoría antes de cargar productos.",
+        "error"
+      );
+      return;
+    }
+
+    const productId = Number(productIdInput.value);
+    const productInput = {
+      nombre: nameInput.value.trim(),
+      descripcion: descriptionInput.value.trim(),
+      precio: Number(priceInput.value),
+      stock: Number(stockInput.value),
+      categoriaId: Number(categorySelect.value),
+      imagen: imageInput.value.trim(),
+      disponible: availableInput.checked,
+    };
+
+    const validationError = validateAdminProductInput(
+      productInput,
+      productCategories
     );
-    return;
+
+    if (validationError) {
+      setFormMessage(message, validationError, "error");
+      return;
+    }
+
+    if (productId) {
+      adminProducts = updateAdminProduct(adminProducts, productId, productInput);
+      setFormMessage(message, "Producto actualizado correctamente.", "success");
+    } else {
+      adminProducts = createAdminProduct(adminProducts, productInput);
+      setFormMessage(message, "Producto creado correctamente.", "success");
+    }
+
+    saveProducts(adminProducts);
+    refreshProductViews();
+    resetProductForm(false);
+    closeProductModal();
+  } finally {
+    isProductSubmitting = false;
   }
-
-  const productId = Number(productIdInput.value);
-  const productPrice = Number(priceInput.value);
-  const productData: Product = {
-    id: productId || getNextProductId(products),
-    name: nameInput.value.trim(),
-    description: descriptionInput.value.trim(),
-    longDescription: longDescriptionInput.value.trim(),
-    price: productPrice,
-    image: imageInput.value.trim(),
-    category: getFormCategory(),
-    destacado: featuredInput.checked,
-  };
-
-  if (
-    !productData.name ||
-    !productData.description ||
-    !productData.longDescription ||
-    !productData.image ||
-    !Number.isFinite(productData.price) ||
-    productData.price <= 0
-  ) {
-    setFormMessage(
-      message,
-      "Completá todos los campos del producto con un precio numérico mayor a cero.",
-      "error"
-    );
-    return;
-  }
-
-  if (productId) {
-    products = products.map((product) =>
-      product.id === productId ? productData : product
-    );
-    setFormMessage(message, "Producto actualizado correctamente.", "success");
-  } else {
-    products = [...products, productData];
-    setFormMessage(message, "Producto creado correctamente.", "success");
-  }
-
-  persistProducts();
-  resetForm(false);
 });
+
+let isCategorySubmitting = false;
 
 categoryForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (isCategorySubmitting) return;
+  isCategorySubmitting = true;
 
-  const categoryId = Number(categoryIdInput.value);
-  const categoryName = categoryNameInput.value.trim();
-  const normalizedCategoryName = normalizeCategoryName(categoryName);
-  const currentCategory = productCategories.find(
-    (category) => category.id === categoryId
-  );
-  const categoryAlreadyExists = productCategories.some(
-    (category) =>
-      normalizeCategoryName(category.name) === normalizedCategoryName &&
-      category.id !== categoryId
-  );
-
-  if (!categoryName) {
-    setFormMessage(
-      categoryMessage,
-      "Completá el nombre de la categoría.",
-      "error"
+  try {
+    const categoryId = Number(categoryIdInput.value);
+    const categoryName = categoryNameInput.value.trim();
+    const categoryDescription = categoryDescriptionInput.value.trim();
+    const categoryImage = categoryImageSelect.value.trim();
+    const currentCategory = productCategories.find(
+      (category) => category.id === categoryId
     );
-    return;
+    const categoryAlreadyExists = isCategoryNameTaken(
+      productCategories,
+      categoryName,
+      categoryId || undefined
+    );
+
+    if (!categoryName || !categoryDescription || !categoryImage) {
+      setFormMessage(categoryMessage, "Completá todos los campos.", "error");
+      return;
+    }
+
+    if (categoryAlreadyExists) {
+      setFormMessage(
+        categoryMessage,
+        "Ya existe una categoría con ese nombre.",
+        "error"
+      );
+      return;
+    }
+
+    if (categoryId && currentCategory) {
+      productCategories = updateAdminCategory(productCategories, categoryId, {
+        name: categoryName,
+        description: categoryDescription,
+        image: categoryImage,
+      });
+      setFormMessage(
+        categoryMessage,
+        "Categoría actualizada correctamente.",
+        "success"
+      );
+    } else {
+      productCategories = createAdminCategory(productCategories, {
+        name: categoryName,
+        description: categoryDescription,
+        image: categoryImage,
+      });
+      setFormMessage(
+        categoryMessage,
+        "Categoría creada correctamente.",
+        "success"
+      );
+    }
+
+    saveCategories(productCategories);
+    refreshCategoryViews();
+    resetCategoryForm(false);
+    closeCategoryModal();
+  } finally {
+    isCategorySubmitting = false;
   }
-
-  if (categoryAlreadyExists) {
-    setFormMessage(
-      categoryMessage,
-      "Ya existe una categoría con ese nombre.",
-      "error"
-    );
-    return;
-  }
-
-  if (categoryId && currentCategory) {
-    const previousCategoryName = currentCategory.name;
-
-    productCategories = productCategories.map((category) =>
-      category.id === categoryId ? { ...category, name: categoryName } : category
-    );
-    products = products.map((product) =>
-      product.category === previousCategoryName
-        ? { ...product, category: categoryName }
-        : product
-    );
-    saveProducts(products);
-    renderProducts();
-    setFormMessage(
-      categoryMessage,
-      "Categoría actualizada correctamente.",
-      "success"
-    );
-  } else {
-    productCategories = [
-      ...productCategories,
-      { id: getNextCategoryId(productCategories), name: categoryName },
-    ];
-    setFormMessage(
-      categoryMessage,
-      "Categoría creada correctamente.",
-      "success"
-    );
-  }
-
-  persistCategories();
-  resetCategoryForm(false);
 });
 
 productsTableBody.addEventListener("click", (event) => {
@@ -434,38 +907,109 @@ productsTableBody.addEventListener("click", (event) => {
   }
 
   const productId = Number(target.dataset.id);
-  const product = products.find((item) => item.id === productId);
+  const product = adminProducts.find((item) => item.id === productId);
 
   if (!product) {
     return;
   }
 
-  if (target.classList.contains("btn-edit")) {
-    productIdInput.value = product.id.toString();
-    nameInput.value = product.name;
-    categorySelect.value = product.category;
-    priceInput.value = product.price.toString();
-    selectProductImage(product.image);
-    descriptionInput.value = product.description;
-    longDescriptionInput.value = product.longDescription;
-    featuredInput.checked = product.destacado;
-    setFormMessage(message, `Editando producto: ${product.name}.`, "info");
-    productSection.scrollIntoView({ behavior: "smooth", block: "start" });
-    nameInput.focus();
+  if (target.classList.contains("btn-edit-product")) {
+    openProductEditor(product);
+    setFormMessage(
+      message,
+      `Editando producto: ${product.nombre}.`,
+      "info"
+    );
     return;
   }
 
-  if (target.classList.contains("btn-delete")) {
-    const deletedProductName = product.name;
+  if (target.classList.contains("btn-delete-product")) {
+    const confirmed = window.confirm(
+      `¿Eliminar el producto ${product.nombre}? Esta acción no se puede deshacer.`
+    );
 
-    products = products.filter((item) => item.id !== productId);
-    persistProducts();
-    resetForm(false);
+    if (!confirmed) {
+      return;
+    }
+
+    adminProducts = deleteAdminProduct(adminProducts, productId);
+    saveProducts(adminProducts);
+    refreshProductViews();
+    resetProductForm(false);
+    closeProductModal();
     setFormMessage(
       message,
-      `Producto eliminado: ${deletedProductName}.`,
+      `Producto eliminado: ${product.nombre}.`,
       "success"
     );
+  }
+});
+
+ordersTableBody.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLButtonElement)) {
+    return;
+  }
+
+  const order = adminOrders.find((item) => item.id === target.dataset.id);
+
+  if (!order || !target.classList.contains("btn-view-order")) {
+    return;
+  }
+
+  openOrderModal(order, target);
+});
+
+ordersFilterForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+});
+
+orderStatusFilter.addEventListener("change", () => {
+  selectedOrderStatus = orderStatusFilter.value as AdminOrderStatusFilter;
+  renderOrders();
+});
+
+const applyOrderStatusButton = document.querySelector<HTMLButtonElement>("#applyOrderStatusButton");
+
+const isDestructiveStatusChange = (from: OrderStatus, to: OrderStatus): boolean =>
+  to === "CANCELADO" && from !== "CANCELADO";
+
+applyOrderStatusButton?.addEventListener("click", () => {
+  if (!activeOrderId) return;
+
+  const currentOrder = adminOrders.find((item) => item.id === activeOrderId);
+  if (!currentOrder) return;
+
+  const nextStatus = orderStatusSelect.value as OrderStatus;
+
+  if (nextStatus === currentOrder.estado) return;
+
+  if (isDestructiveStatusChange(currentOrder.estado, nextStatus)) {
+    const confirmed = window.confirm(
+      `¿Cancelar el pedido ${activeOrderId}? Esta acción no se puede deshacer.`
+    );
+    if (!confirmed) {
+      orderStatusSelect.value = currentOrder.estado;
+      return;
+    }
+
+    refundStock(currentOrder.detalles);
+  }
+
+  adminOrders = updateAdminOrderStatus(adminOrders, activeOrderId, nextStatus);
+  saveOrders(adminOrders);
+  renderOrders();
+  syncOrderModal();
+});
+
+closeOrderModalButton.addEventListener("click", () => {
+  closeOrderModal();
+});
+
+orderModal.addEventListener("click", (event) => {
+  if (event.target === orderModal) {
+    closeOrderModal();
   }
 });
 
@@ -484,34 +1028,28 @@ categoriesTableBody.addEventListener("click", (event) => {
   }
 
   if (target.classList.contains("btn-edit-category")) {
-    categoryIdInput.value = category.id.toString();
-    categoryNameInput.value = category.name;
-    setFormMessage(categoryMessage, `Editando categoría: ${category.name}.`, "info");
+    openCategoryEditor(category);
+    setFormMessage(categoryMessage, `Editando categoría: ${category.nombre}.`, "info");
     return;
   }
 
   if (target.classList.contains("btn-delete-category")) {
-    const categoryHasProducts = products.some(
-      (product) => product.category === category.name
+    const confirmed = window.confirm(
+      `¿Eliminar la categoría ${category.nombre}? Los productos de esta categoría no se eliminarán.`
     );
 
-    if (categoryHasProducts) {
-      setFormMessage(
-        categoryMessage,
-        "No se puede eliminar una categoría con productos asociados.",
-        "error"
-      );
+    if (!confirmed) {
       return;
     }
 
-    const deletedCategoryName = category.name;
-
-    productCategories = productCategories.filter((item) => item.id !== categoryId);
-    persistCategories();
+    productCategories = deleteAdminCategory(productCategories, categoryId);
+    saveCategories(productCategories);
+    refreshCategoryViews();
     resetCategoryForm(false);
+    closeCategoryModal();
     setFormMessage(
       categoryMessage,
-      `Categoría eliminada: ${deletedCategoryName}.`,
+      `Categoría eliminada: ${category.nombre}.`,
       "success"
     );
   }
@@ -519,26 +1057,65 @@ categoriesTableBody.addEventListener("click", (event) => {
 
 adminSearchForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  renderProducts();
+  renderProductTable();
 });
 
-adminSearchInput.addEventListener("input", () => {
-  renderProducts();
+const debouncedAdminSearch = (() => {
+  let timer: ReturnType<typeof setTimeout>;
+  return () => {
+    clearTimeout(timer);
+    timer = setTimeout(renderProductTable, 150);
+  };
+})();
+
+adminSearchInput.addEventListener("input", debouncedAdminSearch);
+
+openProductModalButton.addEventListener("click", () => {
+  const hasCategories = getVisibleAdminCategories(productCategories).length > 0;
+
+  if (!hasCategories) {
+    setFormMessage(
+      message,
+      "Creá una categoría antes de cargar productos.",
+      "error"
+    );
+    return;
+  }
+
+  openProductEditor();
 });
 
-imageInput.addEventListener("change", updateImagePreview);
+closeProductModalButton.addEventListener("click", () => {
+  closeProductModal();
+});
+
+productModal.addEventListener("click", (event) => {
+  if (event.target === productModal) {
+    closeProductModal();
+  }
+});
+
+categoryImageSelect.addEventListener("change", updateCategoryImagePreview);
+imageInput.addEventListener("change", updateProductImagePreview);
 
 cancelEditButton.addEventListener("click", () => {
-  const wasEditing = productIdInput.value !== "";
+  resetProductForm(false);
+  setFormMessage(message, "Formulario de producto limpio.", "info");
+  closeProductModal();
+});
 
-  resetForm(false);
-  setFormMessage(
-    message,
-    wasEditing
-      ? "Edición de producto cancelada."
-      : "Formulario de producto limpio.",
-    "info"
-  );
+openCategoryModalButton.addEventListener("click", () => {
+  openCategoryEditor();
+});
+
+closeCategoryModalButton.addEventListener("click", () => {
+  closeCategoryModal();
+});
+
+categoryModal.addEventListener("click", (event) => {
+  if (event.target === categoryModal) {
+    closeCategoryModal();
+  }
 });
 
 cancelCategoryEditButton.addEventListener("click", () => {
@@ -552,10 +1129,29 @@ cancelCategoryEditButton.addEventListener("click", () => {
       : "Formulario de categoría limpio.",
     "info"
   );
+  closeCategoryModal();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !categoryModal.hidden) {
+    closeCategoryModal();
+  }
+
+  if (event.key === "Escape" && !productModal.hidden) {
+    closeProductModal();
+  }
+
+  if (event.key === "Escape" && !orderModal.hidden) {
+    closeOrderModal();
+  }
 });
 
 renderProductImageOptions();
-renderCategories();
-renderCategoryTable();
-renderProducts();
+renderCategoryImageOptions();
+renderProductCategoryOptions();
+renderOrderStatusSelectOptions();
 renderOrders();
+void loadAdminCategories();
+void loadAdminProducts();
+void loadAdminOrders();
+void renderDashboard();

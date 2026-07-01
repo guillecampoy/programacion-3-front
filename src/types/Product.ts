@@ -14,4 +14,5 @@ export interface Product {
   image: string;
   category: Category;
   destacado: boolean;
+  stock?: number;
 }

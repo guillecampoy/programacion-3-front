@@ -9,24 +9,32 @@
 </head>
 
 <body class="auth-page">
-    <main class="auth-card">
-        <h1 class="title">Registro</h1>
+    <main class="auth-stage">
+        <section class="auth-card" aria-labelledby="register-title">
+            <p class="auth-brand">Food Store</p>
+            <h2 id="register-title" class="auth-heading">Registrarse</h2>
 
-        <form id="form" class="auth-form">
-            <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" autocomplete="email" inputmode="email" maxlength="50" required placeholder="example@example.com">
-            </div>
-            <div>
-                <label for="password">Contraseña</label>
-                <input type="password" id="password" name="password" autocomplete="new-password" minlength="8" maxlength="20" pattern="(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@._$!%*?&amp;\-]+" title="La contraseña debe tener entre 8 y 20 caracteres, incluir letras y números, y no contener espacios." required placeholder="********">
-                <small>Usá entre 8 y 20 caracteres, con letras y números.</small>
-            </div>
-            <p id="message"></p>
-            <button type="submit">Registrarse</button>
-        </form>
+            <form id="form" class="auth-form">
+                <div>
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name" name="name" autocomplete="name" maxlength="80" required autofocus placeholder="Tu nombre">
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email" inputmode="email" maxlength="50" required placeholder="ejemplo@correo.com">
+                </div>
+                <div>
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" minlength="6" maxlength="20" required placeholder="Ingresa tu contraseña">
+                    <button type="button" id="passwordToggle" class="password-toggle" aria-pressed="false" aria-label="Mostrar contraseña">Mostrar</button>
+                    <small>Usá al menos 6 caracteres.</small>
+                </div>
+                <p id="message" class="form-message" aria-live="polite"></p>
+                <button type="submit">Registrarse</button>
+            </form>
 
-        <a href="../login/login.html">Ya tengo cuenta</a>
+            <a class="auth-link" href="../login/login.html">¿Ya tenés cuenta? Iniciá sesión</a>
+        </section>
     </main>
 
     <script type="module" src="./registro.ts"></script>

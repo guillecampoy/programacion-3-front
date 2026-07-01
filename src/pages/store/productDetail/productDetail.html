@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../../assets/food-store/favicon_bodegon.png">
+    <title>Food Store - Detalle de producto</title>
+</head>
+<body class="store-page">
+    <div class="store-shell">
+        <header class="store-header">
+            <div class="top-bar">
+                <div class="header-container">
+                    <img id="storeLogo" src="../../../assets/food-store/logo_bodegon.png" alt="Logo de Food Store" class="logo" decoding="async">
+                    <h1 class="title">Food Store</h1>
+                </div>
+                <section class="session-box" aria-label="Usuario logueado">
+                    <span id="loggedUserName"></span>
+                    <button id="logoutButton" type="button">Cerrar sesión</button>
+                </section>
+            </div>
+            <nav id="storeNavigation" class="store-navigation" aria-label="Navegación principal"></nav>
+        </header>
+        <hr>
+
+        <main id="productDetailLayout" class="product-detail-layout product-detail-page" aria-busy="true">
+            <article id="productDetailCard" class="product-detail-card" hidden>
+                <img id="productDetailImage" class="product-detail-image" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" width="600" height="600" hidden decoding="async">
+                <div class="product-detail-content">
+                    <p id="productDetailCategory" class="modal-category"></p>
+                    <h2 id="productDetailTitle" class="modal-title"></h2>
+                    <p id="productDetailPrice" class="product-price"></p>
+                    <p id="productDetailStatus" class="product-detail-status"></p>
+                    <p id="productDetailDescription" class="modal-description"></p>
+                    <p id="productDetailStock" class="product-detail-stock"></p>
+                    <div class="product-detail-form">
+                        <label for="quantity">Cantidad:</label>
+                        <div class="quantity-stepper">
+                            <button id="decreaseQuantityButton" type="button" class="quantity-stepper-button" aria-label="Disminuir cantidad">-</button>
+                            <input id="quantity" type="number" min="1" step="1" value="1">
+                            <button id="increaseQuantityButton" type="button" class="quantity-stepper-button" aria-label="Aumentar cantidad">+</button>
+                        </div>
+                        <div class="product-detail-actions">
+                            <button id="addToCartButton" type="button" class="product-detail-primary-button">Agregar al Carrito</button>
+                            <a id="backToCatalogLink" class="button-secondary product-detail-secondary-button" href="../home/home.html">← Volver</a>
+                        </div>
+                    </div>
+                    <p id="productDetailMessage" class="form-message"></p>
+                </div>
+            </article>
+        </main>
+
+        <hr>
+        <footer class="store-footer">
+            <p>&copy; 2026 Food Store. Todos los derechos reservados</p>
+            <p>Contacto: <a href="mailto:info@foodstore.com">info@foodstore.com</a></p>
+        </footer>
+    </div>
+    <script type="module" src="./productDetail.ts"></script>
+</body>
+</html>

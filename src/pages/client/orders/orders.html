@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../../assets/food-store/favicon_bodegon.png">
+    <title>Food Store - Mis pedidos</title>
+</head>
+
+<body class="store-page">
+    <header>
+        <div class="top-bar">
+            <div class="header-container">
+                <img id="storeLogo" alt="Logo de Food Store" class="logo">
+                <h1 class="title">Food Store</h1>
+            </div>
+            <section class="session-box" aria-label="Usuario logueado">
+                <span id="loggedUserName"></span>
+                <button id="logoutButton" type="button">Cerrar sesión</button>
+            </section>
+        </div>
+        <nav id="storeNavigation" class="store-navigation" aria-label="Navegación principal"></nav>
+    </header>
+    <hr>
+    <main class="client-orders-layout">
+        <section class="client-orders-box">
+            <div class="orders-heading">
+                <h2 class="client-section-title">Mis pedidos</h2>
+                <p id="ordersMessage" class="empty-message"></p>
+            </div>
+            <div id="ordersList" class="orders-list" aria-live="polite"></div>
+        </section>
+    </main>
+    <div id="orderDetailModal" class="modal-overlay" hidden>
+        <article class="modal-content order-modal-content" role="dialog" aria-modal="true" aria-labelledby="orderDetailTitle">
+            <button id="closeOrderDetailButton" type="button" class="modal-close" aria-label="Cerrar detalle">Cerrar</button>
+            <p id="orderDetailStatus" class="order-status-badge"></p>
+            <h2 id="orderDetailTitle" class="modal-title"></h2>
+            <p id="orderDetailMeta" class="modal-category"></p>
+            <div id="orderDetailSummary" class="order-detail-summary"></div>
+            <div id="orderDetailItems" class="order-detail-items"></div>
+        </article>
+    </div>
+    <hr>
+    <footer>
+        <p>&copy; 2026 Food Store. Todos los derechos reservados</p>
+        <p>Contacto: <a href="mailto:info@foodstore.com">info@foodstore.com</a></p>
+    </footer>
+    <script type="module" src="./orders.ts"></script>
+</body>
+
+</html>

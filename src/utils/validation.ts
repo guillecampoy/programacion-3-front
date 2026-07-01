@@ -3,6 +3,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&._-]+$/;
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 20;
+export const REGISTRATION_PASSWORD_MIN_LENGTH = 6;
 
 export const validateEmail = (email: string): string | null => {
   const normalizedEmail = email.trim();
@@ -45,4 +46,58 @@ export const validatePassword = (password: string): string | null => {
 export const validateCredentials = (
   email: string,
   password: string
-): string | null => validateEmail(email) ?? validatePassword(password);
+): string | null => {
+  const errors = [validateEmail(email), validatePassword(password)].filter(Boolean);
+  return errors.length > 0 ? errors.join(" ") : null;
+};
+
+export const validateRegistration = (
+  name: string,
+  email: string,
+  password: string
+): string | null => {
+  const normalizedName = name.trim();
+
+  if (!normalizedName) {
+    return "El nombre es requerido.";
+  }
+
+  const emailError = validateEmail(email);
+
+  if (emailError) {
+    return emailError;
+  }
+
+  const normalizedPassword = password.trim();
+
+  if (!normalizedPassword) {
+    return "La contraseña es requerida.";
+  }
+
+  if (normalizedPassword.length < REGISTRATION_PASSWORD_MIN_LENGTH) {
+    return `La contraseña debe tener al menos ${REGISTRATION_PASSWORD_MIN_LENGTH} caracteres.`;
+  }
+
+  return null;
+};
+
+export const validateCheckout = (
+  phone: string,
+  paymentMethod: string
+): string | null => {
+  const normalizedPhone = phone.trim();
+
+  if (!normalizedPhone) {
+    return "El teléfono es requerido.";
+  }
+
+  if (!/^\d+$/.test(normalizedPhone)) {
+    return "El teléfono debe contener solo números.";
+  }
+
+  if (!paymentMethod.trim()) {
+    return "La forma de pago es requerida.";
+  }
+
+  return null;
+};

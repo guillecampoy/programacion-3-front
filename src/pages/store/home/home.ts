@@ -2,272 +2,329 @@ import "../../../main";
 import "../../../style.css";
 
 import logoImage from "../../../assets/food-store/logo_bodegon.png";
-import type { Product } from "../../../types/Product";
-import { logout } from "../../../utils/auth";
-import { getCategories } from "../../../utils/categories";
+import type { CatalogProduct, CatalogSort } from "../../../utils/catalog";
 import {
-  addProductToCart,
-  getCart,
-  getUser,
-} from "../../../utils/localStorage";
-import { getProducts } from "../../../utils/products";
+  buildCatalogProducts,
+  filterCatalogProducts,
+} from "../../../utils/catalog";
+import { logout } from "../../../utils/auth";
+import { fetchCategories, fetchProducts } from "../../../utils/api";
+import { getCart, getUser, addProductToCart, getCartQuantityForProduct } from "../../../utils/localStorage";
+import { getProductStock } from "../../../utils/productState";
+import { renderStoreNavigation } from "../../../utils/storeNavigation";
+import type { Product } from "../../../types/Product";
+import { Rol } from "../../../types/Rol";
 
 const buttonLogout = document.querySelector<HTMLButtonElement>("#logoutButton");
-buttonLogout?.addEventListener("click", () => {
-  logout();
-});
-
 const loggedUserName = document.querySelector<HTMLSpanElement>("#loggedUserName");
 const logo = document.querySelector<HTMLImageElement>("#storeLogo");
+const storeNavigation = document.querySelector<HTMLElement>("#storeNavigation");
 const categoryList = document.querySelector<HTMLUListElement>("#lista-categorias");
 const productList = document.querySelector<HTMLElement>("#contenedor-productos");
 const searchForm = document.querySelector<HTMLFormElement>("#searchForm");
 const searchInput = document.querySelector<HTMLInputElement>("#buscarProducto");
-const featuredFilterInput =
-  document.querySelector<HTMLInputElement>("#featuredFilter");
+const sortSelect = document.querySelector<HTMLSelectElement>("#sortProducts");
 const searchMessage = document.querySelector<HTMLParagraphElement>("#searchMessage");
 const productsTitle = document.querySelector<HTMLHeadingElement>("#productsTitle");
+const productsCount = document.querySelector<HTMLParagraphElement>("#productsCount");
 const showAllProductsButton = document.querySelector<HTMLButtonElement>(
   "#showAllProductsButton"
 );
-const productDetailModal =
-  document.querySelector<HTMLDivElement>("#productDetailModal");
-const closeProductDetailButton = document.querySelector<HTMLButtonElement>(
-  "#closeProductDetailButton"
-);
-const productDetailImage =
-  document.querySelector<HTMLImageElement>("#productDetailImage");
-const productDetailTitle =
-  document.querySelector<HTMLHeadingElement>("#productDetailTitle");
-const productDetailCategory = document.querySelector<HTMLParagraphElement>(
-  "#productDetailCategory"
-);
-const productDetailDescription = document.querySelector<HTMLParagraphElement>(
-  "#productDetailDescription"
-);
-const productDetailPrice =
-  document.querySelector<HTMLParagraphElement>("#productDetailPrice");
-const cartQuantity = document.querySelector<HTMLSpanElement>("#cartQuantity");
 
 if (
+  !buttonLogout ||
   !loggedUserName ||
   !logo ||
+  !storeNavigation ||
   !categoryList ||
   !productList ||
   !searchForm ||
   !searchInput ||
-  !featuredFilterInput ||
+  !sortSelect ||
   !searchMessage ||
   !productsTitle ||
-  !showAllProductsButton ||
-  !productDetailModal ||
-  !closeProductDetailButton ||
-  !productDetailImage ||
-  !productDetailTitle ||
-  !productDetailCategory ||
-  !productDetailDescription ||
-  !productDetailPrice ||
-  !cartQuantity
+  !productsCount ||
+  !showAllProductsButton
 ) {
   throw new Error("No se encontraron los elementos necesarios del catálogo");
 }
 
+buttonLogout.addEventListener("click", () => {
+  logout();
+});
+
 logo.src = logoImage;
-loggedUserName.textContent = getUser()?.email ?? "";
+const currentUser = getUser();
+const isAdminUser = currentUser?.role === Rol.Admin;
 
-const currencyFormatter = new Intl.NumberFormat("es-AR");
+loggedUserName.textContent = currentUser?.name ?? currentUser?.email ?? "";
+renderStoreNavigation(storeNavigation, {
+  isAdmin: isAdminUser,
+  cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
+});
 
-const products = getProducts();
-const categories = getCategories();
-let selectedCategory = "";
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 0,
+});
+
+let categories: Awaited<ReturnType<typeof fetchCategories>> = [];
+let catalogProducts: CatalogProduct[] = [];
+let selectedCategoryId: number | null = null;
 
 const renderCartQuantity = (): void => {
-  const totalQuantity = getCart().reduce(
-    (total, cartItem) => total + cartItem.quantity,
-    0
-  );
-
-  cartQuantity.textContent = String(totalQuantity);
-};
-
-const setActiveCategoryButton = (): void => {
-  document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
-    button.classList.toggle("active", button.dataset.category === selectedCategory);
+  renderStoreNavigation(storeNavigation, {
+    isAdmin: isAdminUser,
+    cartQuantity: getCart().reduce((total, cartItem) => total + cartItem.quantity, 0),
   });
 };
 
 const renderProductsTitle = (): void => {
+  const selectedCategory = categories.find(
+    (category) => category.id === selectedCategoryId
+  );
+
   productsTitle.textContent = selectedCategory
-    ? `Productos de ${selectedCategory}`
-    : "Productos";
+    ? selectedCategory.nombre
+    : "Todos los Productos";
 };
 
-categories.forEach((category) => {
-  const li = document.createElement("li");
-  const button = document.createElement("button");
-
-  button.type = "button";
-  button.className = "button-secondary category-filter";
-  button.dataset.category = category.name;
-  button.textContent = category.name;
-  li.appendChild(button);
-  categoryList.appendChild(li);
+const toCartProduct = (product: CatalogProduct): Product => ({
+  id: product.id,
+  name: product.nombre,
+  description: product.descripcion,
+  longDescription: product.descripcion,
+  price: product.precio,
+  image: product.imagen,
+  category: product.categoryName,
+  destacado: true,
+  stock: product.stock,
 });
 
-const normalizeSearchText = (value: string): string =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+const setActiveCategoryButton = (): void => {
+  document.querySelectorAll<HTMLButtonElement>(".category-filter").forEach((button) => {
+    const isActive = button.dataset.categoryId === String(selectedCategoryId ?? "");
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+};
 
-const productMatchesSearch = (product: Product, searchText: string): boolean =>
-  normalizeSearchText(product.name).includes(normalizeSearchText(searchText));
+const renderCategories = (): void => {
+  categoryList.innerHTML = "";
 
-const renderProducts = (productsToRender: Product[]): void => {
+  categories.forEach((category) => {
+    const li = document.createElement("li");
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "button-secondary category-filter";
+    button.dataset.categoryId = String(category.id);
+    button.setAttribute("aria-pressed", "false");
+    button.textContent = category.nombre;
+    li.appendChild(button);
+    categoryList.appendChild(li);
+  });
+};
+
+const navigateToProductDetail = (productId: number): void => {
+  window.location.href = `../productDetail/productDetail.html?id=${productId}`;
+};
+
+const createTextParagraph = (className: string, text: string): HTMLParagraphElement => {
+  const paragraph = document.createElement("p");
+  paragraph.className = className;
+  paragraph.textContent = text;
+  return paragraph;
+};
+
+const createProductCard = (product: CatalogProduct): HTMLElement => {
+  const article = document.createElement("article");
+  article.className = "product-card";
+  article.dataset.id = String(product.id);
+
+
+  const image = document.createElement("img");
+  image.src = product.imagen;
+  image.alt = product.nombre;
+  article.appendChild(image);
+
+  const title = document.createElement("h3");
+  title.className = "product-title";
+  title.textContent = product.nombre;
+  article.appendChild(title);
+
+  const description = createTextParagraph("product-description", product.descripcion);
+  article.appendChild(description);
+
+  const price = document.createElement("p");
+  price.className = "product-price";
+  price.append("Precio: ");
+  const priceValue = document.createElement("strong");
+  priceValue.textContent = `${currencyFormatter.format(product.precio)}`;
+  price.appendChild(priceValue);
+  article.appendChild(price);
+
+  const detailButton = document.createElement("button");
+  detailButton.type = "button";
+  detailButton.className = "btn-detalle";
+  detailButton.dataset.id = String(product.id);
+  detailButton.textContent = "Ver detalle";
+  article.appendChild(detailButton);
+
+  if (!isAdminUser) {
+    const effectiveStock = getProductStock(product.id);
+    const remainingStock = effectiveStock - getCartQuantityForProduct(product.id);
+
+    if (effectiveStock > 0 && remainingStock > 0) {
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "btn-agregar";
+      addButton.dataset.id = String(product.id);
+      addButton.textContent = "Agregar al carrito";
+      article.appendChild(addButton);
+    } else {
+      const stockLabel = document.createElement("p");
+      stockLabel.className = "product-stock-empty";
+      stockLabel.textContent = "Sin stock";
+      article.appendChild(stockLabel);
+    }
+  }
+
+  return article;
+};
+
+const renderProducts = (): void => {
+  const products = filterCatalogProducts(
+    catalogProducts,
+    searchInput.value,
+    selectedCategoryId,
+    sortSelect.value as CatalogSort
+  );
+
   productList.innerHTML = "";
   searchMessage.textContent = "";
+  productsCount.textContent = `${products.length} ${products.length === 1 ? "producto" : "productos"}`;
 
-  if (productsToRender.length === 0) {
-    searchMessage.textContent = "No se encontraron productos con ese nombre.";
+  if (products.length === 0) {
+    searchMessage.textContent = "No se encontraron productos con esos filtros.";
     return;
   }
 
-  productsToRender.forEach((product) => {
-    const article = document.createElement("article");
-    article.className = "product-card";
-    article.innerHTML = `
-      <img src="${product.image}" alt="${product.name}">
-      <h3 class="product-title">${product.name}</h3>
-      <p class="product-description">${product.description}</p>
-      <p class="product-price">Precio: <strong>$${currencyFormatter.format(
-        product.price
-      )}</strong></p>
-      <button type="button" class="btn-detalle" data-id="${product.id}">
-        Ver detalle
-      </button>
-      <button type="button" class="btn-agregar" data-id="${product.id}">
-        Agregar al carrito
-      </button>
-    `;
-
-    productList.appendChild(article);
+  products.forEach((product) => {
+    productList.appendChild(createProductCard(product));
   });
 };
 
-const openProductDetail = (product: Product): void => {
-  productDetailImage.src = product.image;
-  productDetailImage.alt = product.name;
-  productDetailTitle.textContent = product.name;
-  productDetailCategory.textContent = product.category;
-  productDetailDescription.textContent = product.longDescription;
-  productDetailPrice.innerHTML = `Precio: <strong>$${currencyFormatter.format(
-    product.price
-  )}</strong>`;
-  productDetailModal.hidden = false;
-};
-
-const closeProductDetail = (): void => {
-  productDetailModal.hidden = true;
-};
-
-const filterProducts = (): void => {
-  const searchText = searchInput.value.trim();
-  const productsToRender = products.filter((product) => {
-    const matchesCategory = selectedCategory
-      ? product.category === selectedCategory
-      : true;
-    const matchesSearch = searchText
-      ? productMatchesSearch(product, searchText)
-      : true;
-    const matchesFeatured = featuredFilterInput.checked
-      ? product.destacado
-      : true;
-
-    return matchesCategory && matchesSearch && matchesFeatured;
-  });
-
+const refreshProducts = (): void => {
   renderProductsTitle();
   setActiveCategoryButton();
-  renderProducts(productsToRender);
+  renderProducts();
+};
+
+const loadCatalog = async (): Promise<void> => {
+  searchMessage.textContent = "Cargando productos…";
+  try {
+    const [rawCategories, rawProducts] = await Promise.all([
+      fetchCategories(),
+      fetchProducts(),
+    ]);
+
+    categories = rawCategories.filter((category) => !category.eliminado);
+    catalogProducts = buildCatalogProducts(rawProducts, categories);
+
+    renderCategories();
+    refreshProducts();
+  } catch {
+    searchMessage.textContent = "No pudimos cargar los productos. Verificá tu conexión y recargá la página.";
+  }
+};
+
+const showAddToCartToast = (productName: string): void => {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = `✓ ${productName} agregado al carrito`;
+
+  const container = document.getElementById("toastContainer") ?? (() => {
+    const c = document.createElement("div");
+    c.id = "toastContainer";
+    c.className = "toast-container";
+    document.body.appendChild(c);
+    return c;
+  })();
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("toast-leaving");
+    toast.addEventListener("animationend", () => toast.remove(), { once: true });
+  }, 2500);
 };
 
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  filterProducts();
+  refreshProducts();
 });
 
-searchInput.addEventListener("input", filterProducts);
-featuredFilterInput.addEventListener("change", filterProducts);
+const debouncedRefresh = (() => {
+  let timer: ReturnType<typeof setTimeout>;
+  return () => {
+    clearTimeout(timer);
+    timer = setTimeout(refreshProducts, 150);
+  };
+})();
 
-showAllProductsButton.dataset.category = "";
+searchInput.addEventListener("input", debouncedRefresh);
+sortSelect.addEventListener("change", refreshProducts);
+
+showAllProductsButton.dataset.categoryId = "";
 showAllProductsButton.addEventListener("click", () => {
-  selectedCategory = "";
-  filterProducts();
+  selectedCategoryId = null;
+  refreshProducts();
 });
 
 categoryList.addEventListener("click", (event) => {
-  const target = event.target;
-
-  if (!(target instanceof HTMLButtonElement)) {
+  if (!(event.target instanceof HTMLButtonElement)) {
     return;
   }
 
-  selectedCategory = target.dataset.category ?? "";
-  filterProducts();
+  const categoryId = Number(event.target.dataset.categoryId);
+
+  if (Number.isNaN(categoryId)) {
+    return;
+  }
+
+  selectedCategoryId = categoryId;
+  refreshProducts();
 });
 
 document.addEventListener("click", (event) => {
-  const target = event.target;
+  const button = event.target instanceof Element
+    ? event.target.closest<HTMLButtonElement>(".btn-agregar, .btn-detalle")
+    : null;
 
-  if (!(target instanceof HTMLButtonElement)) {
-    return;
-  }
+  if (!button) return;
 
-  if (
-    !target.classList.contains("btn-agregar") &&
-    !target.classList.contains("btn-detalle")
-  ) {
-    return;
-  }
+  const productId = Number(button.dataset.id);
+  const product = catalogProducts.find((item) => item.id === productId);
 
-  const productId = Number(target.dataset.id);
-  const product = products.find((item) => item.id === productId);
+  if (!product) return;
 
-  if (!product) {
-    return;
-  }
+  if (button.classList.contains("btn-agregar")) {
+    const effectiveStock = getProductStock(product.id);
+    const remainingStock = effectiveStock - getCartQuantityForProduct(product.id);
+    if (remainingStock <= 0) return;
 
-  if (target.classList.contains("btn-detalle")) {
-    openProductDetail(product);
-    return;
-  }
-
-  if (target.classList.contains("btn-agregar")) {
-    const cart = addProductToCart(product);
-    const cartItem = cart.find((item) => item.product.id === product.id);
-
+    addProductToCart(toCartProduct(product));
     renderCartQuantity();
-    alert(
-      `Agregaste "${product.name}" a tu carrito de compra. Cantidad: ${
-        cartItem?.quantity ?? 1
-      }`
-    );
+    showAddToCartToast(product.nombre);
+    return;
   }
-});
 
-closeProductDetailButton.addEventListener("click", closeProductDetail);
-
-productDetailModal.addEventListener("click", (event) => {
-  if (event.target === productDetailModal) {
-    closeProductDetail();
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !productDetailModal.hidden) {
-    closeProductDetail();
+  if (button.classList.contains("btn-detalle")) {
+    navigateToProductDetail(product.id);
   }
 });
 
 renderCartQuantity();
-filterProducts();
+void loadCatalog();
