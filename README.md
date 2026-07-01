@@ -2,18 +2,7 @@
 
 Frontend del TPI de Programacion 3, construido con Vite y TypeScript.
 
-La fuente funcional de este proyecto es `docs/TPI.pdf` hasta la pagina 19.  
-Las historias de usuario a iterar estan en `docs/historias/` y este README se va a actualizar a medida que avance cada implementacion.
-
-## Fuentes de verdad
-
-- `docs/TPI.pdf`: alcance funcional general del front.
-- `docs/historias/`: historias a implementar una por una.
-- `public/data/`: contrato de datos local que define el TPI para la primera iteracion del frontend.
-
 ## Estado actual
-
-La base ya integra estos modulos del front:
 
 - autenticacion y registro;
 - catalogo de productos con busqueda, filtros y detalle;
@@ -24,20 +13,20 @@ La base ya integra estos modulos del front:
 No hay backend en esta entrega. La sesion, los usuarios, los productos, las categorias, los pedidos y el carrito viven en el navegador.
 Este README describe el estado validado del proyecto y el cierre final del frontend respecto del TPI.
 
-### Login validado
+### Login
 
 - El login consulta `public/data/usuarios.json`.
 - La sesion se guarda en `localStorage.userData` sin password.
 - La redireccion depende del rol del usuario autenticado.
 
-### Registro validado
+### Registro
 
 - El registro pide nombre, email y contraseña.
 - Verifica que el email no exista en `public/data/usuarios.json`.
 - El alta queda solo en la sesion local y no se persiste en `usuarios.json`.
 - El alta realiza auto-login como `USUARIO`.
 
-### Catalogo validado
+### Catalogo
 
 - El catalogo carga categorias desde `public/data/categorias.json`.
 - El catalogo carga productos desde `public/data/productos.json`.
@@ -46,7 +35,7 @@ Este README describe el estado validado del proyecto y el cierre final del front
 - Cada tarjeta muestra imagen, nombre, precio y badge de disponibilidad.
 - Si la sesion es `ADMIN`, el catalogo queda en modo solo lectura: no muestra accesos al carrito ni botones de compra.
 
-### Detalle validado
+### Detalle
 
 - El detalle de producto vive en `src/pages/store/productDetail/`.
 - Se carga por `id` desde la query string.
@@ -54,7 +43,7 @@ Este README describe el estado validado del proyecto y el cierre final del front
 - La cantidad respeta el stock restante y no permite agregar si no hay stock.
 - Al agregar, el producto queda en `localStorage.cart` con la cantidad elegida.
 
-### Carrito, pedido e historial validado
+### Carrito, pedido e historial
 
 - El carrito muestra subtotal, envio y total.
 - El envio fijo actual es de `$2500`.
@@ -65,21 +54,21 @@ Este README describe el estado validado del proyecto y el cierre final del front
 - El historial filtra por el usuario en sesion, muestra tarjetas con estado coloreado y abre un modal con el detalle completo.
 - Si no hay pedidos para el usuario, se muestra un estado vacio.
 
-### Dashboard admin validado
+### Dashboard admin
 
 - El panel admin muestra un dashboard inicial con 4 tarjetas: total de categorias, total de productos, total de pedidos y productos disponibles.
 - El resumen de dashboard calcula categorias activas/inactivas, productos disponibles/no disponibles, usuarios administradores/clientes y pedidos por estado desde los JSON locales.
 - El acceso al panel sigue restringido al rol `ADMIN`.
 - La navegacion admin incluye acceso a dashboard, productos, categorias, pedidos y un enlace para volver a la tienda como vista de catalogo sin compras.
 
-### CRUD de categorias admin validado
+### CRUD de categorias admin
 
 - Las categorias se cargan desde `/data/categorias.json` y se administran en memoria durante la sesion.
 - El alta y la edicion se resuelven en un modal con nombre, descripcion e imagen obligatorios.
 - La eliminacion pide confirmacion y oculta la fila de inmediato.
 - El selector de productos reutiliza las categorias visibles de la sesion actual.
 
-### CRUD de productos admin validado
+### CRUD de productos admin
 
 - Los productos se cargan desde `/data/productos.json` y las categorias visibles desde `/data/categorias.json`.
 - La tabla de administracion muestra todos los campos del producto y resuelve el nombre de categoria.
@@ -87,7 +76,7 @@ Este README describe el estado validado del proyecto y el cierre final del front
 - Las validaciones rechazan precio menor o igual a 0, stock negativo y categorias inexistentes o eliminadas.
 - Las operaciones de alta, edicion y borrado se aplican sobre el estado en memoria de la sesion.
 
-### Gestion de pedidos admin validada
+### Gestion de pedidos admin
 
 - Los pedidos se cargan desde `/data/pedidos.json` y se combinan con los pedidos locales generados en la sesion.
 - La lista de pedidos se ordena por fecha descendente y muestra el nombre del cliente resuelto desde `/data/usuarios.json`.
@@ -95,9 +84,9 @@ Este README describe el estado validado del proyecto y el cierre final del front
 - El detalle se abre en un modal con la informacion principal del pedido y los items incluidos.
 - El cambio de estado se aplica sobre el estado en memoria de la sesion.
 
-## Cierre TPI Frontend
+## Cierre
 
-### Validación final
+### Validación
 
 1. `npm test`: 49 tests pasados.
 2. `npx vitest run --coverage`: 82.46% statements, 83.01% lines, 92% functions.
@@ -117,12 +106,6 @@ Este README describe el estado validado del proyecto y el cierre final del front
 1. El area admin tiene paginas de entrada separadas para categorias, productos y pedidos, pero sigue reutilizando la implementacion central para no duplicar logica.
 2. La base de pedidos ya no depende de semilla hardcoded; parte de `public/data/pedidos.json` y la sesion solo agrega el overlay local del checkout y cambios de estado.
 3. El dashboard agrega un resumen extra de usuarios admin/cliente. Es una lectura adicional, no un requisito del TPI.
-
-### Cierres técnicos
-
-1. El clamp de stock del carrito quedó corregido en los helpers compartidos y la suite lo valida.
-2. No quedaron semillas de pedidos codificadas en el frontend; la base de datos simulada vive en JSON local.
-3. El split admin quedó materializado como páginas de entrada separadas para cada módulo.
 
 ## Como ejecutar
 
@@ -196,4 +179,3 @@ Claves usadas en `localStorage`:
 - El acceso por rol se resuelve en el front.
 - La validacion de credenciales y formularios es client-side.
 - La persistencia es local, por lo que recargar el navegador no usa un backend real.
-- Las historias futuras se van a cerrar de a una sobre esta base.
