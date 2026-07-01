@@ -31,6 +31,17 @@ describe("adminDashboard", () => {
           eliminado: false,
           categoriaId: 2,
         },
+        {
+          id: 3,
+          nombre: "Papas Panceta",
+          descripcion: "",
+          precio: 11500,
+          stock: 0,
+          imagen: "",
+          disponible: true,
+          eliminado: true,
+          categoriaId: 2,
+        },
       ],
       users: [
         {
@@ -75,12 +86,12 @@ describe("adminDashboard", () => {
     });
 
     expect(stats.totalCategories).toBe(2);
-    expect(stats.totalProducts).toBe(2);
+    expect(stats.totalProducts).toBe(3);
     expect(stats.totalOrders).toBe(2);
-    expect(stats.availableProducts).toBe(1);
+    expect(stats.availableProducts).toBe(2);
     expect(stats.activeCategories).toBe(1);
     expect(stats.inactiveCategories).toBe(1);
-    expect(stats.activeProducts).toBe(1);
+    expect(stats.activeProducts).toBe(2);
     expect(stats.inactiveProducts).toBe(1);
     expect(stats.adminUsers).toBe(1);
     expect(stats.clientUsers).toBe(1);

@@ -46,9 +46,7 @@ export const buildAdminDashboardStats = ({
 }: AdminDashboardData): AdminDashboardStats => {
   const activeCategories = categories.filter((category) => !category.eliminado).length;
   const inactiveCategories = categories.length - activeCategories;
-  const availableProducts = products.filter(
-    (product) => product.disponible && !product.eliminado
-  ).length;
+  const availableProducts = products.filter((product) => product.disponible).length;
   const activeProducts = availableProducts;
   const inactiveProducts = products.length - activeProducts;
 

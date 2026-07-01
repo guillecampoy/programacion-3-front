@@ -179,8 +179,7 @@ const renderDetail = async (): Promise<void> => {
     effectiveStock - getCartQuantityForProduct(productId),
     0
   );
-  const canAdd =
-    !isAdminUser && product.disponible && effectiveStock > 0 && remainingStock > 0;
+  const canAdd = !isAdminUser && product.disponible && effectiveStock > 0 && remainingStock > 0;
 
   setBusy(false);
   productDetailCard.hidden = false;
@@ -197,7 +196,7 @@ const renderDetail = async (): Promise<void> => {
   priceValue.textContent = `${currencyFormatter.format(product.precio)}`;
   productDetailPrice.appendChild(priceValue);
   productDetailStock.textContent = `Stock disponible: ${remainingStock}`;
-  productDetailStatus.textContent = product.disponible && effectiveStock > 0
+  productDetailStatus.textContent = product.disponible
     ? "Estado: Disponible"
     : "Estado: No disponible";
 

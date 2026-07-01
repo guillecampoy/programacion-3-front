@@ -45,19 +45,35 @@ describe("catalog", () => {
       eliminado: false,
       categoriaId: 2,
     },
+    {
+      id: 4,
+      nombre: "Papas Panceta",
+      descripcion: "",
+      precio: 11500,
+      stock: 0,
+      imagen: "papas_panceta.png",
+      disponible: true,
+      eliminado: true,
+      categoriaId: 2,
+    },
   ];
 
   it("normaliza texto para buscar sin tildes", () => {
     expect(normalizeSearchText("  MilanéSas  ")).toBe("milanesas");
   });
 
-  it("filtra productos no disponibles y eliminados", () => {
+  it("incluye productos disponibles aunque tengan stock cero", () => {
     const catalogProducts = buildCatalogProducts(products, categories);
 
-    expect(catalogProducts).toHaveLength(2);
+    expect(catalogProducts).toHaveLength(3);
     expect(catalogProducts[0]).toMatchObject({
       id: 1,
       categoryName: "Milanesas",
+    });
+    expect(catalogProducts[2]).toMatchObject({
+      id: 4,
+      categoryName: "Papas",
+      stock: 0,
     });
   });
 
@@ -70,7 +86,8 @@ describe("catalog", () => {
       "price-desc"
     );
 
-    expect(filteredProducts).toHaveLength(1);
-    expect(filteredProducts[0].nombre).toBe("Papas Baston");
+    expect(filteredProducts).toHaveLength(2);
+    expect(filteredProducts[0].nombre).toBe("Papas Panceta");
+    expect(filteredProducts[1].nombre).toBe("Papas Baston");
   });
 });

@@ -16,6 +16,8 @@ describe("product detail page", () => {
 
     expect(source).not.toContain("#productDetailState");
     expect(source).not.toContain("Cargando detalle del producto...");
+    expect(source).toContain('productDetailStatus.textContent = product.disponible');
+    expect(source).toContain('Estado: Disponible');
   });
 
   it("renders the product image as a cover-style banner", () => {

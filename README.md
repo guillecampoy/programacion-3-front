@@ -41,7 +41,7 @@ Este README describe el estado validado del proyecto y el cierre final del front
 
 - El catalogo carga categorias desde `public/data/categorias.json`.
 - El catalogo carga productos desde `public/data/productos.json`.
-- Solo se muestran productos disponibles y no eliminados.
+- Solo se muestran productos con `disponible = true`; el stock se usa solo para impedir la compra cuando llega a cero.
 - El filtro por categoria, la busqueda por nombre y el ordenamiento se resuelven en el cliente.
 - Cada tarjeta muestra imagen, nombre, precio y badge de disponibilidad.
 - Si la sesion es `ADMIN`, el catalogo queda en modo solo lectura: no muestra accesos al carrito ni botones de compra.
@@ -51,7 +51,7 @@ Este README describe el estado validado del proyecto y el cierre final del front
 - El detalle de producto vive en `src/pages/store/productDetail/`.
 - Se carga por `id` desde la query string.
 - Muestra imagen, nombre, descripcion, precio, stock y estado.
-- La cantidad respeta el stock restante y no permite agregar sin disponibilidad.
+- La cantidad respeta el stock restante y no permite agregar si no hay stock.
 - Al agregar, el producto queda en `localStorage.cart` con la cantidad elegida.
 
 ### Carrito, pedido e historial validado

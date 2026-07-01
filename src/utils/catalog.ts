@@ -20,7 +20,7 @@ export const buildCatalogProducts = (
   const categoriesById = new Map(categories.map((category) => [category.id, category]));
 
   return products
-    .filter((product) => product.disponible && !product.eliminado)
+    .filter((product) => product.disponible)
     .map((product) => ({
       ...product,
       categoryName: categoriesById.get(product.categoriaId)?.nombre ?? "Sin categoría",
