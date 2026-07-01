@@ -26,5 +26,9 @@ describe("product detail page", () => {
     expect(source).toContain(".product-detail-image");
     expect(source).toContain("aspect-ratio: 16 / 9;");
     expect(source).toContain("object-fit: cover;");
+    expect(source).toContain('input[type="number"]');
+    expect(source).toContain("::-webkit-inner-spin-button");
+    expect(source).toContain(".cart-qty-control");
+    expect(source).toContain("vertical-align: middle;");
   });
 });

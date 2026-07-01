@@ -744,6 +744,7 @@ hr {
   display: inline-flex;
   align-items: center;
   gap: 0;
+  vertical-align: middle;
 }
 
 .cart-qty-btn {
@@ -752,6 +753,8 @@ hr {
   justify-content: center;
   width: 32px;
   height: 36px;
+  margin: 0;
+  padding: 0;
   border: 1px solid var(--color-borde);
   background: var(--color-blanco);
   color: var(--color-texto);
@@ -775,8 +778,12 @@ hr {
 }
 
 .cart-qty-control .cart-quantity-input {
+  box-sizing: border-box;
   border-radius: 0;
   width: 52px;
+  height: 36px;
+  margin: 0;
+  padding: 0 8px;
 }
 
 .cart-stock-indicator {
@@ -1098,6 +1105,17 @@ input {
   margin-bottom: 15px;
   border: 1px solid var(--color-borde);
   border-radius: 4px;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
 }
 
 select,
