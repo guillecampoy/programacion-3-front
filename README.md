@@ -127,16 +127,18 @@ Este README describe el estado validado del proyecto y el cierre final del front
 ## Como ejecutar
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ## Checks
 
 ```bash
-npm test
-npm run build
+pnpm test
+pnpm build
 ```
+
+`pnpm-workspace.yaml` queda versionado porque pnpm 11 guarda ahi la aprobacion de scripts nativos como `esbuild`; asi `pnpm install` funciona en un clon limpio sin pedir pasos manuales extra.
 
 ## Usuarios semilla
 

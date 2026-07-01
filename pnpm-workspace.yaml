@@ -1,0 +1,3 @@
+# pnpm 11 stores build-script approvals here so `pnpm install` works without prompts.
+allowBuilds:
+  esbuild: true
